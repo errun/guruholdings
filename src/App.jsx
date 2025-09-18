@@ -5,7 +5,7 @@ import Layout from './components/Layout'
 
 function App() {
   return (
-    <Router basename="/guruHoldings">
+    <Router>
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
