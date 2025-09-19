@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 
 const Layout = ({ children }) => {
+  const currentYear = new Date().getFullYear()
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -45,7 +47,7 @@ const Layout = ({ children }) => {
               数据来源：SEC EDGAR 13F 报告 | 数据延迟：约45天 | 非实时持仓
             </p>
             <p>
-              © 2024 大师持仓追踪. 仅供参考，不构成投资建议。
+              © {currentYear} 大师持仓追踪. 仅供参考，不构成投资建议。
             </p>
           </div>
         </div>

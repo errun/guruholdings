@@ -1,13 +1,89 @@
+import { useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import HoldingsTable from '../components/HoldingsTable'
 import HoldingsChart from '../components/HoldingsChart'
 import AIInsights from '../components/AIInsights'
 import { useHoldingsData } from '../hooks/useHoldingsData'
+import { useSeo } from '../hooks/useSeo'
 
 const HoldingsPage = () => {
   const { guru } = useParams()
   const { data, loading, error } = useHoldingsData(guru)
+
+  const seoConfig = useMemo(() => {
+    if (error) {
+      return {
+        title: '数据加载失败｜大师持仓追踪',
+        description: '抱歉，暂时无法获取该投资大师的持仓数据，请稍后重试。'
+      }
+    }
+
+    if (loading || !data) {
+      return {
+        title: '加载持仓数据中｜大师持仓追踪',
+        description: '正在为您加载投资大师的最新13F持仓数据，敬请稍候。'
+      }
+    }
+
+    const topHoldings = data.holdings?.slice(0, 3).map((holding) => holding.companyName).join('、')
+    const description = topHoldings
+      ? `${data.name}（${data.company}）在${data.lastUpdate}披露的美股13F持仓，核心仓位覆盖${topHoldings}等重点资产。`
+      : `${data.name}（${data.company}）在${data.lastUpdate}披露的美股13F持仓分析。`
+
+    return {
+      title: `${data.name}最新13F持仓分析｜大师持仓追踪`,
+      description,
+      keywords: `${data.name}持仓,${data.name} 13F,${data.company} 投资组合,美股大师持仓`,
+      openGraph: {
+        type: 'article',
+        title: `${data.name}持仓变化解读`,
+        description
+      },
+      structuredData: ({ canonicalUrl }) => ({
+        '@context': 'https://schema.org',
+        '@type': 'ProfilePage',
+        name: `${data.name}持仓分析`,
+        url: canonicalUrl,
+        about: {
+          '@type': 'Person',
+          name: data.name,
+          affiliation: data.company,
+          description
+        },
+        mainEntity: {
+          '@type': 'ItemList',
+          name: `${data.name}的主要持仓`,
+          numberOfItems: data.holdings?.length || 0,
+          itemListElement: (data.holdings || []).map((holding, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: holding.companyName,
+            alternateName: holding.symbol,
+            additionalProperty: [
+              {
+                '@type': 'PropertyValue',
+                name: 'Ticker',
+                value: holding.symbol
+              },
+              {
+                '@type': 'PropertyValue',
+                name: '持仓市值(USD)',
+                value: holding.currentValue
+              },
+              {
+                '@type': 'PropertyValue',
+                name: '组合占比(%)',
+                value: holding.currentWeight
+              }
+            ]
+          }))
+        }
+      })
+    }
+  }, [data, loading, error])
+
+  useSeo(seoConfig)
 
   if (loading) {
     return (

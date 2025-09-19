@@ -1,7 +1,7 @@
 import { formatNumber, formatPercent, getChangeColor } from '../hooks/useHoldingsData'
 
 const HoldingsTable = ({ holdings }) => {
-  const quarters = ['2024Q3', '2024Q2', '2024Q1']
+  const quarters = ['2023Q3', '2023Q2', '2023Q1']
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
