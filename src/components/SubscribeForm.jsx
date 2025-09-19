@@ -56,6 +56,7 @@ const SubscribeForm = () => {
       }, 3000)
       
     } catch (error) {
+      console.error('订阅失败', error)
       setStatus('error')
       setMessage('订阅失败，请稍后重试')
     }
