@@ -1,8 +1,30 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { ChartBarIcon, ArrowTrendingUpIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import SubscribeForm from '../components/SubscribeForm'
+import { useSeo } from '../hooks/useSeo'
 
 const HomePage = () => {
+  const seoConfig = useMemo(() => ({
+    title: '大师持仓追踪｜巴菲特与李录最新13F持仓及AI摘要',
+    description: '大师持仓追踪为你整理沃伦·巴菲特与李录最新的美股13F持仓数据，结合可视化图表与AI智能摘要，帮助投资者快速理解大师的核心持仓与季度变动。',
+    keywords: '巴菲特持仓,李录持仓,13F 报告,美股持仓数据,价值投资,投资大师',
+    structuredData: ({ canonicalUrl }) => ({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: '大师持仓追踪',
+      url: canonicalUrl,
+      description: '追踪投资大师巴菲特与李录的美股持仓变化，提供AI摘要与可视化分析。',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: `${canonicalUrl}?q={search_term_string}`,
+        'query-input': 'required name=search_term_string'
+      }
+    })
+  }), [])
+
+  useSeo(seoConfig)
+
   const gurus = [
     {
       id: 'buffett',
