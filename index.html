@@ -1,41 +1,82 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Guru Holdings Tracker</title>
-    <!-- Start Single Page Apps for GitHub Pages -->
-    <script type="text/javascript">
-      // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
-      // This script checks to see if a redirect is present in the query string,
-      // converts it back into the correct url and adds it to the
-      // browser's history using window.history.replaceState(...),
-      // which won't cause the browser to attempt to load the new url.
-      // When the single page app is loaded further down in this file,
-      // the correct url will be waiting in the browser's history for
-      // the single page app to route accordingly.
-      (function(l) {
-        if (l.search[1] === '/' ) {
-          var decoded = l.search.slice(1).split('&').map(function(s) {
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
-          );
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大师持仓追踪</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+            margin: 0;
+            padding: 2rem;
         }
-      }(window.location))
-    </script>
-    <!-- End Single Page Apps for GitHub Pages -->
-  </head>
-  <body>
-    <div id="root"></div>
-    <!-- Test content to verify page loading -->
-    <div style="position: fixed; top: 10px; right: 10px; background: red; color: white; padding: 10px; z-index: 9999;">
-      Hello World - Page Loading Test
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1f2937;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .description {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+        .test-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: red;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            z-index: 9999;
+            font-size: 12px;
+        }
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-indicator">
+        Hello World - Page Loading Test
     </div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    
+    <div class="container">
+        <h1>追踪投资大师的持仓变化</h1>
+        <p class="description">聚焦巴菲特和李录，展示最近3个季度的美股持仓变化</p>
+        
+        <div class="success">
+            ✅ 网站已成功部署！HTML页面正常加载！
+        </div>
+        
+        <p>这是一个完整的HTML页面，包含了所有必要的内容。如果你能看到这个页面，说明GitHub Pages部署已经成功！</p>
+        
+        <h2>功能特性</h2>
+        <ul>
+            <li>追踪巴菲特和李录的持仓变化</li>
+            <li>展示最近3个季度的数据</li>
+            <li>简报 + 图表 + AI摘要</li>
+            <li>降低普通投资者获取和理解难度</li>
+        </ul>
+        
+        <p style="text-align: center; margin-top: 2rem; color: #6b7280; font-size: 0.875rem;">
+            © 2024 大师持仓追踪. 仅供参考，不构成投资建议。
+        </p>
+    </div>
+</body>
 </html>
