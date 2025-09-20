@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { readStorageValue, writeStorageValue } from '../utils/storage.js'
 
 const translationResources = {
   en: {
@@ -307,29 +308,20 @@ const formatQuarter = (quarter, language) => {
 
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => {
-    if (typeof window === 'undefined') {
-      return 'en'
+    const { value, error } = readStorageValue('app-language')
+
+    if (error && typeof window !== 'undefined') {
+      console.warn('[language] unable to access localStorage, defaulting to English', error)
     }
 
-    try {
-      const stored = window.localStorage.getItem('app-language')
-      return stored === 'zh' ? 'zh' : 'en'
-    } catch (error) {
-      console.warn('[language] unable to access localStorage, defaulting to English', error)
-      return 'en'
-    }
+    return value === 'zh' ? 'zh' : 'en'
   })
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
+    const { success, error } = writeStorageValue('app-language', language)
 
-    try {
-      window.localStorage.setItem('app-language', language)
-    } catch (error) {
+    if (!success && error) {
       console.warn('[language] unable to persist preference', error)
-
     }
   }, [language])
 
