@@ -1,34 +1,36 @@
-import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   Legend
 } from 'recharts'
 import { formatNumber } from '../hooks/useHoldingsData'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 const COLORS = [
-  '#3B82F6', // Blue
-  '#10B981', // Green
-  '#F59E0B', // Yellow
-  '#EF4444', // Red
-  '#8B5CF6', // Purple
-  '#06B6D4', // Cyan
-  '#84CC16', // Lime
-  '#F97316', // Orange
-  '#EC4899', // Pink
-  '#6B7280'  // Gray
+  '#3B82F6',
+  '#10B981',
+  '#F59E0B',
+  '#EF4444',
+  '#8B5CF6',
+  '#06B6D4',
+  '#84CC16',
+  '#F97316',
+  '#EC4899',
+  '#6B7280'
 ]
 
 const HoldingsChart = ({ data, type, title }) => {
+  const { t } = useLanguage()
+
   if (type === 'pie') {
-    // 准备饼图数据 - 只显示当前季度的前5大持仓
     const pieData = data
       .slice(0, 5)
       .map((holding, index) => ({
@@ -38,14 +40,13 @@ const HoldingsChart = ({ data, type, title }) => {
         color: COLORS[index % COLORS.length]
       }))
 
-    // 计算其他持仓的总和
     const othersValue = data
       .slice(5)
       .reduce((sum, holding) => sum + holding.currentValue, 0)
-    
+
     if (othersValue > 0) {
       pieData.push({
-        name: '其他',
+        name: t('common.others'),
         value: othersValue,
         weight: data.slice(5).reduce((sum, holding) => sum + holding.currentWeight, 0),
         color: COLORS[5 % COLORS.length]
@@ -54,15 +55,15 @@ const HoldingsChart = ({ data, type, title }) => {
 
     const CustomTooltip = ({ active, payload }) => {
       if (active && payload && payload.length) {
-        const data = payload[0].payload
+        const item = payload[0].payload
         return (
           <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-            <p className="font-medium text-gray-900">{data.name}</p>
+            <p className="font-medium text-gray-900">{item.name}</p>
             <p className="text-sm text-gray-600">
-              市值: ${formatNumber(data.value)}
+              {t('charts.pie.tooltipValue')}: ${formatNumber(item.value)}
             </p>
             <p className="text-sm text-gray-600">
-              占比: {data.weight.toFixed(1)}%
+              {t('charts.pie.tooltipWeight')}: {item.weight.toFixed(1)}%
             </p>
           </div>
         )
@@ -90,8 +91,8 @@ const HoldingsChart = ({ data, type, title }) => {
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                verticalAlign="bottom" 
+              <Legend
+                verticalAlign="bottom"
                 height={36}
                 formatter={(value, entry) => (
                   <span style={{ color: entry.color }}>
@@ -107,10 +108,9 @@ const HoldingsChart = ({ data, type, title }) => {
   }
 
   if (type === 'line') {
-    // 准备线图数据
-    const lineData = data.map(item => ({
-      quarter: item.quarter,
-      value: item.value / 1e9, // 转换为十亿美元
+    const lineData = data.map((item) => ({
+      quarter: item.label,
+      value: item.value / 1e9,
       displayValue: formatNumber(item.value)
     }))
 
@@ -120,7 +120,7 @@ const HoldingsChart = ({ data, type, title }) => {
           <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
             <p className="font-medium text-gray-900">{label}</p>
             <p className="text-sm text-gray-600">
-              总市值: ${payload[0].payload.displayValue}
+              {t('charts.line.tooltipValue')}: ${payload[0].payload.displayValue}
             </p>
           </div>
         )
@@ -135,21 +135,21 @@ const HoldingsChart = ({ data, type, title }) => {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={lineData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="quarter" 
+              <XAxis
+                dataKey="quarter"
                 stroke="#6b7280"
                 fontSize={12}
               />
-              <YAxis 
+              <YAxis
                 stroke="#6b7280"
                 fontSize={12}
                 tickFormatter={(value) => `$${value.toFixed(0)}B`}
               />
               <Tooltip content={<CustomLineTooltip />} />
-              <Line 
-                type="monotone" 
-                dataKey="value" 
-                stroke="#3B82F6" 
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="#3B82F6"
                 strokeWidth={3}
                 dot={{ fill: '#3B82F6', strokeWidth: 2, r: 6 }}
                 activeDot={{ r: 8, stroke: '#3B82F6', strokeWidth: 2 }}
