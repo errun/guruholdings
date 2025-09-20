@@ -71,7 +71,9 @@ const translationResources = {
         invalid: 'Please enter a valid email address.',
         exists: 'This email is already subscribed.',
         success: 'Subscription successful! We will email you after each quarterly update.',
-        failure: 'Subscription failed. Please try again later.'
+        failure: 'Subscription failed. Please try again later.',
+        storageUnavailable:
+          'We could not access your browser storage. Please enable local storage to subscribe.'
       },
       promise: 'We respect your inbox and you can unsubscribe at any time.',
       subscriberCount: '{{count}} investors have subscribed.'
@@ -205,7 +207,8 @@ const translationResources = {
         invalid: '请输入有效的邮箱地址。',
         exists: '该邮箱已经订阅过了。',
         success: '订阅成功！每次季度更新后我们都会通知您。',
-        failure: '订阅失败，请稍后重试。'
+        failure: '订阅失败，请稍后重试。',
+        storageUnavailable: '无法访问您的浏览器存储，请启用本地存储后再试。'
       },
       promise: '我们承诺不会发送垃圾邮件，您可以随时取消订阅。',
       subscriberCount: '已有 {{count}} 位投资者订阅。'
