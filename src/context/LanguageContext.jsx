@@ -27,6 +27,8 @@ const translationResources = {
         high: 'High'
       },
       others: 'Others',
+      languageSelectorLabel: 'Language',
+
       languageNames: {
         en: 'English',
         zh: '中文'
@@ -84,6 +86,7 @@ const translationResources = {
         description: 'Compared with {{previousQuarter}}',
         increase: 'Up {{amount}} ({{percent}})',
         decrease: 'Down {{amount}} ({{percent}})',
+        noChange: 'No change from {{previousQuarter}}',
         noPrevious: 'No prior quarter available for comparison.'
       },
       charts: {
@@ -159,6 +162,7 @@ const translationResources = {
         high: '高'
       },
       others: '其他',
+      languageSelectorLabel: '语言',
       languageNames: {
         en: 'English',
         zh: '中文'
@@ -216,6 +220,7 @@ const translationResources = {
         description: '与 {{previousQuarter}} 比较',
         increase: '上涨 {{amount}}（{{percent}}）',
         decrease: '下降 {{amount}}（{{percent}}）',
+        noChange: '与 {{previousQuarter}} 持平',
         noPrevious: '暂无上一季度可供比较。'
       },
       charts: {
@@ -299,16 +304,29 @@ const formatQuarter = (quarter, language) => {
 
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => {
-    if (typeof window !== 'undefined') {
-
-      return localStorage.getItem('app-language') || 'en'
+    if (typeof window === 'undefined') {
+      return 'en'
     }
-    return 'en'
+
+    try {
+      const stored = window.localStorage.getItem('app-language')
+      return stored === 'zh' ? 'zh' : 'en'
+    } catch (error) {
+      console.warn('[language] unable to access localStorage, defaulting to English', error)
+      return 'en'
+    }
   })
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('app-language', language)
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    try {
+      window.localStorage.setItem('app-language', language)
+    } catch (error) {
+      console.warn('[language] unable to persist preference', error)
+
     }
   }, [language])
 
@@ -320,7 +338,7 @@ export const LanguageProvider = ({ children }) => {
   }, [language])
 
   const changeLanguage = useCallback((nextLanguage) => {
-    setLanguage(nextLanguage)
+    setLanguage(nextLanguage === 'zh' ? 'zh' : 'en')
   }, [])
 
   const localizeText = useCallback((value) => {

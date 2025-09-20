@@ -26,7 +26,15 @@ const HoldingsPage = () => {
     }
 
     const changeValue = latest.value - previous.value
-    const directionKey = changeValue >= 0 ? 'increase' : 'decrease'
+    if (changeValue === 0) {
+      return {
+        description: t('holdingsPage.quarterChange.description', { previousQuarter: previous.label }),
+        changeLabel: t('holdingsPage.quarterChange.noChange', { previousQuarter: previous.label }),
+        direction: 'neutral'
+      }
+    }
+    const directionKey = changeValue > 0 ? 'increase' : 'decrease'
+
     const absoluteChange = Math.abs(changeValue)
     const percentChange = previous.value === 0 ? 0 : (absoluteChange / previous.value) * 100
 
@@ -120,7 +128,9 @@ const HoldingsPage = () => {
               className={`mt-3 sm:mt-0 inline-flex px-3 py-1 text-sm font-medium rounded-full ${
                 quarterSummary.direction === 'increase'
                   ? 'bg-green-50 text-green-700'
-                  : 'bg-red-50 text-red-700'
+                  : quarterSummary.direction === 'decrease'
+                    ? 'bg-red-50 text-red-700'
+                    : 'bg-gray-100 text-gray-700'
               }`}
             >
               {quarterSummary.changeLabel}
