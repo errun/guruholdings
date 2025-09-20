@@ -96,7 +96,6 @@ const SubscribeForm = () => {
         console.warn('[subscribe] Stored subscribers value is not an array')
         setStorageErrored(true)
         setSubscriberCount(0)
-
         return
       }
 
