@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { useLanguage } from '../context/LanguageContext.jsx'
+import { readStorageJSON, writeStorageJSON } from '../utils/storage.js'
+
+const STORAGE_KEY = 'subscribers'
 
 const SubscribeForm = () => {
   const { t } = useLanguage()
@@ -8,11 +11,48 @@ const SubscribeForm = () => {
   const [status, setStatus] = useState('idle')
   const [message, setMessage] = useState('')
   const [subscriberCount, setSubscriberCount] = useState(0)
+  const [storageErrored, setStorageErrored] = useState(false)
+  const resetTimerRef = useRef(null)
+
+  const clearResetTimer = useCallback(() => {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current)
+      resetTimerRef.current = null
+    }
+  }, [])
 
   useEffect(() => {
-    const subscribers = JSON.parse(localStorage.getItem('subscribers') || '[]')
-    setSubscriberCount(subscribers.length)
+    const { value, error } = readStorageJSON(STORAGE_KEY, [])
+
+    if (error) {
+      console.warn('[subscribe] Unable to read subscribers from storage', error)
+      setStorageErrored(true)
+      setSubscriberCount(Array.isArray(value) ? value.length : 0)
+      return
+    }
+
+    if (!Array.isArray(value)) {
+      console.warn('[subscribe] Stored subscribers value is not an array')
+      setStorageErrored(true)
+      setSubscriberCount(0)
+      return
+    }
+
+    setSubscriberCount(value.length)
+    setStorageErrored(false)
   }, [])
+
+  useEffect(() => clearResetTimer, [clearResetTimer])
+
+  useEffect(() => {
+    if (!storageErrored) {
+      return
+    }
+
+    clearResetTimer()
+    setStatus('error')
+    setMessage(t('subscribe.messages.storageUnavailable'))
+  }, [storageErrored, clearResetTimer, t])
 
   const validateEmail = (value) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -21,6 +61,8 @@ const SubscribeForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    clearResetTimer()
 
     if (!email.trim()) {
       setStatus('error')
@@ -39,23 +81,45 @@ const SubscribeForm = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      const subscribers = JSON.parse(localStorage.getItem('subscribers') || '[]')
+      const { value: storedSubscribers, error: readError } = readStorageJSON(STORAGE_KEY, [])
 
-      if (subscribers.includes(email)) {
+      if (readError) {
+        console.warn('[subscribe] Unable to read subscribers from storage', readError)
+        setSubscriberCount(Array.isArray(storedSubscribers) ? storedSubscribers.length : 0)
+        setStorageErrored(true)
+        return
+      }
+
+      if (!Array.isArray(storedSubscribers)) {
+        console.warn('[subscribe] Stored subscribers value is not an array')
+        setStorageErrored(true)
+        setSubscriberCount(0)
+        return
+      }
+
+      if (storedSubscribers.includes(email)) {
         setStatus('error')
         setMessage(t('subscribe.messages.exists'))
         return
       }
 
-      subscribers.push(email)
-      localStorage.setItem('subscribers', JSON.stringify(subscribers))
+      const nextSubscribers = [...storedSubscribers, email]
+      const { success: persistSuccess, error: persistError } = writeStorageJSON(STORAGE_KEY, nextSubscribers)
 
+      if (!persistSuccess) {
+        console.warn('[subscribe] Unable to persist subscribers to storage', persistError)
+        setSubscriberCount(storedSubscribers.length)
+        setStorageErrored(true)
+        return
+      }
+
+      setStorageErrored(false)
       setStatus('success')
       setMessage(t('subscribe.messages.success'))
       setEmail('')
-      setSubscriberCount(subscribers.length)
+      setSubscriberCount(nextSubscribers.length)
 
-      setTimeout(() => {
+      resetTimerRef.current = setTimeout(() => {
         setStatus('idle')
         setMessage('')
       }, 3000)
@@ -64,6 +128,9 @@ const SubscribeForm = () => {
       setMessage(t('subscribe.messages.failure'))
     }
   }
+
+  const isSubmitting = status === 'loading'
+  const isFormDisabled = isSubmitting || storageErrored
 
   return (
     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 text-center border border-blue-100">
@@ -82,14 +149,14 @@ const SubscribeForm = () => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t('subscribe.placeholder')}
             className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-            disabled={status === 'loading'}
+            disabled={isFormDisabled}
           />
           <button
             type="submit"
-            disabled={status === 'loading'}
+            disabled={isFormDisabled}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
           >
-            {status === 'loading' ? (
+            {isSubmitting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                 <span>{t('subscribe.buttonLoading')}</span>
