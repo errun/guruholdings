@@ -28,6 +28,7 @@ const translationResources = {
       },
       others: 'Others',
       languageSelectorLabel: 'Language',
+
       languageNames: {
         en: 'English',
         zh: '中文'
@@ -325,6 +326,7 @@ export const LanguageProvider = ({ children }) => {
       window.localStorage.setItem('app-language', language)
     } catch (error) {
       console.warn('[language] unable to persist preference', error)
+
     }
   }, [language])
 

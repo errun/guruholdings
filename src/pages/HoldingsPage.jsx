@@ -26,7 +26,6 @@ const HoldingsPage = () => {
     }
 
     const changeValue = latest.value - previous.value
-
     if (changeValue === 0) {
       return {
         description: t('holdingsPage.quarterChange.description', { previousQuarter: previous.label }),
@@ -34,8 +33,8 @@ const HoldingsPage = () => {
         direction: 'neutral'
       }
     }
-
     const directionKey = changeValue > 0 ? 'increase' : 'decrease'
+
     const absoluteChange = Math.abs(changeValue)
     const percentChange = previous.value === 0 ? 0 : (absoluteChange / previous.value) * 100
 

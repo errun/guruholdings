@@ -10,6 +10,7 @@ const LanguageSelector = () => {
   return (
     <label className="flex items-center space-x-2 text-sm text-gray-600" aria-label={t('common.languageSelectorLabel')}>
       <span className="text-gray-500" aria-hidden="true">🌐</span>
+
       <span className="text-gray-500">{t('common.languageSelectorLabel')}</span>
       <select
         value={language}
