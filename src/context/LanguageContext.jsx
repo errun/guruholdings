@@ -85,6 +85,7 @@ const translationResources = {
         description: 'Compared with {{previousQuarter}}',
         increase: 'Up {{amount}} ({{percent}})',
         decrease: 'Down {{amount}} ({{percent}})',
+        noChange: 'No change from {{previousQuarter}}',
         noPrevious: 'No prior quarter available for comparison.'
       },
       charts: {
@@ -218,6 +219,7 @@ const translationResources = {
         description: '与 {{previousQuarter}} 比较',
         increase: '上涨 {{amount}}（{{percent}}）',
         decrease: '下降 {{amount}}（{{percent}}）',
+        noChange: '与 {{previousQuarter}} 持平',
         noPrevious: '暂无上一季度可供比较。'
       },
       charts: {
