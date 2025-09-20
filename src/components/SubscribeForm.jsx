@@ -5,6 +5,69 @@ import { readStorageJSON, writeStorageJSON } from '../utils/storage.js'
 
 const STORAGE_KEY = 'subscribers'
 
+const STORAGE_KEY = 'subscribers'
+
+const readSubscribersSafely = () => {
+  if (typeof window === 'undefined') {
+    return { subscribers: [], error: new Error('localStorage is unavailable') }
+  }
+
+  let storage
+
+  try {
+    storage = window.localStorage
+  } catch (error) {
+    return { subscribers: [], error }
+  }
+
+  if (typeof storage === 'undefined' || storage === null) {
+    return { subscribers: [], error: new Error('localStorage is unavailable') }
+  }
+
+  try {
+    const stored = storage.getItem(STORAGE_KEY)
+
+    if (!stored) {
+      return { subscribers: [], error: null }
+    }
+
+    const parsed = JSON.parse(stored)
+
+    if (Array.isArray(parsed)) {
+      return { subscribers: parsed, error: null }
+    }
+
+    return { subscribers: [], error: new Error('Stored subscribers value is not an array') }
+  } catch (error) {
+    return { subscribers: [], error }
+  }
+}
+
+const persistSubscribersSafely = (subscribers) => {
+  if (typeof window === 'undefined') {
+    return { success: false, error: new Error('localStorage is unavailable') }
+  }
+
+  let storage
+
+  try {
+    storage = window.localStorage
+  } catch (error) {
+    return { success: false, error }
+  }
+
+  if (typeof storage === 'undefined' || storage === null) {
+    return { success: false, error: new Error('localStorage is unavailable') }
+  }
+
+  try {
+    storage.setItem(STORAGE_KEY, JSON.stringify(subscribers))
+    return { success: true, error: null }
+  } catch (error) {
+    return { success: false, error }
+  }
+}
+
 const SubscribeForm = () => {
   const { t } = useLanguage()
   const [email, setEmail] = useState('')
@@ -40,6 +103,7 @@ const SubscribeForm = () => {
 
     setSubscriberCount(value.length)
     setStorageErrored(false)
+
   }, [])
 
   useEffect(() => clearResetTimer, [clearResetTimer])
@@ -94,6 +158,7 @@ const SubscribeForm = () => {
         console.warn('[subscribe] Stored subscribers value is not an array')
         setStorageErrored(true)
         setSubscriberCount(0)
+
         return
       }
 
@@ -105,6 +170,7 @@ const SubscribeForm = () => {
 
       const nextSubscribers = [...storedSubscribers, email]
       const { success: persistSuccess, error: persistError } = writeStorageJSON(STORAGE_KEY, nextSubscribers)
+
 
       if (!persistSuccess) {
         console.warn('[subscribe] Unable to persist subscribers to storage', persistError)
