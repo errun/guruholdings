@@ -300,6 +300,7 @@ const formatQuarter = (quarter, language) => {
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => {
     if (typeof window !== 'undefined') {
+
       return localStorage.getItem('app-language') || 'en'
     }
     return 'en'
@@ -308,6 +309,13 @@ export const LanguageProvider = ({ children }) => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('app-language', language)
+    }
+  }, [language])
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const htmlLang = language === 'zh' ? 'zh-CN' : 'en'
+      document.documentElement.setAttribute('lang', htmlLang)
     }
   }, [language])
 
