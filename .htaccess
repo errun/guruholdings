@@ -1,0 +1,14 @@
+# Set correct MIME types for JavaScript modules
+AddType application/javascript .js
+AddType text/css .css
+
+# Enable CORS for assets
+<FilesMatch "\.(js|css)$">
+    Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
+
+# Cache static assets
+<FilesMatch "\.(js|css|png|jpg|jpeg|gif|svg|ico)$">
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+</FilesMatch>
