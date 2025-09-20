@@ -2,173 +2,42 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Guru Holdings Tracker</title>
-    <meta
-      name="description"
-      content="Track Warren Buffett and Li Lu portfolio changes over the latest four quarters with localized insights, charts, and AI commentary."
-    />
-    <meta property="og:title" content="Guru Holdings Tracker" />
-    <meta
-      property="og:description"
-      content="Follow guru investors with quarterly holdings, portfolio charts, and localized AI highlights."
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.guruholdings.net/" />
-    <meta property="og:locale" content="en_US" />
-    <link rel="canonical" href="https://www.guruholdings.net/" />
-    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
+    <!-- Start Single Page Apps for GitHub Pages -->
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // MIT License
+      // https://github.com/rafgraph/spa-github-pages
+      // This script checks to see if a redirect is present in the query string,
+      // converts it back into the correct url and adds it to the
+      // browser's history using window.history.replaceState(...),
+      // which won't cause the browser to attempt to load the new url.
+      // When the single page app is loaded further down in this file,
+      // the correct url will be waiting in the browser's history for
+      // the single page app to route accordingly.
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
+    <!-- End Single Page Apps for GitHub Pages -->
+    <script type="module" crossorigin src="./assets/index-DkNWvaOH.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-51i9jydX.css">
   </head>
   <body>
-    <noscript>
-      <strong>请启用 JavaScript 以查看 Guru Holdings Tracker 的完整内容。</strong>
-    </noscript>
     <div id="root"></div>
-    <script>
-      ;(function () {
-        var overlayId = 'app-error-overlay'
+    <!-- Test content to verify page loading -->
+    <div style="position: fixed; top: 10px; right: 10px; background: red; color: white; padding: 10px; z-index: 9999;">
+      Hello World - Page Loading Test
+    </div>
 
-        function ensureOverlay() {
-          var existing = document.getElementById(overlayId)
-          if (existing) {
-            return existing
-          }
-
-          var container = document.createElement('div')
-          container.id = overlayId
-          container.style.position = 'fixed'
-          container.style.inset = '0'
-          container.style.zIndex = '9999'
-          container.style.background = 'rgba(17, 24, 39, 0.8)'
-          container.style.color = '#fff'
-          container.style.display = 'flex'
-          container.style.alignItems = 'center'
-          container.style.justifyContent = 'center'
-          container.style.padding = '24px'
-          container.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-
-          var card = document.createElement('div')
-          card.style.background = '#111827'
-          card.style.borderRadius = '12px'
-          card.style.maxWidth = '720px'
-          card.style.width = '100%'
-          card.style.padding = '24px'
-          card.style.boxShadow = '0 20px 45px rgba(0,0,0,0.35)'
-          card.style.border = '1px solid rgba(255,255,255,0.1)'
-
-          var title = document.createElement('h2')
-          title.textContent = '页面运行出现问题'
-          title.style.fontSize = '20px'
-          title.style.margin = '0 0 12px'
-
-          var subtitle = document.createElement('p')
-          subtitle.textContent = '浏览器遇到错误，已阻止页面渲染。请查看下面的详细信息。'
-          subtitle.style.margin = '0 0 16px'
-          subtitle.style.lineHeight = '1.6'
-
-          var instruction = document.createElement('p')
-          instruction.innerHTML =
-            '您可以打开开发者工具（F12 或 Option + ⌘ + I）查看控制台日志，并将下方信息发送给开发者。'
-          instruction.style.margin = '0 0 16px'
-          instruction.style.fontSize = '14px'
-          instruction.style.lineHeight = '1.6'
-          instruction.style.color = 'rgba(255,255,255,0.85)'
-
-          var pre = document.createElement('pre')
-          pre.style.background = '#1f2937'
-          pre.style.padding = '16px'
-          pre.style.borderRadius = '8px'
-          pre.style.overflowX = 'auto'
-          pre.style.whiteSpace = 'pre-wrap'
-          pre.style.fontSize = '13px'
-          pre.style.lineHeight = '1.5'
-          pre.style.color = '#f9fafb'
-
-          card.appendChild(title)
-          card.appendChild(subtitle)
-          card.appendChild(instruction)
-          card.appendChild(pre)
-          container.appendChild(card)
-          document.body.appendChild(container)
-
-          return container
-        }
-
-        function renderError(detail) {
-          try {
-            var container = ensureOverlay()
-            var pre = container.querySelector('pre')
-            if (pre) {
-              pre.textContent = detail
-            }
-          } catch (err) {
-            console.error('无法展示错误信息', err)
-          }
-        }
-
-        function formatStack(input) {
-          if (!input) {
-            return '（没有可用的错误详情）'
-          }
-
-          if (typeof input === 'string') {
-            return input
-          }
-
-          if (input.stack) {
-            return input.stack
-          }
-
-          if (input.message) {
-            return input.message
-          }
-
-          try {
-            return JSON.stringify(input, null, 2)
-          } catch (err) {
-            return String(input)
-          }
-        }
-
-        window.addEventListener(
-          'error',
-          function (event) {
-            if (!event) {
-              return
-            }
-
-            var scriptTarget = event.target
-            if (scriptTarget && scriptTarget.tagName === 'SCRIPT' && scriptTarget.src) {
-              renderError('脚本加载失败：' + scriptTarget.src)
-              return
-            }
-
-            var message = event.message || '未知错误'
-            var locationInfo = ''
-            if (event.filename) {
-              locationInfo = '\n来源：' + event.filename
-              if (event.lineno) {
-                locationInfo += ':' + event.lineno
-                if (event.colno) {
-                  locationInfo += ':' + event.colno
-                }
-              }
-            }
-            renderError(message + locationInfo)
-          },
-          true
-        )
-
-        window.addEventListener('unhandledrejection', function (event) {
-          if (!event) {
-            return
-          }
-
-          var detail = formatStack(event.reason)
-          renderError('未处理的 Promise 拒绝：\n' + detail)
-        })
-      })()
-    </script>
-    <script type="module" src="./src/main.jsx"></script>
   </body>
 </html>
