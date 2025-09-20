@@ -27,7 +27,6 @@ const translationResources = {
         high: 'High'
       },
       others: 'Others',
-      languageSelectorLabel: 'Language',
       languageNames: {
         en: 'English',
         zh: '中文'
@@ -160,7 +159,6 @@ const translationResources = {
         high: '高'
       },
       others: '其他',
-      languageSelectorLabel: '语言',
       languageNames: {
         en: 'English',
         zh: '中文'
@@ -302,8 +300,8 @@ const formatQuarter = (quarter, language) => {
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('app-language')
-      return stored === 'zh' ? 'zh' : 'en'
+
+      return localStorage.getItem('app-language') || 'en'
     }
     return 'en'
   })
