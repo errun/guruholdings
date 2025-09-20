@@ -5,6 +5,7 @@ import { readStorageJSON, writeStorageJSON } from '../utils/storage.js'
 
 const STORAGE_KEY = 'subscribers'
 
+
 const SubscribeForm = () => {
   const { t } = useLanguage()
   const [email, setEmail] = useState('')
@@ -40,6 +41,7 @@ const SubscribeForm = () => {
 
     setSubscriberCount(value.length)
     setStorageErrored(false)
+
   }, [])
 
   useEffect(() => clearResetTimer, [clearResetTimer])
@@ -94,6 +96,7 @@ const SubscribeForm = () => {
         console.warn('[subscribe] Stored subscribers value is not an array')
         setStorageErrored(true)
         setSubscriberCount(0)
+
         return
       }
 
