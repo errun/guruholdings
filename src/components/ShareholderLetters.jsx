@@ -79,9 +79,9 @@ const ShareholderLetters = () => {
                   </a>
                   <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200">
                     {expandedLetter === letter.year ? (
-                      <ChevronUpIcon className="w-5 h-5" />
+                      <ChevronUpIcon className="w-6 h-6" />
                     ) : (
-                      <ChevronDownIcon className="w-5 h-5" />
+                      <ChevronDownIcon className="w-6 h-6" />
                     )}
                   </button>
                 </div>

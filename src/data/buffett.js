@@ -29,25 +29,25 @@ const buffettData = {
       }
     ]
   },
-  lastUpdate: '2024Q3',
+  lastUpdate: '2024Q4',
   totalValue: 350000000000,
   insights: {
     summary: {
-      en: 'Buffett increased his Apple stake again in Q3 2024 and initiated a new position in TSMC, keeping the portfolio concentrated in mega-cap tech and consumer franchises.',
-      zh: 'Q3季度巴菲特继续增持苹果公司，同时新增了台积电的持仓。整体持仓更加集中于科技和消费龙头股。'
+      en: 'Buffett continued to reduce his Apple position in Q4 2024 while maintaining focus on cash generation and dividend-paying stocks, ending the year with record cash levels.',
+      zh: 'Q4季度巴菲特继续减持苹果公司，专注于现金流和分红股票，年末现金储备创历史新高。'
     },
     keyChanges: [
       {
-        en: 'Apple position grew 15%, remaining the top holding.',
-        zh: '苹果公司持仓增加15%，仍为第一大重仓股'
+        en: 'Apple position reduced by 25%, but still remains the largest holding.',
+        zh: '苹果公司持仓减少25%，但仍为第一大重仓股'
       },
       {
-        en: 'Initiated a $4B stake in Taiwan Semiconductor.',
-        zh: '新增台积电持仓，价值约40亿美元'
+        en: 'Cash reserves reached record $325B, up from $276B in Q3.',
+        zh: '现金储备达到创纪录的3250亿美元，较Q3的2760亿美元大幅增加'
       },
       {
-        en: 'Trimmed bank exposure with Bank of America down 8%.',
-        zh: '减持银行股，美国银行持仓下降8%'
+        en: 'Continued to trim Bank of America, reducing stake by another 12%.',
+        zh: '继续减持美国银行，持仓再次下降12%'
       }
     ],
     riskLevel: 'moderate',

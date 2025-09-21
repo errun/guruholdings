@@ -29,25 +29,25 @@ const liLuData = {
       }
     ]
   },
-  lastUpdate: '2024Q3',
+  lastUpdate: '2024Q4',
   totalValue: 4000000000,
   insights: {
     summary: {
-      en: 'Li Lu materially added to BYD in Q3 2024 while trimming US bank exposure and introducing Alibaba to the portfolio.',
-      zh: 'Q3季度李录大幅增持比亚迪，同时减持了部分银行股。整体投资风格依然集中，重点关注中国优质企业的美股ADR。'
+      en: 'Li Lu maintained his concentrated approach in Q4 2024, holding steady on BYD while adding to Chinese tech positions amid market volatility.',
+      zh: 'Q4季度李录保持集中投资策略，稳定持有比亚迪，同时在市场波动中增加了中国科技股的配置。'
     },
     keyChanges: [
       {
-        en: 'BYD position expanded by 25%, now 45% of assets.',
-        zh: '比亚迪持仓增加25%，占总持仓的45%'
+        en: 'BYD position held steady at 45% of total assets despite market volatility.',
+        zh: '比亚迪持仓保持稳定，占总持仓的45%，未受市场波动影响'
       },
       {
-        en: 'Reduced Wells Fargo holdings by 12%.',
-        zh: '减持富国银行，持仓下降12%'
+        en: 'Increased Alibaba position by 20% to $360M.',
+        zh: '阿里巴巴持仓增加20%，价值达到3.6亿美元'
       },
       {
-        en: 'Opened a $300M position in Alibaba.',
-        zh: '新增阿里巴巴持仓，价值约3亿美元'
+        en: 'Added small position in PDD Holdings worth $150M.',
+        zh: '新增拼多多持仓，价值约1.5亿美元'
       }
     ],
     riskLevel: 'elevated',

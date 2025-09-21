@@ -46,15 +46,15 @@ const HomePage = () => {
 
         <div className="flex justify-center space-x-8 text-sm text-gray-500">
           <div className="flex items-center space-x-2">
-            <DocumentTextIcon className="w-5 h-5" />
+            <DocumentTextIcon className="w-6 h-6" />
             <span>{t('home.features.secData')}</span>
           </div>
           <div className="flex items-center space-x-2">
-            <ChartBarIcon className="w-5 h-5" />
+            <ChartBarIcon className="w-6 h-6" />
             <span>{t('home.features.visualCharts')}</span>
           </div>
           <div className="flex items-center space-x-2">
-            <ArrowTrendingUpIcon className="w-5 h-5" />
+            <ArrowTrendingUpIcon className="w-6 h-6" />
             <span>{t('home.features.aiSummary')}</span>
           </div>
         </div>
