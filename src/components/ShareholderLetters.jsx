@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { DocumentTextIcon, CalendarIcon, ExternalLinkIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
+import { DocumentTextIcon, CalendarIcon, ArrowTopRightOnSquareIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { useLanguage } from '../context/LanguageContext.jsx'
-import buffettLetters from '../data/buffett-letters.js'
+import { buffettLetters } from '../data/buffett-letters.js'
 
 const ShareholderLetters = () => {
   const { t, localizeText } = useLanguage()
@@ -74,7 +74,7 @@ const ShareholderLetters = () => {
                     className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors duration-200"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <ExternalLinkIcon className="w-4 h-4 mr-1" />
+                    <ArrowTopRightOnSquareIcon className="w-4 h-4 mr-1" />
                     {t('shareholderLetters.readLetter')}
                   </a>
                   <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200">
