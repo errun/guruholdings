@@ -5,6 +5,7 @@ const translationResources = {
   en: {
     common: {
       brand: 'Guru Holdings Tracker',
+      locale: 'en-US',
       navigation: {
         home: 'Home',
         subscribe: 'Subscribe'
@@ -60,6 +61,14 @@ const translationResources = {
         investmentHighlights: 'Investment highlights',
         viewHoldings: 'View holdings details'
       }
+    },
+    shareholderLetters: {
+      title: 'Buffett\'s Letters to Shareholders',
+      subtitle: 'Annual insights and wisdom from Warren Buffett',
+      readLetter: 'Read Letter',
+      keyHighlights: 'Key Highlights',
+      showMore: 'Show More Letters',
+      showLess: 'Show Less'
     },
     subscribe: {
       title: 'Subscribe for holdings updates',
@@ -142,6 +151,7 @@ const translationResources = {
   zh: {
     common: {
       brand: '大师持仓追踪',
+      locale: 'zh-CN',
       navigation: {
         home: '首页',
         subscribe: '订阅'
@@ -196,6 +206,14 @@ const translationResources = {
         investmentHighlights: '投资亮点',
         viewHoldings: '查看持仓详情'
       }
+    },
+    shareholderLetters: {
+      title: '巴菲特致股东信',
+      subtitle: '沃伦·巴菲特的年度洞察与智慧',
+      readLetter: '阅读原文',
+      keyHighlights: '核心要点',
+      showMore: '查看更多信件',
+      showLess: '收起'
     },
     subscribe: {
       title: '订阅持仓更新',

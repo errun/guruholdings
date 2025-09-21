@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { ChartBarIcon, ArrowTrendingUpIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import SubscribeForm from '../components/SubscribeForm'
+import ShareholderLetters from '../components/ShareholderLetters'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import buffettData from '../data/buffett.js'
 import liLuData from '../data/li-lu.js'
@@ -107,6 +108,9 @@ const HomePage = () => {
           </div>
         ))}
       </div>
+
+      {/* Shareholder Letters Section */}
+      <ShareholderLetters />
 
       {/* Subscribe Section */}
       <div id="subscribe">
