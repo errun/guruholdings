@@ -96,6 +96,17 @@ const translationResources = {
         currentAllocation: 'Current allocation',
         totalValueTrend: 'Total value trend'
       },
+      resources: {
+        title: 'Primary sources',
+        shareholderLetters: {
+          title: 'Shareholder letters',
+          subtitle: 'Official annual letters to Berkshire Hathaway shareholders.'
+        },
+        meetingTranscripts: {
+          title: 'Annual meeting transcripts',
+          subtitle: 'Read the full Q&A from Berkshire Hathaway annual meetings.'
+        }
+      },
       dataNotice: {
         title: 'Data notes',
         items: [
@@ -230,6 +241,17 @@ const translationResources = {
       charts: {
         currentAllocation: '当前持仓分布',
         totalValueTrend: '总市值趋势'
+      },
+      resources: {
+        title: '原始资料',
+        shareholderLetters: {
+          title: '股东信',
+          subtitle: '伯克希尔·哈撒韦官方每年致股东公开信。'
+        },
+        meetingTranscripts: {
+          title: '股东大会问答实录',
+          subtitle: '查看伯克希尔·哈撒韦股东大会的完整问答内容。'
+        }
       },
       dataNotice: {
         title: '数据说明',
