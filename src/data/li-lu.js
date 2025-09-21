@@ -29,25 +29,25 @@ const liLuData = {
       }
     ]
   },
-  lastUpdate: '2024Q4',
+  lastUpdate: '2025Q1',
   totalValue: 4000000000,
   insights: {
     summary: {
-      en: 'Li Lu maintained his concentrated approach in Q4 2024, holding steady on BYD while adding to Chinese tech positions amid market volatility.',
-      zh: 'Q4季度李录保持集中投资策略，稳定持有比亚迪，同时在市场波动中增加了中国科技股的配置。'
+      en: 'Li Lu entered 2025 with cautious optimism, maintaining core BYD position while strategically positioning in Chinese consumer and technology leaders.',
+      zh: '李录以谨慎乐观的态度进入2025年，维持比亚迪核心持仓，同时战略性布局中国消费和科技龙头股。'
     },
     keyChanges: [
       {
-        en: 'BYD position held steady at 45% of total assets despite market volatility.',
-        zh: '比亚迪持仓保持稳定，占总持仓的45%，未受市场波动影响'
+        en: 'BYD remains core holding at 42% of portfolio, slight trim for diversification.',
+        zh: '比亚迪仍为核心持仓，占投资组合42%，小幅减持以实现多元化'
       },
       {
-        en: 'Increased Alibaba position by 20% to $360M.',
-        zh: '阿里巴巴持仓增加20%，价值达到3.6亿美元'
+        en: 'Increased Tencent position by 15% to $280M on gaming recovery.',
+        zh: '基于游戏业务复苏，腾讯持仓增加15%至2.8亿美元'
       },
       {
-        en: 'Added small position in PDD Holdings worth $150M.',
-        zh: '新增拼多多持仓，价值约1.5亿美元'
+        en: 'New position in Xiaomi worth $200M, betting on EV transition.',
+        zh: '新增小米持仓2亿美元，押注电动汽车转型'
       }
     ],
     riskLevel: 'elevated',

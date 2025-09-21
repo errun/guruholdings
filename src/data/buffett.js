@@ -29,25 +29,25 @@ const buffettData = {
       }
     ]
   },
-  lastUpdate: '2024Q4',
+  lastUpdate: '2025Q1',
   totalValue: 350000000000,
   insights: {
     summary: {
-      en: 'Buffett continued to reduce his Apple position in Q4 2024 while maintaining focus on cash generation and dividend-paying stocks, ending the year with record cash levels.',
-      zh: 'Q4季度巴菲特继续减持苹果公司，专注于现金流和分红股票，年末现金储备创历史新高。'
+      en: 'Buffett started 2025 with strategic positioning, maintaining high cash reserves while selectively adding to energy and utility positions amid market uncertainty.',
+      zh: '2025年初巴菲特保持战略性布局，维持高现金储备的同时，在市场不确定性中有选择性地增加能源和公用事业持仓。'
     },
     keyChanges: [
       {
-        en: 'Apple position reduced by 25%, but still remains the largest holding.',
-        zh: '苹果公司持仓减少25%，但仍为第一大重仓股'
+        en: 'Apple position held steady at current levels, maintaining largest holding status.',
+        zh: '苹果公司持仓保持稳定，维持第一大重仓股地位'
       },
       {
-        en: 'Cash reserves reached record $325B, up from $276B in Q3.',
-        zh: '现金储备达到创纪录的3250亿美元，较Q3的2760亿美元大幅增加'
+        en: 'Cash reserves remain elevated at $320B, providing flexibility for opportunities.',
+        zh: '现金储备维持在3200亿美元高位，为投资机会提供灵活性'
       },
       {
-        en: 'Continued to trim Bank of America, reducing stake by another 12%.',
-        zh: '继续减持美国银行，持仓再次下降12%'
+        en: 'Added to Chevron position by 8% amid energy sector strength.',
+        zh: '在能源板块走强背景下，雪佛龙持仓增加8%'
       }
     ],
     riskLevel: 'moderate',
