@@ -87,6 +87,10 @@ const HoldingsPage = () => {
     )
   }
 
+  const shareholderLetters = data.resources?.shareholderLetters ?? []
+  const meetingTranscripts = data.resources?.meetingTranscripts ?? []
+  const hasResources = shareholderLetters.length > 0 || meetingTranscripts.length > 0
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
@@ -162,6 +166,74 @@ const HoldingsPage = () => {
       <div className="mb-8">
         <HoldingsTable holdings={data.holdings} quarters={data.quarters} />
       </div>
+
+      {/* Resources */}
+      {hasResources && (
+        <div className="mb-8">
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              {t('holdingsPage.resources.title')}
+            </h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              {shareholderLetters.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {t('holdingsPage.resources.shareholderLetters.title')}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    {t('holdingsPage.resources.shareholderLetters.subtitle')}
+                  </p>
+                  <ul className="space-y-3">
+                    {shareholderLetters.map((item) => (
+                      <li key={`shareholder-${item.year}`} className="space-y-1">
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          {item.year} · {item.title}
+                        </a>
+                        {item.description && (
+                          <p className="text-sm text-gray-500">{item.description}</p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {meetingTranscripts.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {t('holdingsPage.resources.meetingTranscripts.title')}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    {t('holdingsPage.resources.meetingTranscripts.subtitle')}
+                  </p>
+                  <ul className="space-y-3">
+                    {meetingTranscripts.map((item) => (
+                      <li key={`meeting-${item.year}`} className="space-y-1">
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          {item.year} · {item.title}
+                        </a>
+                        {item.description && (
+                          <p className="text-sm text-gray-500">{item.description}</p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Data Source Notice */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">

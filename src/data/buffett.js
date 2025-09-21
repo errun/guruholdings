@@ -263,7 +263,85 @@ const buffettData = {
         }
       }
     }
-  ]
+  ],
+  resources: {
+    shareholderLetters: [
+      {
+        year: 2023,
+        title: {
+          en: '2023 Shareholder Letter',
+          zh: '2023年致股东信'
+        },
+        description: {
+          en: 'Buffett reflects on Berkshire’s performance and capital allocation during 2023.',
+          zh: '巴菲特回顾伯克希尔在2023年的经营表现与资本配置策略。'
+        },
+        url: 'https://www.berkshirehathaway.com/letters/2023ltr.pdf'
+      },
+      {
+        year: 2022,
+        title: {
+          en: '2022 Shareholder Letter',
+          zh: '2022年致股东信'
+        },
+        description: {
+          en: 'Highlights the resilience of Berkshire’s operating companies and investment discipline.',
+          zh: '强调伯克希尔旗下运营公司与投资策略在2022年的韧性。'
+        },
+        url: 'https://www.berkshirehathaway.com/letters/2022ltr.pdf'
+      },
+      {
+        year: 2021,
+        title: {
+          en: '2021 Shareholder Letter',
+          zh: '2021年致股东信'
+        },
+        description: {
+          en: 'Discusses Berkshire’s buyback program and long-term investment philosophy.',
+          zh: '讨论伯克希尔的股份回购计划与长期投资理念。'
+        },
+        url: 'https://www.berkshirehathaway.com/letters/2021ltr.pdf'
+      }
+    ],
+    meetingTranscripts: [
+      {
+        year: 2024,
+        title: {
+          en: '2024 Annual Meeting Transcript',
+          zh: '2024年股东大会问答实录'
+        },
+        description: {
+          en: 'Full Q&A from the 2024 Berkshire Hathaway annual meeting in Omaha.',
+          zh: '2024年伯克希尔股东大会完整问答实录，来自奥马哈现场。'
+        },
+        url: 'https://www.berkshirehathaway.com/meetings/2024/2024meetingtranscript.pdf'
+      },
+      {
+        year: 2023,
+        title: {
+          en: '2023 Annual Meeting Transcript',
+          zh: '2023年股东大会问答实录'
+        },
+        description: {
+          en: 'Detailed discussion of Berkshire’s holdings, insurance operations, and market outlook.',
+          zh: '详尽记录伯克希尔在持仓、保险业务及市场展望方面的讨论。'
+        },
+        url: 'https://www.berkshirehathaway.com/meetings/2023/2023meetingtranscript.pdf'
+      },
+      {
+        year: 2022,
+        title: {
+          en: '2022 Annual Meeting Transcript',
+          zh: '2022年股东大会问答实录'
+        },
+        description: {
+          en: 'Covers Buffett and Munger’s commentary on inflation, buybacks, and market volatility.',
+          zh: '涵盖巴菲特与芒格对通胀、回购及市场波动的观点。'
+        },
+        url: 'https://www.berkshirehathaway.com/meetings/2022/2022meetingtranscript.pdf'
+      }
+    ]
+  }
 }
 
 export default buffettData

@@ -71,6 +71,15 @@ const transformGuruData = (rawData, { localizeText, formatQuarterLabel, t }) => 
   })
 
   const insights = rawData.insights || {}
+  const resources = rawData.resources || {}
+
+  const mapResourceItems = (items = []) =>
+    items.map((item) => ({
+      year: item.year,
+      title: localizeText(item.title) ?? '',
+      description: localizeText(item.description) ?? '',
+      url: item.url
+    }))
 
   return {
     id: rawData.id,
@@ -95,7 +104,15 @@ const transformGuruData = (rawData, { localizeText, formatQuarterLabel, t }) => 
     },
     valueHistory,
     holdings,
-    quarters: lastFourQuartersDesc
+    quarters: lastFourQuartersDesc,
+    resources: {
+      shareholderLetters: Array.isArray(resources.shareholderLetters)
+        ? mapResourceItems(resources.shareholderLetters)
+        : [],
+      meetingTranscripts: Array.isArray(resources.meetingTranscripts)
+        ? mapResourceItems(resources.meetingTranscripts)
+        : []
+    }
   }
 }
 
