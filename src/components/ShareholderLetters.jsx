@@ -27,7 +27,7 @@ const ShareholderLetters = () => {
   return (
     <div className="bg-white rounded-xl shadow-lg p-8 mb-16">
       <div className="flex items-center mb-6">
-        <DocumentTextIcon className="w-8 h-8 text-blue-600 mr-3" />
+        <DocumentTextIcon className="w-6 h-6 text-blue-600 mr-3" />
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
             {t('shareholderLetters.title')}
