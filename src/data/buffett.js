@@ -3,16 +3,16 @@ const buffettData = {
   overview: {
     name: {
       en: 'Warren Buffett',
-      zh: '沃伦·巴菲�?
+      zh: '沃伦·巴菲特'
     },
     company: {
       en: 'Berkshire Hathaway',
-      zh: '伯克希尔·哈撒�?
+      zh: '伯克希尔·哈撒韦'
     },
-    avatar: '🧙‍♂�?,
+    avatar: '🧙‍♂️',
     description: {
       en: 'Legendary value investor known for holding high-quality companies for decades.',
-      zh: '股神巴菲特，价值投资的代表人物，以长期持有优质公司股票而闻名�?
+      zh: '股神巴菲特，价值投资的代表人物，以长期持有优质公司股票而闻名。'
     },
     highlights: [
       {
@@ -21,7 +21,7 @@ const buffettData = {
       },
       {
         en: 'Focuses on consumer staples, financials, and mega-cap technology leaders.',
-        zh: '偏爱消费品、金融、科技龙头�?
+        zh: '偏爱消费品、金融、科技龙头�?
       },
       {
         en: 'Long-term owner of Apple, Coca-Cola and other blue-chip names.',
@@ -34,7 +34,7 @@ const buffettData = {
   insights: {
     summary: {
       en: 'Buffett started 2025 with strategic positioning, maintaining high cash reserves while selectively adding to energy and utility positions amid market uncertainty.',
-      zh: '2025年初巴菲特保持战略性布局，维持高现金储备的同时，在市场不确定性中有选择性地增加能源和公用事业持仓�?
+      zh: '2025年初巴菲特保持战略性布局，维持高现金储备的同时，在市场不确定性中有选择性地增加能源和公用事业持仓�?
     },
     keyChanges: [
       {
@@ -43,7 +43,7 @@ const buffettData = {
       },
       {
         en: 'Cash reserves remain elevated at $320B, providing flexibility for opportunities.',
-        zh: '现金储备维持�?200亿美元高位，为投资机会提供灵活�?
+        zh: '现金储备维持�?200亿美元高位，为投资机会提供灵活�?
       },
       {
         en: 'Added to Chevron position by 8% amid energy sector strength.',
@@ -53,7 +53,7 @@ const buffettData = {
     riskLevel: 'moderate',
     diversification: {
       en: 'High concentration: top five holdings represent 68% of the portfolio.',
-      zh: '集中度较高，�?大持仓占�?8%'
+      zh: '集中度较高，�?大持仓占�?8%'
     }
   },
   valueHistory: [
@@ -187,7 +187,7 @@ const buffettData = {
       symbol: 'CVX',
       companyName: {
         en: 'Chevron',
-        zh: '雪佛�?
+        zh: '雪佛�?
       },
       currentShares: 123100000,
       currentValue: 18465000000,
@@ -227,7 +227,7 @@ const buffettData = {
       symbol: 'TSM',
       companyName: {
         en: 'Taiwan Semiconductor',
-        zh: '台积�?
+        zh: '台积�?
       },
       currentShares: 60000000,
       currentValue: 6000000000,
@@ -270,11 +270,11 @@ const buffettData = {
         year: 2023,
         title: {
           en: '2023 Shareholder Letter',
-          zh: '2023年致股东�?
+          zh: '2023年致股东�?
         },
         description: {
           en: 'Buffett reflects on Berkshire’s performance and capital allocation during 2023.',
-          zh: '巴菲特回顾伯克希尔在2023年的经营表现与资本配置策略�?
+          zh: '巴菲特回顾伯克希尔在2023年的经营表现与资本配置策略�?
         },
         url: 'https://www.berkshirehathaway.com/letters/2023ltr.pdf'
       },
@@ -282,11 +282,11 @@ const buffettData = {
         year: 2022,
         title: {
           en: '2022 Shareholder Letter',
-          zh: '2022年致股东�?
+          zh: '2022年致股东�?
         },
         description: {
           en: 'Highlights the resilience of Berkshire’s operating companies and investment discipline.',
-          zh: '强调伯克希尔旗下运营公司与投资策略在2022年的韧性�?
+          zh: '强调伯克希尔旗下运营公司与投资策略在2022年的韧性�?
         },
         url: 'https://www.berkshirehathaway.com/letters/2022ltr.pdf'
       },
@@ -294,11 +294,11 @@ const buffettData = {
         year: 2021,
         title: {
           en: '2021 Shareholder Letter',
-          zh: '2021年致股东�?
+          zh: '2021年致股东�?
         },
         description: {
           en: 'Discusses Berkshire’s buyback program and long-term investment philosophy.',
-          zh: '讨论伯克希尔的股份回购计划与长期投资理念�?
+          zh: '讨论伯克希尔的股份回购计划与长期投资理念�?
         },
         url: 'https://www.berkshirehathaway.com/letters/2021ltr.pdf'
       }
@@ -308,11 +308,11 @@ const buffettData = {
         year: 2024,
         title: {
           en: '2024 Annual Meeting Transcript',
-          zh: '2024年股东大会问答实�?
+          zh: '2024年股东大会问答实�?
         },
         description: {
           en: 'Full Q&A from the 2024 Berkshire Hathaway annual meeting in Omaha.',
-          zh: '2024年伯克希尔股东大会完整问答实录，来自奥马哈现场�?
+          zh: '2024年伯克希尔股东大会完整问答实录，来自奥马哈现场�?
         },
         url: 'https://www.berkshirehathaway.com/meetings/2024/2024meetingtranscript.pdf'
       },
@@ -320,11 +320,11 @@ const buffettData = {
         year: 2023,
         title: {
           en: '2023 Annual Meeting Transcript',
-          zh: '2023年股东大会问答实�?
+          zh: '2023年股东大会问答实�?
         },
         description: {
           en: 'Detailed discussion of Berkshire’s holdings, insurance operations, and market outlook.',
-          zh: '详尽记录伯克希尔在持仓、保险业务及市场展望方面的讨论�?
+          zh: '详尽记录伯克希尔在持仓、保险业务及市场展望方面的讨论�?
         },
         url: 'https://www.berkshirehathaway.com/meetings/2023/2023meetingtranscript.pdf'
       },
@@ -332,11 +332,11 @@ const buffettData = {
         year: 2022,
         title: {
           en: '2022 Annual Meeting Transcript',
-          zh: '2022年股东大会问答实�?
+          zh: '2022年股东大会问答实�?
         },
         description: {
           en: 'Covers Buffett and Munger’s commentary on inflation, buybacks, and market volatility.',
-          zh: '涵盖巴菲特与芒格对通胀、回购及市场波动的观点�?
+          zh: '涵盖巴菲特与芒格对通胀、回购及市场波动的观点�?
         },
         url: 'https://www.berkshirehathaway.com/meetings/2022/2022meetingtranscript.pdf'
       }

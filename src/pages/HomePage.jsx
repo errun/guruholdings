@@ -4,8 +4,8 @@ import { ChartBarIcon, ArrowTrendingUpIcon, DocumentTextIcon } from '@heroicons/
 import SubscribeForm from '../components/SubscribeForm'
 import ShareholderLetters from '../components/ShareholderLetters'
 import { useLanguage } from '../context/LanguageContext.jsx'
-import buffettData from '../data/buffett.js'
-import liLuData from '../data/li-lu.js'
+import buffettData from '../data/buffett-test.js'
+import liLuData from '../data/li-lu-test.js'
 import { formatNumber } from '../hooks/useHoldingsData.js'
 
 const HomePage = () => {

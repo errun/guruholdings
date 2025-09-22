@@ -130,9 +130,9 @@ export const useHoldingsData = (guruId) => {
 
         let dataModule
         if (guruId === 'buffett') {
-          dataModule = await import('../data/buffett.js')
+          dataModule = await import('../data/buffett-test.js')
         } else if (guruId === 'li-lu') {
-          dataModule = await import('../data/li-lu.js')
+          dataModule = await import('../data/li-lu-test.js')
         } else {
           throw new Error('data_not_found')
         }
