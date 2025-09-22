@@ -29,25 +29,25 @@ const liLuData = {
       }
     ]
   },
-  lastUpdate: '2025Q1',
-  totalValue: 4200000000,
+  lastUpdate: '2025Q2',
+  totalValue: 4500000000,
   insights: {
     summary: {
-      en: 'Li Lu entered 2025 with cautious optimism, maintaining core BYD position while strategically positioning in Chinese consumer and technology leaders.',
-      zh: 'Li Lu entered 2025 with cautious optimism, maintaining core BYD position while strategically positioning in Chinese consumer and technology leaders.'
+      en: 'Li Lu continued strategic positioning in Q2 2025, maintaining BYD as core holding while expanding technology exposure amid Chinese market recovery.',
+      zh: 'Li Lu continued strategic positioning in Q2 2025, maintaining BYD as core holding while expanding technology exposure amid Chinese market recovery.'
     },
     keyChanges: [
       {
-        en: 'BYD remains core holding at 42% of portfolio, slight trim for diversification.',
-        zh: 'BYD remains core holding at 42% of portfolio, slight trim for diversification.'
+        en: 'BYD remains core holding at 40% of portfolio, benefiting from EV market expansion.',
+        zh: 'BYD remains core holding at 40% of portfolio, benefiting from EV market expansion.'
       },
       {
-        en: 'New position in Xiaomi worth $200M, betting on EV transition.',
-        zh: 'New position in Xiaomi worth $200M, betting on EV transition.'
+        en: 'Expanded Xiaomi position to $250M, capitalizing on smartphone and EV synergies.',
+        zh: 'Expanded Xiaomi position to $250M, capitalizing on smartphone and EV synergies.'
       },
       {
-        en: 'Reduced exposure to traditional financials, focusing on tech innovation.',
-        zh: 'Reduced exposure to traditional financials, focusing on tech innovation.'
+        en: 'Portfolio value increased to $4.5B in Q2 2025, driven by Chinese tech recovery.',
+        zh: 'Portfolio value increased to $4.5B in Q2 2025, driven by Chinese tech recovery.'
       }
     ],
     riskLevel: 'elevated',
@@ -57,10 +57,10 @@ const liLuData = {
     }
   },
   valueHistory: [
-    { quarter: '2024Q2', value: 3500000000 },
     { quarter: '2024Q3', value: 3800000000 },
     { quarter: '2024Q4', value: 4000000000 },
-    { quarter: '2025Q1', value: 4200000000 }
+    { quarter: '2025Q1', value: 4200000000 },
+    { quarter: '2025Q2', value: 4500000000 }
   ],
   holdings: [
     {
@@ -71,8 +71,15 @@ const liLuData = {
       },
       currentShares: 45000000,
       currentValue: 1800000000,
-      currentWeight: 42.86,
+      currentWeight: 40.0,
       quarters: {
+        '2025Q2': {
+          shares: 45000000,
+          value: 1800000000,
+          weight: 40.0,
+          changeType: 'unchanged',
+          changePercent: 0
+        },
         '2025Q1': {
           shares: 45000000,
           value: 1800000000,
@@ -93,13 +100,6 @@ const liLuData = {
           weight: 46.3,
           changeType: 'increase',
           changePercent: 10.0
-        },
-        '2024Q2': {
-          shares: 40000000,
-          value: 1600000000,
-          weight: 45.7,
-          changeType: 'unchanged',
-          changePercent: 0
         }
       }
     }

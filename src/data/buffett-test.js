@@ -29,25 +29,25 @@ const buffettData = {
       }
     ]
   },
-  lastUpdate: '2025Q1',
-  totalValue: 365000000000,
+  lastUpdate: '2025Q2',
+  totalValue: 380000000000,
   insights: {
     summary: {
-      en: 'Buffett started 2025 with strategic positioning, maintaining high cash reserves while selectively adding to energy and utility positions amid market uncertainty.',
-      zh: 'Buffett started 2025 with strategic positioning, maintaining high cash reserves while selectively adding to energy and utility positions amid market uncertainty.'
+      en: 'Buffett continued strategic positioning in Q2 2025, with selective additions to technology and financial positions while maintaining substantial cash reserves for future opportunities.',
+      zh: 'Buffett continued strategic positioning in Q2 2025, with selective additions to technology and financial positions while maintaining substantial cash reserves for future opportunities.'
     },
     keyChanges: [
       {
-        en: 'Portfolio value increased to $365B in Q1 2025, up from $350B in Q4 2024.',
-        zh: 'Portfolio value increased to $365B in Q1 2025, up from $350B in Q4 2024.'
+        en: 'Portfolio value increased to $380B in Q2 2025, up from $365B in Q1 2025.',
+        zh: 'Portfolio value increased to $380B in Q2 2025, up from $365B in Q1 2025.'
       },
       {
-        en: 'Cash reserves remain elevated at $320B, providing flexibility for opportunities.',
-        zh: 'Cash reserves remain elevated at $320B, providing flexibility for opportunities.'
+        en: 'Cash reserves remain elevated at $310B, providing flexibility for strategic acquisitions.',
+        zh: 'Cash reserves remain elevated at $310B, providing flexibility for strategic acquisitions.'
       },
       {
-        en: 'Added to Chevron position by 8% amid energy sector strength.',
-        zh: 'Added to Chevron position by 8% amid energy sector strength.'
+        en: 'Increased Apple position by 5% as technology valuations became more attractive.',
+        zh: 'Increased Apple position by 5% as technology valuations became more attractive.'
       }
     ],
     riskLevel: 'moderate',
@@ -57,10 +57,10 @@ const buffettData = {
     }
   },
   valueHistory: [
-    { quarter: '2024Q2', value: 325000000000 },
     { quarter: '2024Q3', value: 340000000000 },
     { quarter: '2024Q4', value: 350000000000 },
-    { quarter: '2025Q1', value: 365000000000 }
+    { quarter: '2025Q1', value: 365000000000 },
+    { quarter: '2025Q2', value: 380000000000 }
   ],
   holdings: [
     {
@@ -69,35 +69,35 @@ const buffettData = {
         en: 'Apple Inc.',
         zh: 'Apple Inc.'
       },
-      currentShares: 915560000,
-      currentValue: 174500000000,
-      currentWeight: 49.86,
+      currentShares: 961340000,
+      currentValue: 183200000000,
+      currentWeight: 48.21,
       quarters: {
+        '2025Q2': {
+          shares: 961340000,
+          value: 183200000000,
+          weight: 48.21,
+          changeType: 'increase',
+          changePercent: 5.0
+        },
         '2025Q1': {
           shares: 915560000,
           value: 174500000000,
-          weight: 49.86,
+          weight: 47.81,
           changeType: 'increase',
           changePercent: 15.2
         },
         '2024Q4': {
           shares: 795000000,
           value: 149800000000,
-          weight: 44.06,
+          weight: 42.8,
           changeType: 'increase',
           changePercent: 8.5
         },
         '2024Q3': {
           shares: 732500000,
           value: 125600000000,
-          weight: 38.65,
-          changeType: 'unchanged',
-          changePercent: 0
-        },
-        '2024Q2': {
-          shares: 732500000,
-          value: 122300000000,
-          weight: 38.1,
+          weight: 36.94,
           changeType: 'unchanged',
           changePercent: 0
         }
