@@ -29,8 +29,8 @@ const liLuData = {
       }
     ]
   },
-  lastUpdate: '2025Q1',
-  totalValue: 4200000000,
+  lastUpdate: '2025Q2',
+  totalValue: 4500000000,
   insights: {
     summary: {
       en: 'Li Lu entered 2025 with cautious optimism, maintaining core BYD position while strategically positioning in Chinese consumer and technology leaders.',

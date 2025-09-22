@@ -29,8 +29,8 @@ const buffettData = {
       }
     ]
   },
-  lastUpdate: '2025Q1',
-  totalValue: 365000000000,
+  lastUpdate: '2025Q2',
+  totalValue: 380000000000,
   insights: {
     summary: {
       en: 'Buffett started 2025 with strategic positioning, maintaining high cash reserves while selectively adding to energy and utility positions amid market uncertainty.',
