@@ -16,9 +16,12 @@ export function ShareholderLetters() {
 
   return (
     <Card>
-      <CardHeader className="text-center">
+	      <CardHeader className="text-center space-y-1">
         <CardTitle className="text-2xl">{String(t('shareholderLetters.title'))}</CardTitle>
         <CardDescription>{String(t('shareholderLetters.subtitle'))}</CardDescription>
+	        <p className="text-xs text-muted-foreground">
+	          {String(t('shareholderLetters.mixedNote'))}
+	        </p>
       </CardHeader>
       <CardContent className="space-y-4">
         {displayedLetters.map((letter) => (

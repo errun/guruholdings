@@ -65,13 +65,13 @@ const buffettData: GuruData = {
 	    { quarter: '2025Q2', value: 380000000000 },
 	    { quarter: '2025Q3', value: 395000000000 }
 	  ],
-  holdings: [
-    {
-      symbol: 'AAPL',
-      companyName: {
-        en: 'Apple Inc.',
-        zh: 'Apple Inc.'
-      },
+	  holdings: [
+	    {
+	      symbol: 'AAPL',
+	      companyName: {
+	        en: 'Apple Inc.',
+	        zh: 'Apple Inc.'
+	      },
 	      currentShares: 980000000,
 	      currentValue: 190000000000,
 	      currentWeight: 48.1,
@@ -86,34 +86,222 @@ const buffettData: GuruData = {
 	        '2025Q2': {
 	          shares: 961340000,
 	          value: 183200000000,
-	          weight: 48.21,
+	          weight: 48.2,
 	          changeType: 'increase',
 	          changePercent: 3.9
 	        },
-        '2025Q1': {
-          shares: 915560000,
-          value: 174500000000,
-          weight: 47.81,
-          changeType: 'increase',
-          changePercent: 15.2
-        },
-        '2024Q4': {
-          shares: 795000000,
-          value: 149800000000,
-          weight: 42.8,
-          changeType: 'increase',
-          changePercent: 8.5
-        },
-        '2024Q3': {
-          shares: 732500000,
-          value: 125600000000,
-          weight: 36.94,
-          changeType: 'unchanged',
-          changePercent: 0
-        }
-      }
-    }
-  ],
+	        '2025Q1': {
+	          shares: 915560000,
+	          value: 174500000000,
+	          weight: 47.8,
+	          changeType: 'increase',
+	          changePercent: 15.2
+	        },
+	        '2024Q4': {
+	          shares: 795000000,
+	          value: 149800000000,
+	          weight: 42.8,
+	          changeType: 'increase',
+	          changePercent: 8.5
+	        },
+	        '2024Q3': {
+	          shares: 732500000,
+	          value: 125600000000,
+	          weight: 36.9,
+	          changeType: 'unchanged',
+	          changePercent: 0
+	        }
+	      }
+	    },
+	    {
+	      symbol: 'BAC',
+	      companyName: {
+	        en: 'Bank of America Corp.',
+	        zh: 'Bank of America Corp.'
+	      },
+	      currentShares: 1000000000,
+	      currentValue: 45000000000,
+	      currentWeight: 11.4,
+	      quarters: {
+	        '2025Q3': {
+	          shares: 1000000000,
+	          value: 45000000000,
+	          weight: 11.4,
+	          changeType: 'increase',
+	          changePercent: 4.7
+	        },
+	        '2025Q2': {
+	          shares: 970000000,
+	          value: 43000000000,
+	          weight: 11.3,
+	          changeType: 'increase',
+	          changePercent: 3.6
+	        },
+	        '2025Q1': {
+	          shares: 940000000,
+	          value: 41500000000,
+	          weight: 11.4,
+	          changeType: 'unchanged',
+	          changePercent: 0
+	        },
+	        '2024Q4': {
+	          shares: 940000000,
+	          value: 40000000000,
+	          weight: 11.4,
+	          changeType: 'increase',
+	          changePercent: 5.3
+	        },
+	        '2024Q3': {
+	          shares: 910000000,
+	          value: 38000000000,
+	          weight: 11.2,
+	          changeType: 'increase',
+	          changePercent: 4.1
+	        }
+	      }
+	    },
+	    {
+	      symbol: 'KO',
+	      companyName: {
+	        en: 'The Coca-Cola Company',
+	        zh: 'The Coca-Cola Company'
+	      },
+	      currentShares: 400000000,
+	      currentValue: 28000000000,
+	      currentWeight: 7.1,
+	      quarters: {
+	        '2025Q3': {
+	          shares: 400000000,
+	          value: 28000000000,
+	          weight: 7.1,
+	          changeType: 'unchanged',
+	          changePercent: 0
+	        },
+	        '2025Q2': {
+	          shares: 400000000,
+	          value: 27600000000,
+	          weight: 7.3,
+	          changeType: 'unchanged',
+	          changePercent: 0
+	        },
+	        '2025Q1': {
+	          shares: 400000000,
+	          value: 27000000000,
+	          weight: 7.4,
+	          changeType: 'unchanged',
+	          changePercent: 0
+	        },
+	        '2024Q4': {
+	          shares: 400000000,
+	          value: 26000000000,
+	          weight: 7.4,
+	          changeType: 'unchanged',
+	          changePercent: 0
+	        },
+	        '2024Q3': {
+	          shares: 400000000,
+	          value: 25500000000,
+	          weight: 7.5,
+	          changeType: 'unchanged',
+	          changePercent: 0
+	        }
+	      }
+	    },
+	    {
+	      symbol: 'AXP',
+	      companyName: {
+	        en: 'American Express Company',
+	        zh: 'American Express Company'
+	      },
+	      currentShares: 150000000,
+	      currentValue: 32000000000,
+	      currentWeight: 8.1,
+	      quarters: {
+	        '2025Q3': {
+	          shares: 150000000,
+	          value: 32000000000,
+	          weight: 8.1,
+	          changeType: 'increase',
+	          changePercent: 4.2
+	        },
+	        '2025Q2': {
+	          shares: 145000000,
+	          value: 30700000000,
+	          weight: 8.1,
+	          changeType: 'increase',
+	          changePercent: 3.7
+	        },
+	        '2025Q1': {
+	          shares: 140000000,
+	          value: 29600000000,
+	          weight: 8.1,
+	          changeType: 'increase',
+	          changePercent: 2.1
+	        },
+	        '2024Q4': {
+	          shares: 138000000,
+	          value: 29000000000,
+	          weight: 8.3,
+	          changeType: 'increase',
+	          changePercent: 1.4
+	        },
+	        '2024Q3': {
+	          shares: 136000000,
+	          value: 28600000000,
+	          weight: 8.4,
+	          changeType: 'unchanged',
+	          changePercent: 0
+	        }
+	      }
+	    },
+	    {
+	      symbol: 'OXY',
+	      companyName: {
+	        en: 'Occidental Petroleum Corp.',
+	        zh: 'Occidental Petroleum Corp.'
+	      },
+	      currentShares: 250000000,
+	      currentValue: 25000000000,
+	      currentWeight: 6.3,
+	      quarters: {
+	        '2025Q3': {
+	          shares: 250000000,
+	          value: 25000000000,
+	          weight: 6.3,
+	          changeType: 'increase',
+	          changePercent: 5.0
+	        },
+	        '2025Q2': {
+	          shares: 238000000,
+	          value: 23800000000,
+	          weight: 6.3,
+	          changeType: 'increase',
+	          changePercent: 4.4
+	        },
+	        '2025Q1': {
+	          shares: 228000000,
+	          value: 22500000000,
+	          weight: 6.2,
+	          changeType: 'increase',
+	          changePercent: 3.2
+	        },
+	        '2024Q4': {
+	          shares: 220000000,
+	          value: 21000000000,
+	          weight: 6.0,
+	          changeType: 'increase',
+	          changePercent: 4.5
+	        },
+	        '2024Q3': {
+	          shares: 200000000,
+	          value: 19000000000,
+	          weight: 5.6,
+	          changeType: 'new',
+	          changePercent: 100.0
+	        }
+	      }
+	    }
+	  ],
   resources: {
     shareholderLetters: [
       {

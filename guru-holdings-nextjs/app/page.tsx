@@ -24,29 +24,13 @@ export default function HomePage() {
   return (
     <div className="container py-8 space-y-12">
       {/* Hero Section */}
-      <section className="text-center space-y-4 py-8">
+	      <section className="text-center space-y-4 py-8">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
           {String(t('home.hero.title'))}
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
           {String(t('home.hero.subtitle'))}
         </p>
-
-        {/* Feature badges */}
-        <div className="flex flex-wrap justify-center gap-4 pt-4">
-          <div className="flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm">
-            <Database className="h-4 w-4 text-primary" />
-            <span>{String(t('home.features.secData'))}</span>
-          </div>
-          <div className="flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm">
-            <BarChart3 className="h-4 w-4 text-primary" />
-            <span>{String(t('home.features.visualCharts'))}</span>
-          </div>
-          <div className="flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span>{String(t('home.features.aiSummary'))}</span>
-          </div>
-        </div>
       </section>
 
       {/* Guru Cards */}

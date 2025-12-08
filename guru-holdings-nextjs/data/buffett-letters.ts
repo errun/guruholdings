@@ -1,7 +1,34 @@
 import { ShareholderLetter } from '@/lib/types';
 
 export const buffettLetters: ShareholderLetter[] = [
-	{
+		{
+		  year: 2025,
+		  title: {
+		    en: "2025 Thanksgiving Letter to Shareholders",
+		    zh: "2025年感恩节致股东信",
+		  },
+		  summary: {
+		    en: "A special Thanksgiving message where Buffett reflects on gratitude, Berkshire's future leadership, and his ongoing connection with shareholders.",
+		    zh: "一封特别的感恩节来信，巴菲特回顾自己的感恩之情、伯克希尔未来的领导安排，以及他与股东之间持续的伙伴关系。",
+		  },
+		  highlights: [
+		    {
+		      en: "Marks Buffett's final Thanksgiving letter as Berkshire's CEO while signaling his intention to keep writing to shareholders.",
+		      zh: "作为巴菲特以伯克希尔首席执行官身份写下的最后一封感恩节股东信，同时表示他计划在卸任后继续以书信形式与股东沟通。",
+		    },
+		    {
+		      en: "Expresses deep gratitude to long-term shareholders, employees, and the Omaha community.",
+		      zh: "向长期股东、公司员工以及奥马哈当地社区表达由衷的感激。",
+		    },
+		    {
+		      en: "Reinforces his long-term stewardship mindset and commitment to philanthropy.",
+		      zh: "重申长期守护股东资本的心态，以及对公益慈善承诺的坚持。",
+		    },
+		  ],
+		  url: "https://www.businessinsider.com/read-warren-buffett-thanksgiving-shareholder-letter-full-text-2025-11",
+		  publishDate: "2025-11-10",
+		},
+		{
 	  year: 2024,
 	  title: {
 	    en: "2024 Annual Letter to Shareholders",

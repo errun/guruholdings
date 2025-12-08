@@ -58,14 +58,16 @@ export const translations = {
         viewHoldings: 'View holdings details'
       }
     },
-    shareholderLetters: {
-      title: "Buffett's Letters to Shareholders",
-      subtitle: 'Annual insights and wisdom from Warren Buffett',
-      readLetter: 'Read Letter',
-      keyHighlights: 'Key Highlights',
-      showMore: 'Show More Letters',
-      showLess: 'Show Less'
-    },
+	    shareholderLetters: {
+	      title: "Buffett's Letters to Shareholders",
+	      subtitle: 'Annual insights and wisdom from Warren Buffett',
+	      mixedNote:
+	        'Includes annual Berkshire letters and selected special messages (for example, Thanksgiving letters).',
+	      readLetter: 'Read Letter',
+	      keyHighlights: 'Key Highlights',
+	      showMore: 'Show More Letters',
+	      showLess: 'Show Less'
+	    },
     subscribe: {
       title: 'Subscribe for holdings updates',
       description: 'Receive quarterly breakdowns of guru portfolio changes delivered straight to your inbox once new 13F filings are released.',
@@ -180,7 +182,15 @@ export const translations = {
       features: { secData: 'SEC 13F 数据', visualCharts: '可视化图表', aiSummary: 'AI 智能摘要' },
       cards: { totalValue: '总市值', latestUpdate: '最新更新', investmentHighlights: '投资亮点', viewHoldings: '查看持仓详情' }
     },
-    shareholderLetters: { title: '巴菲特致股东信', subtitle: '沃伦·巴菲特的年度洞察与智慧', readLetter: '阅读原文', keyHighlights: '核心要点', showMore: '查看更多信件', showLess: '收起' },
+	    shareholderLetters: {
+	      title: '巴菲特致股东信',
+	      subtitle: '沃伦·巴菲特的年度洞察与智慧',
+	      mixedNote: '包含伯克希尔年度股东信及部分特别来信（例如感恩节来信）。',
+	      readLetter: '阅读原文',
+	      keyHighlights: '核心要点',
+	      showMore: '查看更多信件',
+	      showLess: '收起'
+	    },
     subscribe: {
       title: '订阅持仓更新',
       description: '13F 季度报告发布后，我们会第一时间为您梳理持仓变化，并通过邮件发送详细简报。',

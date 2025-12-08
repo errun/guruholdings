@@ -65,13 +65,13 @@ const liLuData: GuruData = {
 	    { quarter: '2025Q2', value: 4500000000 },
 	    { quarter: '2025Q3', value: 4800000000 }
 	  ],
-  holdings: [
-    {
-      symbol: 'BYDDY',
-      companyName: {
-        en: 'BYD Company',
-        zh: 'BYD Company'
-      },
+	  holdings: [
+	    {
+	      symbol: 'BYDDY',
+	      companyName: {
+	        en: 'BYD Company',
+	        zh: 'BYD Company'
+	      },
 	      currentShares: 46000000,
 	      currentValue: 2000000000,
 	      currentWeight: 41.7,
@@ -90,30 +90,171 @@ const liLuData: GuruData = {
 	          changeType: 'unchanged',
 	          changePercent: 0
 	        },
-        '2025Q1': {
-          shares: 45000000,
-          value: 1800000000,
-          weight: 42.86,
-          changeType: 'decrease',
-          changePercent: -2.5
-        },
-        '2024Q4': {
-          shares: 46000000,
-          value: 1840000000,
-          weight: 46,
-          changeType: 'increase',
-          changePercent: 5.0
-        },
-        '2024Q3': {
-          shares: 44000000,
-          value: 1760000000,
-          weight: 46.3,
-          changeType: 'increase',
-          changePercent: 10.0
-        }
-      }
-    }
-  ],
+	        '2025Q1': {
+	          shares: 45000000,
+	          value: 1800000000,
+	          weight: 42.9,
+	          changeType: 'decrease',
+	          changePercent: -2.5
+	        },
+	        '2024Q4': {
+	          shares: 46000000,
+	          value: 1840000000,
+	          weight: 46.0,
+	          changeType: 'increase',
+	          changePercent: 5.0
+	        },
+	        '2024Q3': {
+	          shares: 44000000,
+	          value: 1760000000,
+	          weight: 46.3,
+	          changeType: 'increase',
+	          changePercent: 10.0
+	        }
+	      }
+	    },
+	    {
+	      symbol: 'BABA',
+	      companyName: {
+	        en: 'Alibaba Group Holding',
+	        zh: 'Alibaba Group Holding'
+	      },
+	      currentShares: 15000000,
+	      currentValue: 1000000000,
+	      currentWeight: 20.8,
+	      quarters: {
+	        '2025Q3': {
+	          shares: 15000000,
+	          value: 1000000000,
+	          weight: 20.8,
+	          changeType: 'increase',
+	          changePercent: 5.3
+	        },
+	        '2025Q2': {
+	          shares: 14500000,
+	          value: 950000000,
+	          weight: 21.1,
+	          changeType: 'increase',
+	          changePercent: 5.6
+	        },
+	        '2025Q1': {
+	          shares: 13700000,
+	          value: 900000000,
+	          weight: 21.4,
+	          changeType: 'increase',
+	          changePercent: 2.9
+	        },
+	        '2024Q4': {
+	          shares: 13300000,
+	          value: 875000000,
+	          weight: 21.9,
+	          changeType: 'increase',
+	          changePercent: 1.2
+	        },
+	        '2024Q3': {
+	          shares: 13000000,
+	          value: 865000000,
+	          weight: 22.8,
+	          changeType: 'new',
+	          changePercent: 100.0
+	        }
+	      }
+	    },
+	    {
+	      symbol: 'TCEHY',
+	      companyName: {
+	        en: 'Tencent Holdings',
+	        zh: 'Tencent Holdings'
+	      },
+	      currentShares: 20000000,
+	      currentValue: 800000000,
+	      currentWeight: 16.7,
+	      quarters: {
+	        '2025Q3': {
+	          shares: 20000000,
+	          value: 800000000,
+	          weight: 16.7,
+	          changeType: 'increase',
+	          changePercent: 4.0
+	        },
+	        '2025Q2': {
+	          shares: 19500000,
+	          value: 770000000,
+	          weight: 17.1,
+	          changeType: 'increase',
+	          changePercent: 3.2
+	        },
+	        '2025Q1': {
+	          shares: 19000000,
+	          value: 740000000,
+	          weight: 17.6,
+	          changeType: 'increase',
+	          changePercent: 2.8
+	        },
+	        '2024Q4': {
+	          shares: 18500000,
+	          value: 720000000,
+	          weight: 18.0,
+	          changeType: 'increase',
+	          changePercent: 2.9
+	        },
+	        '2024Q3': {
+	          shares: 18000000,
+	          value: 700000000,
+	          weight: 18.4,
+	          changeType: 'new',
+	          changePercent: 100.0
+	        }
+	      }
+	    },
+	    {
+	      symbol: 'JD',
+	      companyName: {
+	        en: 'JD.com Inc.',
+	        zh: 'JD.com Inc.'
+	      },
+	      currentShares: 20000000,
+	      currentValue: 500000000,
+	      currentWeight: 10.4,
+	      quarters: {
+	        '2025Q3': {
+	          shares: 20000000,
+	          value: 500000000,
+	          weight: 10.4,
+	          changeType: 'increase',
+	          changePercent: 6.4
+	        },
+	        '2025Q2': {
+	          shares: 19000000,
+	          value: 470000000,
+	          weight: 10.4,
+	          changeType: 'increase',
+	          changePercent: 4.4
+	        },
+	        '2025Q1': {
+	          shares: 18000000,
+	          value: 440000000,
+	          weight: 10.5,
+	          changeType: 'increase',
+	          changePercent: 2.3
+	        },
+	        '2024Q4': {
+	          shares: 17500000,
+	          value: 420000000,
+	          weight: 10.5,
+	          changeType: 'increase',
+	          changePercent: 1.9
+	        },
+	        '2024Q3': {
+	          shares: 17000000,
+	          value: 400000000,
+	          weight: 10.5,
+	          changeType: 'new',
+	          changePercent: 100.0
+	        }
+	      }
+	    }
+	  ],
   resources: {
     shareholderLetters: [],
     meetingTranscripts: []
