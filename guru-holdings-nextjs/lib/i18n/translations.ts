@@ -51,6 +51,7 @@ export const translations = {
         visualCharts: 'Interactive charts',
         aiSummary: 'AI-powered summaries'
       },
+      versionLabel: 'Version',
       cards: {
         totalValue: 'Total value',
         latestUpdate: 'Latest update',
@@ -180,6 +181,7 @@ export const translations = {
     home: {
       hero: { title: '追踪大师最近四个季度的持仓变化', subtitle: '聚焦巴菲特与李录的季度持仓、图表与AI摘要，让13F信息更易理解。' },
       features: { secData: 'SEC 13F 数据', visualCharts: '可视化图表', aiSummary: 'AI 智能摘要' },
+      versionLabel: '版本',
       cards: { totalValue: '总市值', latestUpdate: '最新更新', investmentHighlights: '投资亮点', viewHoldings: '查看持仓详情' }
     },
 	    shareholderLetters: {
@@ -216,4 +218,3 @@ export const translations = {
     charts: { pie: { tooltipValue: '市值', tooltipWeight: '仓位占比' }, line: { tooltipValue: '总市值' } }
   }
 } as const;
-

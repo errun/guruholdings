@@ -24,6 +24,7 @@ export default function HomePage() {
 
   const totalPortfolioValue = `$${formatNumber(buffettData.totalValue + liLuData.totalValue)}`;
   const latestUpdate = formatQuarterLabel(buffettData.lastUpdate);
+  const versionDate = '2026-01-19';
   const heroFeatures = [
     { icon: Database, label: String(t('home.features.secData')) },
     { icon: BarChart3, label: String(t('home.features.visualCharts')) },
@@ -114,6 +115,10 @@ export default function HomePage() {
 
         <section className="animate-in fade-in slide-in-from-bottom-6 duration-700">
           <SubscribeForm />
+        </section>
+
+        <section className="text-center text-xs text-muted-foreground">
+          {String(t('home.versionLabel'))}: {versionDate}
         </section>
       </div>
     </div>
