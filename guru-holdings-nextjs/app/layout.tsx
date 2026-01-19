@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Fraunces, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { LanguageProvider } from '@/lib/i18n';
 import { Header, Footer } from '@/components/layout';
 
-const inter = Inter({ subsets: ['latin'] });
+const display = Fraunces({ subsets: ['latin'], variable: '--font-display' });
+const sans = Space_Grotesk({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: 'Guru Holdings Tracker',
@@ -18,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen bg-background antialiased`}>
+      <body className={`${sans.variable} ${display.variable} min-h-screen bg-background font-sans antialiased`}>
         <LanguageProvider>
           <div className="relative flex min-h-screen flex-col">
             <Header />
@@ -30,4 +31,3 @@ export default function RootLayout({
     </html>
   );
 }
-

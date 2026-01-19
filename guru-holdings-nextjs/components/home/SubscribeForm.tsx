@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import { readStorageJSON, writeStorageJSON } from '@/lib/storage';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -115,53 +115,59 @@ export function SubscribeForm() {
   const isFormDisabled = isSubmitting || storageErrored;
 
   return (
-    <Card id="subscribe" className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">{String(t('subscribe.title'))}</CardTitle>
-        <CardDescription className="max-w-2xl mx-auto">
-          {String(t('subscribe.description'))}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={String(t('subscribe.placeholder'))}
-              disabled={isFormDisabled}
-              className="flex-1"
-            />
-            <Button type="submit" disabled={isFormDisabled}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {String(t('subscribe.buttonLoading'))}
-                </>
-              ) : (
-                String(t('subscribe.button'))
-              )}
-            </Button>
+    <Card
+      id="subscribe"
+      className="relative overflow-hidden border border-slate-200/80 bg-gradient-to-br from-amber-50 via-white to-sky-50"
+    >
+      <div className="pointer-events-none absolute -left-24 top-10 h-48 w-48 rounded-full bg-amber-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute -right-20 bottom-0 h-56 w-56 rounded-full bg-sky-200/40 blur-3xl" />
+      <CardContent className="relative grid gap-8 p-6 sm:p-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="space-y-4">
+          <CardTitle className="text-2xl font-display sm:text-3xl">
+            {String(t('subscribe.title'))}
+          </CardTitle>
+          <CardDescription className="text-base text-muted-foreground">
+            {String(t('subscribe.description'))}
+          </CardDescription>
+          <p className="text-xs text-muted-foreground">{String(t('subscribe.promise'))}</p>
+        </div>
+
+        <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={String(t('subscribe.placeholder'))}
+                disabled={isFormDisabled}
+                className="flex-1 rounded-full bg-white"
+              />
+              <Button type="submit" disabled={isFormDisabled} className="rounded-full px-6">
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {String(t('subscribe.buttonLoading'))}
+                  </>
+                ) : (
+                  String(t('subscribe.button'))
+                )}
+              </Button>
+            </div>
+
+            {message && (
+              <Alert variant={status === 'success' ? 'success' : 'destructive'}>
+                {status === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+                <AlertDescription>{message}</AlertDescription>
+              </Alert>
+            )}
+          </form>
+
+          <div className="mt-6 border-t border-slate-200/80 pt-4 text-sm text-muted-foreground">
+            {String(t('subscribe.subscriberCount')).replace('{{count}}', String(subscriberCount))}
           </div>
-
-          {message && (
-            <Alert variant={status === 'success' ? 'success' : 'destructive'}>
-              {status === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          )}
-        </form>
-
-        <p className="text-xs text-center text-muted-foreground mt-4">
-          {String(t('subscribe.promise'))}
-        </p>
-
-        <div className="text-center text-sm text-muted-foreground mt-6 pt-4 border-t border-blue-200">
-          {String(t('subscribe.subscriberCount')).replace('{{count}}', String(subscriberCount))}
         </div>
       </CardContent>
     </Card>
   );
 }
-

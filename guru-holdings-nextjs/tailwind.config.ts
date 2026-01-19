@@ -63,9 +63,12 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        sans: ["var(--font-sans)"],
+        display: ["var(--font-display)"],
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
 };
 export default config;
-
