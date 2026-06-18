@@ -140,7 +140,7 @@ export function ManagerCompare({ managers }: { managers: AnyRecord[] }) {
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
                 <Metric label="总市值" value={formatCurrency(manager.latestTotalValue)} />
-                <Metric label="公司数" value={formatNumber(manager.companyHoldings.length)} />
+                <Metric label="公司数" value={formatNumber(manager.companyHoldingCount ?? manager.companyHoldings.length)} />
                 <Metric label="Top10 权重" value={formatWeight(manager.metrics?.top10Weight || 0)} />
                 <Metric label="集中度" value={concentrationName(manager.metrics?.concentration || 'unknown')} />
               </div>

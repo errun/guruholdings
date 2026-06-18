@@ -33,6 +33,7 @@ import {
   formatWeight,
   themeName,
 } from '@/lib/sec13f-view';
+import { getExplorerData, getManagerCompareData } from '@/lib/sec13f-lite';
 
 type Snapshot = typeof snapshot;
 type Manager = Snapshot['managers'][number];
@@ -137,6 +138,8 @@ function ConsensusTable({
 }
 
 export default function Live13FPage() {
+  const explorerData = getExplorerData();
+  const managerCompareData = getManagerCompareData();
   const sharedIncrease = snapshot.consensus.sharedIncrease;
   const sharedDecrease = snapshot.consensus.sharedDecrease;
   const themeChanges = snapshot.consensus.themeChanges;
@@ -178,10 +181,12 @@ export default function Live13FPage() {
       <main className="container py-8 lg:py-10">
         <section className="mb-8">
           <ExplorerSearch
-            searchIndex={snapshot.searchIndex}
-            stocks={snapshot.stocks}
-            managers={snapshot.managers}
-            consensus={snapshot.consensus}
+            stocks={explorerData.stocks}
+            managers={explorerData.managers}
+            consensus={explorerData.consensus}
+            themes={explorerData.themes}
+            stockTotal={explorerData.stockTotal}
+            managerTotal={explorerData.managerTotal}
           />
         </section>
 
@@ -203,7 +208,7 @@ export default function Live13FPage() {
         )}
 
         <section className="mb-10">
-          <ManagerCompare managers={snapshot.managers} />
+          <ManagerCompare managers={managerCompareData} />
         </section>
 
         <section className="mb-10 grid gap-6">

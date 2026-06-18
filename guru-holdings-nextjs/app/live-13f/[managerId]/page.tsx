@@ -34,6 +34,7 @@ import {
   formatWeight,
   themeName,
 } from '@/lib/sec13f-view';
+import { getManagerChartData, getManagerOperationData } from '@/lib/sec13f-lite';
 
 type Manager = typeof snapshot.managers[number];
 type CompanyChange = Manager['latestCompanyChanges'][number];
@@ -247,7 +248,7 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
             <FileText className="h-5 w-5 text-slate-700" />
             <h2 className="text-2xl font-semibold tracking-tight text-slate-950">趋势与持仓结构</h2>
           </div>
-          <ManagerCharts manager={manager} />
+          <ManagerCharts manager={getManagerChartData(manager)} />
         </section>
 
         <section className="mb-10">
@@ -305,7 +306,7 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
             <Table2 className="h-5 w-5 text-slate-700" />
             <h2 className="text-2xl font-semibold tracking-tight text-slate-950">季度操作筛选表</h2>
           </div>
-          <ManagerOperationsTable manager={manager} />
+          <ManagerOperationsTable manager={getManagerOperationData(manager)} />
         </section>
 
         <section className="mb-10">

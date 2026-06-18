@@ -28,6 +28,7 @@ import {
   formatSignedNumber,
   formatWeight,
 } from '@/lib/sec13f-view';
+import { getExplorerData } from '@/lib/sec13f-lite';
 
 type Manager = typeof snapshot.managers[number];
 type ConsensusItem = typeof snapshot.consensus.sharedIncrease[number];
@@ -93,6 +94,7 @@ function Metric({ label, value, tone }: { label: string; value: string; tone?: s
 }
 
 export default function HomePage() {
+  const explorerData = getExplorerData();
   const totalValue = snapshot.managers.reduce((sum, manager) => sum + manager.latestTotalValue, 0);
   const totalCompanyHoldings = snapshot.managers.reduce((sum, manager) => sum + manager.companyHoldings.length, 0);
   const topSharedIncrease = snapshot.consensus.sharedIncrease.slice(0, 4);
@@ -122,10 +124,12 @@ export default function HomePage() {
             </div>
 
             <ExplorerSearch
-              searchIndex={snapshot.searchIndex}
-              stocks={snapshot.stocks}
-              managers={snapshot.managers}
-              consensus={snapshot.consensus}
+              stocks={explorerData.stocks}
+              managers={explorerData.managers}
+              consensus={explorerData.consensus}
+              themes={explorerData.themes}
+              stockTotal={explorerData.stockTotal}
+              managerTotal={explorerData.managerTotal}
               compact
             />
           </div>

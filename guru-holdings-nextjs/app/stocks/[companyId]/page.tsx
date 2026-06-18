@@ -28,11 +28,18 @@ import {
   formatWeight,
   themeName,
 } from '@/lib/sec13f-view';
+import { getStockChartData } from '@/lib/sec13f-lite';
 
 type Stock = typeof snapshot.stocks[number];
 
 interface StockPageProps {
   params: Promise<{ companyId: string }>;
+}
+
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return snapshot.stocks.map((stock) => ({ companyId: stock.companyId }));
 }
 
 export default async function StockPage({ params }: StockPageProps) {
@@ -96,7 +103,7 @@ export default async function StockPage({ params }: StockPageProps) {
             <Layers3 className="h-5 w-5 text-slate-700" />
             <h2 className="text-2xl font-semibold tracking-tight text-slate-950">最近 4 个季度趋势</h2>
           </div>
-          <StockTrendChart stock={stock} />
+          <StockTrendChart stock={getStockChartData(stock)} />
         </section>
 
         <section className="mb-10">

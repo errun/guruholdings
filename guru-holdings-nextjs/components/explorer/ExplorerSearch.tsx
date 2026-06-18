@@ -22,10 +22,13 @@ import {
 type AnyRecord = Record<string, any>;
 
 type ExplorerSearchProps = {
-  searchIndex: AnyRecord;
   stocks: AnyRecord[];
   managers: AnyRecord[];
   consensus: AnyRecord;
+  themes?: string[];
+  stockTotal?: number;
+  managerTotal?: number;
+  searchIndex?: AnyRecord;
   initialQuery?: string;
   compact?: boolean;
 };
@@ -39,7 +42,17 @@ const matchesQuery = (searchText: string | undefined, query: string) => {
 
 const resultLimit = (compact?: boolean) => (compact ? 4 : 8);
 
-export function ExplorerSearch({ searchIndex, stocks, managers, consensus, initialQuery = '', compact = false }: ExplorerSearchProps) {
+export function ExplorerSearch({
+  searchIndex = {},
+  stocks,
+  managers,
+  consensus,
+  themes: providedThemes,
+  stockTotal,
+  managerTotal,
+  initialQuery = '',
+  compact = false,
+}: ExplorerSearchProps) {
   const [query, setQuery] = useState(initialQuery);
   const [managerId, setManagerId] = useState('all');
   const [changeType, setChangeType] = useState('all');
@@ -54,8 +67,8 @@ export function ExplorerSearch({ searchIndex, stocks, managers, consensus, initi
   }, []);
 
   const themes = useMemo(
-    () => Array.from(new Set(stocks.flatMap((stock) => stock.themes || []))).sort(),
-    [stocks]
+    () => providedThemes || Array.from(new Set(stocks.flatMap((stock) => stock.themes || []))).sort(),
+    [providedThemes, stocks]
   );
 
   const results = useMemo(() => {
@@ -67,7 +80,7 @@ export function ExplorerSearch({ searchIndex, stocks, managers, consensus, initi
       .slice(0, resultLimit(compact));
 
     const managerResults = managers
-      .filter((manager) => matchesQuery(searchIndex.managers?.find((item: AnyRecord) => item.id === manager.id)?.searchText, normalizedQuery))
+      .filter((manager) => matchesQuery(manager.searchText || searchIndex.managers?.find((item: AnyRecord) => item.id === manager.id)?.searchText, normalizedQuery))
       .filter((manager) => managerId === 'all' || manager.id === managerId)
       .filter((manager) => changeType === 'all' || (manager.metrics?.changeCounts?.[changeType] || 0) > 0)
       .filter((manager) => theme === 'all' || manager.themeAllocation?.some((item: AnyRecord) => item.theme === theme))
@@ -102,7 +115,7 @@ export function ExplorerSearch({ searchIndex, stocks, managers, consensus, initi
               投研搜索
             </CardTitle>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              {formatNumber(stocks.length)} 只股票，{formatNumber(managers.length)} 家机构，数据来自已校验 13F 快照。
+              {formatNumber(stockTotal ?? stocks.length)} 只股票，{formatNumber(managerTotal ?? managers.length)} 家机构，数据来自已校验 13F 快照。
             </p>
           </div>
           {hasFilters && (
