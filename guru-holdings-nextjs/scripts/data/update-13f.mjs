@@ -141,6 +141,12 @@ const createSecurityResolver = (securities = []) => {
     ticker: security.ticker || null,
     cusips: (security.cusips || []).map((cusip) => cusip.replace(/\s+/g, '').toUpperCase()),
     issuerAliases: (security.issuerAliases || []).map(normalizeIssuer),
+    searchAliases: unique([
+      ...(security.ticker ? String(security.ticker).split(/[\/,|]/).map((item) => item.trim()) : []),
+      ...(security.searchAliases || []),
+      ...(security.cusips || []),
+      security.canonicalName,
+    ]).map((item) => String(item).trim()).filter(Boolean),
     themes: security.themes || [],
     note: security.note || null,
   }));
@@ -593,6 +599,357 @@ const computeConsensus = (managers, latestQuarter) => {
   };
 };
 
+const changeTypes = ['new', 'exit', 'increase', 'decrease', 'unchanged'];
+
+const computeChangeCounts = (changes = []) =>
+  Object.fromEntries(changeTypes.map((type) => [type, changes.filter((change) => change.changeType === type).length]));
+
+const computeTop10Weight = (companyHoldings = []) =>
+  companyHoldings.slice(0, 10).reduce((sum, holding) => sum + (holding.weight || 0), 0);
+
+const computeThemeAllocation = (companyHoldings = []) => {
+  const totalValue = companyHoldings.reduce((sum, holding) => sum + holding.value, 0);
+  const byTheme = new Map();
+
+  for (const holding of companyHoldings) {
+    const themes = holding.themes?.length ? holding.themes : ['unclassified'];
+    const valuePerTheme = holding.value / themes.length;
+    for (const theme of themes) {
+      if (!byTheme.has(theme)) {
+        byTheme.set(theme, {
+          theme,
+          value: 0,
+          holdingCount: 0,
+          topCompanies: [],
+        });
+      }
+      const record = byTheme.get(theme);
+      record.value += valuePerTheme;
+      record.holdingCount += 1;
+      record.topCompanies.push({
+        companyId: holding.companyId,
+        canonicalName: holding.canonicalName || holding.issuerName,
+        value: holding.value,
+        weight: holding.weight,
+      });
+    }
+  }
+
+  return Array.from(byTheme.values())
+    .map((record) => ({
+      ...record,
+      weight: totalValue > 0 ? (record.value / totalValue) * 100 : 0,
+      topCompanies: record.topCompanies.sort((a, b) => b.value - a.value).slice(0, 5),
+    }))
+    .sort((a, b) => b.value - a.value);
+};
+
+const concentrationBucket = (companyHoldingCount, top10Weight) => {
+  if (companyHoldingCount <= 15 || top10Weight >= 80) return 'focused';
+  if (companyHoldingCount <= 60 || top10Weight >= 55) return 'balanced';
+  return 'diversified';
+};
+
+const buildQuarterAnalytics = (quarters, holdingsByQuarter, companyHoldingsByQuarter, companyChangesByQuarter) =>
+  quarters.map((quarter) => {
+    const holdings = holdingsByQuarter[quarter] || [];
+    const companyHoldings = companyHoldingsByQuarter[quarter] || [];
+    const changes = companyChangesByQuarter[quarter] || [];
+    const totalValue = holdings.reduce((sum, holding) => sum + holding.value, 0);
+
+    return {
+      quarter,
+      totalValue,
+      holdingCount: holdings.length,
+      companyHoldingCount: companyHoldings.length,
+      top10Weight: computeTop10Weight(companyHoldings),
+      changeCounts: computeChangeCounts(changes),
+      themeAllocation: computeThemeAllocation(companyHoldings),
+    };
+  });
+
+const buildManagerMetrics = (latestCompanyHoldings, latestCompanyChanges, quarterAnalytics) => {
+  const changeCounts = computeChangeCounts(latestCompanyChanges);
+  const top10Weight = computeTop10Weight(latestCompanyHoldings);
+  const totalValue = latestCompanyHoldings.reduce((sum, holding) => sum + holding.value, 0);
+  const newValue = latestCompanyChanges
+    .filter((change) => change.changeType === 'new')
+    .reduce((sum, change) => sum + change.currentValue, 0);
+  const largestIncrease = latestCompanyChanges
+    .filter((change) => ['increase', 'new'].includes(change.changeType))
+    .sort((a, b) => b.valueChange - a.valueChange)[0] || null;
+  const largestDecrease = latestCompanyChanges
+    .filter((change) => ['decrease', 'exit'].includes(change.changeType))
+    .sort((a, b) => a.valueChange - b.valueChange)[0] || null;
+  const turnoverCount = changeCounts.new + changeCounts.exit;
+
+  return {
+    holdingCount: latestCompanyHoldings.length,
+    top10Weight,
+    concentration: concentrationBucket(latestCompanyHoldings.length, top10Weight),
+    changeCounts,
+    newValue,
+    newValueWeight: totalValue > 0 ? (newValue / totalValue) * 100 : 0,
+    turnoverCount,
+    turnoverRate: latestCompanyHoldings.length > 0 ? (turnoverCount / latestCompanyHoldings.length) * 100 : 0,
+    largestIncrease: largestIncrease ? toPublicChange(largestIncrease) : null,
+    largestDecrease: largestDecrease ? toPublicChange(largestDecrease) : null,
+    quarterTrend: quarterAnalytics,
+  };
+};
+
+const buildStockIndex = (managers, latestQuarter, consensus) => {
+  const recentQuarters = unique(managers.flatMap((manager) => manager.quarters || []))
+    .sort(compareQuarter)
+    .slice(-4);
+  const byCompany = new Map();
+
+  const ensureStock = (seed) => {
+    const companyId = seed.companyId || seed.canonicalCompanyId || seed.securityId;
+    if (!companyId) return null;
+
+    if (!byCompany.has(companyId)) {
+      byCompany.set(companyId, {
+        companyId,
+        canonicalCompanyId: seed.canonicalCompanyId || companyId,
+        canonicalName: seed.canonicalName || seed.issuerName,
+        canonicalTicker: seed.canonicalTicker || null,
+        canonicalCusips: seed.canonicalCusips || [],
+        rawCusips: [],
+        issuerNames: [],
+        themes: [],
+        searchAliases: [],
+        holders: [],
+        rawHoldings: [],
+      });
+    }
+
+    const record = byCompany.get(companyId);
+    record.canonicalName = record.canonicalName || seed.canonicalName || seed.issuerName;
+    record.canonicalTicker = record.canonicalTicker || seed.canonicalTicker || null;
+    record.canonicalCusips = unique([...record.canonicalCusips, ...(seed.canonicalCusips || [])]);
+    record.rawCusips = unique([...record.rawCusips, ...(seed.rawCusips || [seed.cusip]).filter(Boolean)]);
+    record.issuerNames = unique([...record.issuerNames, ...(seed.issuerNames || [seed.issuerName]).filter(Boolean)]);
+    record.themes = unique([...record.themes, ...(seed.themes || [])]);
+    record.searchAliases = unique([
+      ...record.searchAliases,
+      seed.canonicalTicker,
+      seed.canonicalName,
+      seed.issuerName,
+      ...(seed.canonicalCusips || []),
+      ...(seed.rawCusips || [seed.cusip]).filter(Boolean),
+    ]);
+    return record;
+  };
+
+  for (const manager of managers) {
+    const latestChangesByCompany = new Map((manager.latestCompanyChanges || []).map((change) => [change.companyId, change]));
+
+    for (const holdings of Object.values(manager.companyHoldingsByQuarter || {})) {
+      for (const holding of holdings) {
+        ensureStock(holding);
+      }
+    }
+
+    for (const holding of manager.latestCompanyHoldings || []) {
+      const stock = ensureStock(holding);
+      if (!stock) continue;
+      const change = latestChangesByCompany.get(holding.companyId) || null;
+      stock.holders.push({
+        managerId: manager.id,
+        managerName: manager.displayName,
+        leadInvestor: manager.leadInvestor,
+        quarter: manager.latestQuarter,
+        value: holding.value,
+        shares: holding.shares,
+        weight: holding.weight,
+        changeType: change?.changeType || 'unchanged',
+        currentShares: change?.currentShares ?? holding.shares,
+        previousShares: change?.previousShares ?? holding.shares,
+        shareChange: change?.shareChange ?? 0,
+        shareChangePercent: change?.shareChangePercent ?? 0,
+        currentValue: change?.currentValue ?? holding.value,
+        previousValue: change?.previousValue ?? holding.value,
+        valueChange: change?.valueChange ?? 0,
+        currentWeight: change?.currentWeight ?? holding.weight,
+        previousWeight: change?.previousWeight ?? holding.weight,
+        weightChange: change?.weightChange ?? 0,
+        accessionNumber: holding.accessionNumber,
+        filingDate: holding.filingDate,
+        sourceUrl: manager.latestFiling?.sourceUrl || null,
+      });
+    }
+
+    for (const holding of manager.latestHoldings || []) {
+      const stock = ensureStock(holding);
+      if (!stock) continue;
+      stock.rawHoldings.push({
+        managerId: manager.id,
+        managerName: manager.displayName,
+        quarter: manager.latestQuarter,
+        securityId: holding.securityId,
+        cusip: holding.cusip,
+        issuerName: holding.issuerName,
+        titleOfClass: holding.titleOfClass,
+        value: holding.value,
+        shares: holding.shares,
+        weight: holding.weight,
+        accessionNumber: holding.accessionNumber,
+        filingDate: holding.filingDate,
+        sourceUrl: manager.latestFiling?.sourceUrl || null,
+      });
+    }
+  }
+
+  const consensusSignalsByCompany = new Map();
+  for (const item of consensus.sharedIncrease || []) {
+    consensusSignalsByCompany.set(item.companyId, [
+      ...(consensusSignalsByCompany.get(item.companyId) || []),
+      { direction: 'increase', managerCount: item.increaseManagers.length, netShareChange: item.netShareChange, netValueChange: item.netValueChange, netWeightChange: item.netWeightChange },
+    ]);
+  }
+  for (const item of consensus.sharedDecrease || []) {
+    consensusSignalsByCompany.set(item.companyId, [
+      ...(consensusSignalsByCompany.get(item.companyId) || []),
+      { direction: 'decrease', managerCount: item.decreaseManagers.length, netShareChange: item.netShareChange, netValueChange: item.netValueChange, netWeightChange: item.netWeightChange },
+    ]);
+  }
+
+  return Array.from(byCompany.values())
+    .map((stock) => {
+      const quarters = recentQuarters.map((quarter) => {
+        const holders = [];
+        for (const manager of managers) {
+          const holding = (manager.companyHoldingsByQuarter?.[quarter] || []).find((item) => item.companyId === stock.companyId);
+          if (!holding) continue;
+          const change = (manager.companyChangesByQuarter?.[quarter] || []).find((item) => item.companyId === stock.companyId) || null;
+          holders.push({
+            managerId: manager.id,
+            managerName: manager.displayName,
+            value: holding.value,
+            shares: holding.shares,
+            weight: holding.weight,
+            changeType: change?.changeType || 'unchanged',
+            shareChange: change?.shareChange || 0,
+            valueChange: change?.valueChange || 0,
+            weightChange: change?.weightChange || 0,
+          });
+        }
+        return {
+          quarter,
+          holderCount: holders.length,
+          totalValue: holders.reduce((sum, holder) => sum + holder.value, 0),
+          totalShares: holders.reduce((sum, holder) => sum + holder.shares, 0),
+          holders,
+        };
+      });
+      const sortedHolders = stock.holders.sort((a, b) => b.value - a.value);
+      const latestTotalValue = sortedHolders.reduce((sum, holder) => sum + holder.value, 0);
+      const latestTotalShares = sortedHolders.reduce((sum, holder) => sum + holder.shares, 0);
+      const aliases = unique([
+        stock.canonicalTicker,
+        stock.canonicalName,
+        ...stock.searchAliases,
+        ...stock.canonicalCusips,
+        ...stock.rawCusips,
+        ...stock.issuerNames,
+      ]).filter(Boolean);
+
+      return {
+        companyId: stock.companyId,
+        canonicalCompanyId: stock.canonicalCompanyId,
+        canonicalName: stock.canonicalName,
+        canonicalTicker: stock.canonicalTicker,
+        canonicalCusips: unique(stock.canonicalCusips),
+        rawCusips: unique(stock.rawCusips),
+        issuerNames: unique(stock.issuerNames),
+        themes: stock.themes.length ? stock.themes : ['unclassified'],
+        latestQuarter,
+        latestHolderCount: sortedHolders.length,
+        latestTotalValue,
+        latestTotalShares,
+        holders: sortedHolders,
+        rawHoldings: stock.rawHoldings.sort((a, b) => b.value - a.value),
+        quarters,
+        consensusSignals: consensusSignalsByCompany.get(stock.companyId) || [],
+        searchAliases: aliases,
+        searchText: aliases.join(' ').toUpperCase(),
+        href: `/stocks/${encodeURIComponent(stock.companyId)}`,
+      };
+    })
+    .sort((a, b) => b.latestTotalValue - a.latestTotalValue);
+};
+
+const buildSearchIndex = (stocks, managers, consensus) => ({
+  stocks: stocks.map((stock) => ({
+    companyId: stock.companyId,
+    canonicalName: stock.canonicalName,
+    canonicalTicker: stock.canonicalTicker,
+    cusips: stock.rawCusips,
+    themes: stock.themes,
+    latestHolderCount: stock.latestHolderCount,
+    latestTotalValue: stock.latestTotalValue,
+    topHolders: stock.holders.slice(0, 4).map((holder) => ({
+      managerId: holder.managerId,
+      managerName: holder.managerName,
+      value: holder.value,
+      weight: holder.weight,
+      changeType: holder.changeType,
+    })),
+    href: stock.href,
+    searchText: stock.searchText,
+  })),
+  managers: managers.map((manager) => ({
+    id: manager.id,
+    displayName: manager.displayName,
+    managerName: manager.managerName,
+    leadInvestor: manager.leadInvestor,
+    cik: manager.cik,
+    latestQuarter: manager.latestQuarter,
+    latestTotalValue: manager.latestTotalValue,
+    latestHoldingCount: manager.latestHoldingCount,
+    companyHoldingCount: manager.companyHoldings.length,
+    top10Weight: manager.metrics?.top10Weight || 0,
+    concentration: manager.metrics?.concentration || 'unknown',
+    href: `/live-13f/${manager.id}`,
+    searchText: unique([
+      manager.id,
+      manager.displayName,
+      manager.managerName,
+      manager.leadInvestor,
+      manager.cik,
+    ]).join(' ').toUpperCase(),
+  })),
+  consensus: [
+    ...(consensus.sharedIncrease || []).map((item) => ({
+      direction: 'increase',
+      companyId: item.companyId,
+      canonicalName: item.canonicalName || item.issuerName,
+      canonicalTicker: item.canonicalTicker,
+      cusips: item.rawCusips,
+      managerCount: item.increaseManagers.length,
+      netShareChange: item.netShareChange,
+      netValueChange: item.netValueChange,
+      netWeightChange: item.netWeightChange,
+      href: `/stocks/${encodeURIComponent(item.companyId)}`,
+      searchText: unique([item.canonicalName, item.issuerName, item.canonicalTicker, ...(item.rawCusips || [])]).join(' ').toUpperCase(),
+    })),
+    ...(consensus.sharedDecrease || []).map((item) => ({
+      direction: 'decrease',
+      companyId: item.companyId,
+      canonicalName: item.canonicalName || item.issuerName,
+      canonicalTicker: item.canonicalTicker,
+      cusips: item.rawCusips,
+      managerCount: item.decreaseManagers.length,
+      netShareChange: item.netShareChange,
+      netValueChange: item.netValueChange,
+      netWeightChange: item.netWeightChange,
+      href: `/stocks/${encodeURIComponent(item.companyId)}`,
+      searchText: unique([item.canonicalName, item.issuerName, item.canonicalTicker, ...(item.rawCusips || [])]).join(' ').toUpperCase(),
+    })),
+  ],
+});
+
 const toPublicHolding = (holding) => ({
   rank: holding.rank,
   securityId: holding.securityId,
@@ -652,6 +1009,7 @@ const toPublicChange = (change) => ({
   quarter: change.quarter,
   previousQuarter: change.previousQuarter,
   accessionNumber: change.accessionNumber,
+  sourceUrl: change.sourceUrl || null,
 });
 
 const toPublicManager = (manager) => ({
@@ -671,9 +1029,19 @@ const toPublicManager = (manager) => ({
   companyHoldings: manager.latestCompanyHoldings.map(toPublicHolding),
   latestChanges: manager.latestChanges.map(toPublicChange),
   latestCompanyChanges: manager.latestCompanyChanges.map(toPublicChange),
+  quarterlyCompanyChanges: Object.fromEntries(
+    manager.quarters.map((quarter) => [
+      quarter,
+      (manager.companyChangesByQuarter[quarter] || []).map(toPublicChange),
+    ])
+  ),
   topHoldings: manager.topHoldings,
   topIncreases: manager.topIncreases,
   topDecreases: manager.topDecreases,
+  metrics: manager.metrics,
+  quarterAnalytics: manager.quarterAnalytics,
+  themeAllocation: manager.themeAllocation,
+  topHoldingWeights: manager.topHoldingWeights,
 });
 
 const validateSnapshot = (snapshot, expectedManagerCount) => {
@@ -685,6 +1053,10 @@ const validateSnapshot = (snapshot, expectedManagerCount) => {
   }
   if (!snapshot.latestQuarter) fatal.push('missing_latest_quarter');
   if (!snapshot.consensus) fatal.push('missing_consensus');
+  if (!Array.isArray(snapshot.stocks) || snapshot.stocks.length === 0) fatal.push('missing_stock_index');
+  if (!snapshot.searchIndex?.stocks?.length || !snapshot.searchIndex?.managers?.length || !snapshot.searchIndex?.consensus?.length) {
+    fatal.push('missing_search_index');
+  }
   if (!snapshot.securityNormalization?.canonicalCompanies?.length) {
     fatal.push('missing_security_normalization_config');
   }
@@ -704,8 +1076,17 @@ const validateSnapshot = (snapshot, expectedManagerCount) => {
     if (!Array.isArray(manager.latestCompanyChanges) || manager.latestCompanyChanges.length === 0) {
       fatal.push(`missing_company_changes:${manager.id}`);
     }
+    if (!manager.quarterlyCompanyChanges || Object.keys(manager.quarterlyCompanyChanges).length < 4) {
+      fatal.push(`missing_quarterly_company_changes:${manager.id}`);
+    }
     if (!Array.isArray(manager.quarterSummaries) || manager.quarterSummaries.length < 4) {
       fatal.push(`quarter_history_below_4:${manager.id}`);
+    }
+    if (!manager.metrics?.changeCounts || !Array.isArray(manager.quarterAnalytics) || manager.quarterAnalytics.length < 4) {
+      fatal.push(`missing_manager_metrics:${manager.id}`);
+    }
+    if (!Array.isArray(manager.themeAllocation)) {
+      fatal.push(`missing_manager_theme_allocation:${manager.id}`);
     }
     if (manager.latestQuarter !== snapshot.latestQuarter) {
       warnings.push(`manager_not_current_global_quarter:${manager.id}:${manager.latestQuarter}`);
@@ -717,6 +1098,15 @@ const validateSnapshot = (snapshot, expectedManagerCount) => {
 
   if (snapshot.consensus.managerCount < 2) {
     warnings.push('consensus_latest_quarter_has_less_than_two_managers');
+  }
+
+  for (const requiredQuery of ['NVDA', 'ALPHABET', 'MICROSOFT', 'BILL ACKMAN']) {
+    const query = requiredQuery.toUpperCase();
+    const matchedStock = snapshot.searchIndex?.stocks?.some((item) => item.searchText?.includes(query));
+    const matchedManager = snapshot.searchIndex?.managers?.some((item) => item.searchText?.includes(query));
+    if (!matchedStock && !matchedManager) {
+      fatal.push(`required_search_query_missing:${requiredQuery}`);
+    }
   }
 
   return {
@@ -734,6 +1124,8 @@ const buildReport = (snapshot) => {
     `Latest quarter: ${snapshot.latestQuarter}`,
     `Validation: ${snapshot.validation.status}`,
     `Canonical companies: ${snapshot.securityNormalization?.canonicalCompanies?.length || 0}`,
+    `Stock index: ${snapshot.stocks?.length || 0}`,
+    `Search index: ${(snapshot.searchIndex?.stocks?.length || 0) + (snapshot.searchIndex?.managers?.length || 0) + (snapshot.searchIndex?.consensus?.length || 0)}`,
     '',
     '## Managers',
     '',
@@ -766,6 +1158,8 @@ const fingerprintSnapshot = (snapshot) =>
     latestQuarter: snapshot.latestQuarter,
     managers: snapshot.managers,
     consensus: snapshot.consensus,
+    stocks: snapshot.stocks,
+    searchIndex: snapshot.searchIndex,
     validation: snapshot.validation,
   }));
 
@@ -843,6 +1237,8 @@ const main = async () => {
     const latestTotalValue = latestHoldings.reduce((sum, item) => sum + item.value, 0);
     const quarterSummaries = quarters.map((quarter) => {
       const quarterHoldings = holdingsByQuarter[quarter] || [];
+      const quarterCompanyHoldings = companyHoldingsByQuarter[quarter] || [];
+      const quarterCompanyChanges = companyChangesByQuarter[quarter] || [];
       const filing = filingsOutput.find((item) => item.quarter === quarter) || null;
       return {
         quarter,
@@ -850,9 +1246,22 @@ const main = async () => {
         reportDate: filing?.reportDate || null,
         accessionNumber: filing?.accessionNumber || null,
         holdingCount: quarterHoldings.length,
+        companyHoldingCount: quarterCompanyHoldings.length,
         totalValue: quarterHoldings.reduce((sum, item) => sum + item.value, 0),
+        top10Weight: computeTop10Weight(quarterCompanyHoldings),
+        changeCounts: computeChangeCounts(quarterCompanyChanges),
       };
     });
+    const quarterAnalytics = buildQuarterAnalytics(quarters, holdingsByQuarter, companyHoldingsByQuarter, companyChangesByQuarter);
+    const metrics = buildManagerMetrics(latestCompanyHoldings, latestCompanyChanges, quarterAnalytics);
+    const themeAllocation = computeThemeAllocation(latestCompanyHoldings);
+    const topHoldingWeights = latestCompanyHoldings.slice(0, 10).map((holding) => ({
+      companyId: holding.companyId,
+      canonicalName: holding.canonicalName || holding.issuerName,
+      canonicalTicker: holding.canonicalTicker || null,
+      value: holding.value,
+      weight: holding.weight,
+    }));
 
     const normalizedManager = {
       id: manager.id,
@@ -875,6 +1284,10 @@ const main = async () => {
       latestCompanyHoldings,
       latestChanges,
       latestCompanyChanges,
+      metrics,
+      quarterAnalytics,
+      themeAllocation,
+      topHoldingWeights,
       topHoldings: latestHoldings.slice(0, 12),
       topIncreases: latestCompanyChanges
         .filter((change) => ['increase', 'new'].includes(change.changeType))
@@ -893,6 +1306,9 @@ const main = async () => {
   const allQuarters = managerOutputs.flatMap((manager) => manager.quarters);
   const latestQuarter = allQuarters.sort(compareQuarter).at(-1) || null;
   const consensus = computeConsensus(managerOutputs, latestQuarter);
+  const publicManagers = managerOutputs.map(toPublicManager);
+  const stocks = buildStockIndex(managerOutputs, latestQuarter, consensus);
+  const searchIndex = buildSearchIndex(stocks, publicManagers, consensus);
   const baseSnapshot = {
     dataSource: 'SEC EDGAR 13F filings',
     securityNormalization: {
@@ -900,8 +1316,10 @@ const main = async () => {
       canonicalCompanies: securityResolver.canonicalCompanies,
     },
     latestQuarter,
-    managers: managerOutputs.map(toPublicManager),
+    managers: publicManagers,
     consensus,
+    stocks,
+    searchIndex,
     validation: null,
   };
   baseSnapshot.validation = validateSnapshot(baseSnapshot, managersConfig.length);

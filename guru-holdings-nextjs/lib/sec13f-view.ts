@@ -16,16 +16,23 @@ export const changeLabels: Record<string, string> = {
   unchanged: '持平',
 };
 
+export const concentrationLabels: Record<string, string> = {
+  focused: '持仓集中',
+  balanced: '相对均衡',
+  diversified: '较分散',
+  unknown: '未分类',
+};
+
 export const formatCurrency = (value: number, compact = true) =>
   new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     notation: compact ? 'compact' : 'standard',
     maximumFractionDigits: compact ? 1 : 0,
-  }).format(value);
+  }).format(value || 0);
 
 export const formatSignedCurrency = (value: number, compact = true) => {
-  const formatted = formatCurrency(Math.abs(value), compact);
+  const formatted = formatCurrency(Math.abs(value || 0), compact);
   if (value > 0) return `+${formatted}`;
   if (value < 0) return `-${formatted}`;
   return formatted;
@@ -34,10 +41,10 @@ export const formatSignedCurrency = (value: number, compact = true) => {
 export const formatNumber = (value: number) =>
   new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(value || 0);
 
 export const formatSignedNumber = (value: number) => {
-  const formatted = formatNumber(Math.abs(value));
+  const formatted = formatNumber(Math.abs(value || 0));
   if (value > 0) return `+${formatted}`;
   if (value < 0) return `-${formatted}`;
   return formatted;
@@ -48,23 +55,24 @@ export const formatPercent = (value: number | null | undefined, digits = 2) => {
   return `${value >= 0 ? '+' : ''}${value.toFixed(digits)}%`;
 };
 
-export const formatDate = (value: string | null | undefined) => {
-  if (!value) return 'n/a';
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date(`${value}T00:00:00Z`));
+export const formatWeight = (value: number | null | undefined, digits = 2) => {
+  if (value === null || value === undefined || Number.isNaN(value)) return 'n/a';
+  return `${value.toFixed(digits)}%`;
 };
 
-export const formatDateTime = (value: string) =>
-  new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value));
+export const formatDate = (value: string | null | undefined) => {
+  if (!value) return 'n/a';
+  const [year, month, day] = value.slice(0, 10).split('-');
+  if (!year || !month || !day) return value;
+  return `${year}/${month}/${day}`;
+};
+
+export const formatDateTime = (value: string) => {
+  if (!value) return 'n/a';
+  const normalized = value.replace('T', ' ');
+  const [date, time = ''] = normalized.split('.');
+  return `${date.slice(0, 16)} UTC`;
+};
 
 export const changeBadgeVariant = (changeType?: string) => {
   if (changeType === 'new' || changeType === 'increase') return 'success' as const;
@@ -86,3 +94,4 @@ export const changeTypeClass = (changeType?: string) => {
 
 export const themeName = (theme: string) => themeLabels[theme] || theme;
 export const changeName = (changeType: string) => changeLabels[changeType] || changeType;
+export const concentrationName = (value: string) => concentrationLabels[value] || value;

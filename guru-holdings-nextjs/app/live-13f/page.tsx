@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -10,15 +11,17 @@ import {
   ExternalLink,
   FileCheck2,
   Layers3,
-  Table2,
 } from 'lucide-react';
 import snapshot from '@/data-generated/snapshots/latest.json';
+import { ExplorerSearch } from '@/components/explorer/ExplorerSearch';
+import { ManagerCompare } from '@/components/explorer/ManagerCompare';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   changeBadgeVariant,
   changeName,
+  concentrationName,
   directionTextClass,
   formatCurrency,
   formatDate,
@@ -27,13 +30,13 @@ import {
   formatPercent,
   formatSignedCurrency,
   formatSignedNumber,
+  formatWeight,
   themeName,
 } from '@/lib/sec13f-view';
 
 type Snapshot = typeof snapshot;
 type Manager = Snapshot['managers'][number];
 type ConsensusItem = Snapshot['consensus']['sharedIncrease'][number];
-type Holding = Manager['holdings'][number];
 
 const managerStatusVariant = (manager: Manager) =>
   manager.latestQuarter === snapshot.latestQuarter ? 'success' as const : 'warning' as const;
@@ -60,7 +63,7 @@ function ConsensusTable({
   const iconClass = direction === 'increase' ? 'text-emerald-700' : 'text-red-700';
 
   return (
-    <Card className="border-stone-200">
+    <Card className="border-stone-200 bg-white">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
           <Icon className={`h-5 w-5 ${iconClass}`} />
@@ -70,7 +73,7 @@ function ConsensusTable({
       </CardHeader>
       <CardContent>
         <div className="max-w-full overflow-x-auto">
-          <table className="w-full min-w-[940px] text-left text-sm">
+          <table className="w-full min-w-[980px] text-left text-sm">
             <thead className="border-y border-stone-200 bg-stone-100 text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-4 py-3">公司</th>
@@ -87,11 +90,13 @@ function ConsensusTable({
                 return (
                   <tr key={`${direction}-${item.companyId}`} className="align-top hover:bg-stone-50">
                     <td className="px-4 py-4">
-                      <div className="font-semibold text-slate-950">{item.canonicalName || item.issuerName}</div>
+                      <Link href={`/stocks/${encodeURIComponent(item.companyId)}`} className="font-semibold text-slate-950 hover:text-primary hover:underline">
+                        {item.canonicalName || item.issuerName}
+                      </Link>
                       <div className="mt-1 font-mono text-xs text-muted-foreground">{item.rawCusips?.join(', ') || item.cusip}</div>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="flex max-w-[260px] flex-wrap gap-1.5">
+                      <div className="flex max-w-[280px] flex-wrap gap-1.5">
                         {rows.map((manager) => (
                           <Badge key={`${item.companyId}-${manager.managerId}`} variant="outline" className="rounded-md border-stone-300 bg-white text-slate-700">
                             {manager.managerName}
@@ -131,93 +136,6 @@ function ConsensusTable({
   );
 }
 
-function HoldingsTable({ manager }: { manager: Manager }) {
-  const changesBySecurity = new Map(manager.latestChanges.map((change) => [change.securityId, change]));
-
-  return (
-    <details className="min-w-0 rounded-lg border border-stone-200 bg-white shadow-sm" open={manager.id === 'berkshire'}>
-      <summary className="flex cursor-pointer flex-col gap-2 p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="text-lg font-semibold text-slate-950">{manager.displayName}</div>
-          <div className="text-sm text-muted-foreground">
-            {manager.latestQuarter}，完整 {formatNumber(manager.holdings.length)} 条原始 CUSIP 持仓
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Badge variant={managerStatusVariant(manager)} className="w-fit rounded-md">
-            {manager.latestQuarter}
-          </Badge>
-          <Badge variant="outline" className="w-fit rounded-md border-stone-300">
-            {formatCurrency(manager.latestTotalValue)}
-          </Badge>
-        </div>
-      </summary>
-
-      <div className="border-t border-stone-200">
-        <div className="max-w-full overflow-x-auto">
-          <table className="w-full min-w-[1120px] text-left text-sm">
-            <thead className="bg-stone-100 text-xs uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3">Rank</th>
-                <th className="px-4 py-3">公司</th>
-                <th className="px-4 py-3">CUSIP</th>
-                <th className="px-4 py-3">归一化公司</th>
-                <th className="px-4 py-3 text-right">市值</th>
-                <th className="px-4 py-3 text-right">股数</th>
-                <th className="px-4 py-3 text-right">权重</th>
-                <th className="px-4 py-3">变化</th>
-                <th className="px-4 py-3">主题</th>
-                <th className="px-4 py-3">来源</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100">
-              {manager.holdings.map((holding: Holding) => {
-                const change = changesBySecurity.get(holding.securityId);
-                return (
-                  <tr key={`${manager.id}-${holding.securityId}`} className="align-top hover:bg-stone-50">
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{holding.rank}</td>
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-slate-950">{holding.issuerName}</div>
-                      <div className="text-xs text-muted-foreground">{holding.titleOfClass || 'n/a'}</div>
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-700">{holding.cusip}</td>
-                    <td className="px-4 py-3">
-                      <div className="text-sm text-slate-800">{holding.canonicalName || holding.issuerName}</div>
-                      <div className="font-mono text-xs text-muted-foreground">{holding.canonicalCompanyId}</div>
-                    </td>
-                    <td className="px-4 py-3 text-right font-mono font-medium text-slate-950">{formatCurrency(holding.value, false)}</td>
-                    <td className="px-4 py-3 text-right font-mono text-xs text-slate-700">{formatNumber(holding.shares)}</td>
-                    <td className="px-4 py-3 text-right font-mono text-slate-700">{holding.weight.toFixed(2)}%</td>
-                    <td className="px-4 py-3">
-                      <Badge variant={changeBadgeVariant(change?.changeType)} className="rounded-md">
-                        {change ? changeName(change.changeType) : 'n/a'}
-                      </Badge>
-                      {change && <div className="mt-1 font-mono text-xs text-muted-foreground">{formatPercent(change.shareChangePercent)}</div>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex max-w-[180px] flex-wrap gap-1">
-                        {holding.themes.map((theme) => (
-                          <Badge key={theme} variant="outline" className="rounded-md border-stone-300 bg-white text-slate-700">
-                            {themeName(theme)}
-                          </Badge>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
-                      <div>{formatDate(holding.filingDate)}</div>
-                      <div className="font-mono">{holding.accessionNumber}</div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </details>
-  );
-}
-
 export default function Live13FPage() {
   const sharedIncrease = snapshot.consensus.sharedIncrease;
   const sharedDecrease = snapshot.consensus.sharedDecrease;
@@ -233,10 +151,10 @@ export default function Live13FPage() {
                 SEC EDGAR 自动抓取
               </Badge>
               <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-                真实 13F 持仓数据
+                真实 13F 数据探索
               </h1>
               <p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground">
-                本页读取发布快照 <span className="font-mono text-slate-900">data-generated/snapshots/latest.json</span>。共同变化按归一化公司聚合，完整表格保留 SEC 原始 CUSIP 行。
+                搜索股票和机构，筛选本季度变化，比较不同机构的集中度、共同持仓和同向操作。完整持仓事实保留 SEC 原始 CUSIP 行。
               </p>
             </div>
 
@@ -257,59 +175,21 @@ export default function Live13FPage() {
         </div>
       </section>
 
-      <div className="container py-8 lg:py-10">
+      <main className="container py-8 lg:py-10">
+        <section className="mb-8">
+          <ExplorerSearch
+            searchIndex={snapshot.searchIndex}
+            stocks={snapshot.stocks}
+            managers={snapshot.managers}
+            consensus={snapshot.consensus}
+          />
+        </section>
+
         <section className="mb-8 grid gap-4 lg:grid-cols-4">
-          <Card className="border-stone-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Database className="h-4 w-4 text-primary" />
-                数据源
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold text-slate-950">SEC EDGAR</div>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{snapshot.dataSource}</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-stone-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Building2 className="h-4 w-4 text-slate-700" />
-                覆盖机构
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold text-slate-950">{snapshot.managers.length}</div>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">固定 CIK 抓取，不按名称模糊匹配。</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-stone-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <ArrowUpRight className="h-4 w-4 text-emerald-700" />
-                共同增持
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold text-slate-950">{sharedIncrease.length}</div>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">至少 2 家机构同季度增持或新增。</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-stone-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <ArrowDownRight className="h-4 w-4 text-red-700" />
-                共同减持
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold text-slate-950">{sharedDecrease.length}</div>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">至少 2 家机构同季度减持或清仓。</p>
-            </CardContent>
-          </Card>
+          <SummaryCard icon={<Database className="h-4 w-4 text-primary" />} title="数据源" value="SEC EDGAR" description={snapshot.dataSource} />
+          <SummaryCard icon={<Building2 className="h-4 w-4 text-slate-700" />} title="覆盖机构" value={formatNumber(snapshot.managers.length)} description="固定 CIK 抓取，不按名称模糊匹配。" />
+          <SummaryCard icon={<ArrowUpRight className="h-4 w-4 text-emerald-700" />} title="共同增持" value={formatNumber(sharedIncrease.length)} description="至少 2 家机构同季度增持或新增。" />
+          <SummaryCard icon={<ArrowDownRight className="h-4 w-4 text-red-700" />} title="共同减持" value={formatNumber(sharedDecrease.length)} description="至少 2 家机构同季度减持或清仓。" />
         </section>
 
         {snapshot.validation.warnings.length > 0 && (
@@ -317,21 +197,25 @@ export default function Live13FPage() {
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>自动校验 warning</AlertTitle>
             <AlertDescription className="break-words">
-              {snapshot.validation.warnings.join('；')}。warning 不阻断发布，但页面会明确展示，避免误解数据覆盖范围。
+              {snapshot.validation.warnings.join('；')}。warning 不阻断发布，但页面会展示，避免误解数据覆盖范围。
             </AlertDescription>
           </Alert>
         )}
 
+        <section className="mb-10">
+          <ManagerCompare managers={snapshot.managers} />
+        </section>
+
         <section className="mb-10 grid gap-6">
           <ConsensusTable
             title="本季度共同增持"
-            description="同一归一化公司下，至少两个机构增持或新增；股数、市值和仓位变化均来自自动复算。"
+            description="同一归一化公司下，至少两家机构增持或新增；股数、市值和仓位变化均来自公司级 13F 聚合。"
             items={sharedIncrease}
             direction="increase"
           />
           <ConsensusTable
             title="本季度共同减持"
-            description="同一归一化公司下，至少两个机构减持或清仓；清仓也会计入共同减持。"
+            description="同一归一化公司下，至少两家机构减持或清仓；清仓也会计入共同减持。"
             items={sharedDecrease}
             direction="decrease"
           />
@@ -345,11 +229,11 @@ export default function Live13FPage() {
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {snapshot.managers.map((manager) => (
-              <Card key={manager.id} className="border-stone-200">
+              <Card key={manager.id} className="border-stone-200 bg-white">
                 <CardHeader className="p-5 pb-3">
                   <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <CardTitle className="text-lg leading-tight">{manager.displayName}</CardTitle>
+                    <div className="min-w-0">
+                      <CardTitle className="truncate text-lg leading-tight">{manager.displayName}</CardTitle>
                       <CardDescription className="mt-1">{manager.leadInvestor}</CardDescription>
                     </div>
                     <Badge variant={managerStatusVariant(manager)} className="rounded-md">
@@ -358,15 +242,10 @@ export default function Live13FPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4 p-5 pt-0">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-md bg-stone-100 p-3">
-                      <div className="text-xs text-muted-foreground">原始持仓行</div>
-                      <div className="mt-1 font-mono font-semibold text-slate-950">{formatNumber(manager.latestHoldingCount)}</div>
-                    </div>
-                    <div className="rounded-md bg-stone-100 p-3">
-                      <div className="text-xs text-muted-foreground">总市值</div>
-                      <div className="mt-1 font-mono font-semibold text-slate-950">{formatCurrency(manager.latestTotalValue)}</div>
-                    </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <SmallStat label="公司数" value={formatNumber(manager.companyHoldings.length)} />
+                    <SmallStat label="Top10" value={formatWeight(manager.metrics.top10Weight)} />
+                    <SmallStat label="集中度" value={concentrationName(manager.metrics.concentration)} />
                   </div>
 
                   <div className="rounded-md border border-stone-200 p-3 text-sm leading-6 text-muted-foreground">
@@ -403,11 +282,11 @@ export default function Live13FPage() {
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {themeChanges.map((theme) => (
-              <Card key={theme.theme} className="border-stone-200">
+              <Card key={theme.theme} className="border-stone-200 bg-white">
                 <CardHeader className="p-5 pb-3">
                   <CardTitle className="text-base">{themeName(theme.theme)}</CardTitle>
                   <CardDescription>
-                    {theme.managerCount} 个机构，{theme.companyCount} 家公司
+                    {theme.managerCount} 家机构，{theme.companyCount} 家公司
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-5 pt-0">
@@ -427,30 +306,43 @@ export default function Live13FPage() {
           </div>
         </section>
 
-        <section className="mb-10">
-          <div className="mb-4 flex items-center gap-3">
-            <Table2 className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">每个机构完整持仓表</h2>
-          </div>
-
-          <div className="space-y-5">
-            {snapshot.managers.map((manager) => (
-              <HoldingsTable key={manager.id} manager={manager} />
-            ))}
-          </div>
-        </section>
-
         <section>
           <Alert className="rounded-lg border-primary/20 bg-white text-slate-900 [&>svg]:text-primary">
             <CheckCircle2 className="h-4 w-4" />
             <AlertTitle>有效性证明</AlertTitle>
             <AlertDescription className="break-words">
               本次发布快照生成于 {formatDateTime(snapshot.generatedAt)}。自动校验会重新请求 SEC XML，并比较远端 hash、本地 raw hash 和 snapshot hash。
-              Alphabet / Google 的 02079K107、02079K305 已在共同变化中合并，原始 CUSIP 仍保留在完整持仓表。
+              Alphabet / Google 的 02079K107、02079K305 会在共同变化中合并，原始 CUSIP 仍保留在股票详情和完整持仓表。
             </AlertDescription>
           </Alert>
         </section>
-      </div>
+      </main>
+    </div>
+  );
+}
+
+function SummaryCard({ icon, title, value, description }: { icon: ReactNode; title: string; value: string; description: string }) {
+  return (
+    <Card className="border-stone-200 bg-white">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          {icon}
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-semibold text-slate-950">{value}</div>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SmallStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md bg-stone-100 p-3">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="mt-1 truncate font-mono font-semibold text-slate-950">{value}</div>
     </div>
   );
 }

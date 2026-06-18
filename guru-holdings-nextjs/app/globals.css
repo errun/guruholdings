@@ -67,6 +67,16 @@
     @apply bg-background text-foreground font-sans;
     font-feature-settings: "tnum" 1, "cv02" 1, "cv03" 1;
   }
+  html,
+  body {
+    overflow-x: clip;
+  }
+  @supports not (overflow: clip) {
+    html,
+    body {
+      overflow-x: hidden;
+    }
+  }
   ::selection {
     background: hsl(170 35% 82%);
     color: hsl(222 35% 10%);

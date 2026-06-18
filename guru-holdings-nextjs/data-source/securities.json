@@ -5,7 +5,28 @@
     "ticker": "GOOG / GOOGL",
     "cusips": ["02079K107", "02079K305"],
     "issuerAliases": ["ALPHABET INC", "GOOGLE INC"],
+    "searchAliases": ["GOOG", "GOOGL", "GOOGLE", "ALPHABET"],
     "themes": ["technology"],
     "note": "SEC 13F may report Alphabet Class A and Class C under different CUSIPs. Consensus analytics treat them as one company while raw holdings keep their original CUSIP rows."
+  },
+  {
+    "canonicalCompanyId": "nvidia",
+    "canonicalName": "NVIDIA Corp.",
+    "ticker": "NVDA",
+    "cusips": ["67066G104"],
+    "issuerAliases": ["NVIDIA CORP", "NVIDIA CORPORATION"],
+    "searchAliases": ["NVDA", "NVIDIA"],
+    "themes": ["technology"],
+    "note": "Ticker and aliases are used for search only. Holdings still come from SEC 13F CUSIP rows."
+  },
+  {
+    "canonicalCompanyId": "microsoft",
+    "canonicalName": "Microsoft Corp.",
+    "ticker": "MSFT",
+    "cusips": ["594918104"],
+    "issuerAliases": ["MICROSOFT CORP", "MICROSOFT CORPORATION"],
+    "searchAliases": ["MSFT", "MICROSOFT"],
+    "themes": ["technology"],
+    "note": "Ticker and aliases are used for search only. Holdings still come from SEC 13F CUSIP rows."
   }
 ]

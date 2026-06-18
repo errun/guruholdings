@@ -314,6 +314,150 @@ const verifySecurityNormalization = (snapshot, securitiesConfig, normalizedManag
   }
 };
 
+const countChanges = (changes = []) => ({
+  new: changes.filter((change) => change.changeType === 'new').length,
+  exit: changes.filter((change) => change.changeType === 'exit').length,
+  increase: changes.filter((change) => change.changeType === 'increase').length,
+  decrease: changes.filter((change) => change.changeType === 'decrease').length,
+  unchanged: changes.filter((change) => change.changeType === 'unchanged').length,
+});
+
+const verifyManagerMetrics = (snapshot, failures) => {
+  for (const manager of snapshot.managers || []) {
+    if (!manager.metrics?.changeCounts) {
+      failures.push(`missing_manager_metrics:${manager.id}`);
+      continue;
+    }
+    const expectedCounts = countChanges(manager.latestCompanyChanges || []);
+    for (const [type, expected] of Object.entries(expectedCounts)) {
+      if (manager.metrics.changeCounts[type] !== expected) {
+        failures.push(`manager_metric_change_count_mismatch:${manager.id}:${type}:expected_${expected}:actual_${manager.metrics.changeCounts[type]}`);
+      }
+    }
+    const expectedTop10Weight = (manager.companyHoldings || []).slice(0, 10).reduce((sum, holding) => sum + holding.weight, 0);
+    if (Math.abs((manager.metrics.top10Weight || 0) - expectedTop10Weight) > 0.0001) {
+      failures.push(`manager_metric_top10_weight_mismatch:${manager.id}`);
+    }
+    if (!Array.isArray(manager.quarterAnalytics) || manager.quarterAnalytics.length < 4) {
+      failures.push(`manager_quarter_analytics_missing:${manager.id}`);
+    }
+    if (!Array.isArray(manager.themeAllocation)) {
+      failures.push(`manager_theme_allocation_missing:${manager.id}`);
+    }
+  }
+};
+
+const verifyStockIndex = (snapshot, normalizedManagers, failures) => {
+  if (!Array.isArray(snapshot.stocks) || snapshot.stocks.length === 0) {
+    failures.push('stock_index_empty');
+    return;
+  }
+
+  const normalizedById = new Map(normalizedManagers.map((manager) => [manager.id, manager]));
+  const stockById = new Map(snapshot.stocks.map((stock) => [stock.companyId, stock]));
+
+  for (const stock of snapshot.stocks) {
+    if (!requiredString(stock.companyId) || !requiredString(stock.canonicalName)) {
+      failures.push(`stock_missing_identity:${stock.companyId || 'unknown'}`);
+    }
+    if (!Array.isArray(stock.holders)) {
+      failures.push(`stock_missing_holders:${stock.companyId}`);
+      continue;
+    }
+    if (!Array.isArray(stock.quarters) || stock.quarters.length === 0) {
+      failures.push(`stock_missing_quarters:${stock.companyId}`);
+    }
+    if (!Array.isArray(stock.rawCusips) || stock.rawCusips.length === 0) {
+      failures.push(`stock_missing_raw_cusips:${stock.companyId}`);
+    }
+
+    for (const holder of stock.holders) {
+      const normalizedManager = normalizedById.get(holder.managerId);
+      if (!normalizedManager) {
+        failures.push(`stock_holder_unknown_manager:${stock.companyId}:${holder.managerId}`);
+        continue;
+      }
+      const expectedHolding = (normalizedManager.latestCompanyHoldings || []).find((holding) => holding.companyId === stock.companyId);
+      if (!expectedHolding) {
+        failures.push(`stock_holder_not_in_latest_company_holdings:${stock.companyId}:${holder.managerId}`);
+        continue;
+      }
+      if (holder.value !== expectedHolding.value || holder.shares !== expectedHolding.shares) {
+        failures.push(`stock_holder_value_mismatch:${stock.companyId}:${holder.managerId}`);
+      }
+    }
+
+    for (const raw of stock.rawHoldings || []) {
+      const normalizedManager = normalizedById.get(raw.managerId);
+      const expectedRaw = (normalizedManager?.latestHoldings || []).find((holding) => holding.securityId === raw.securityId);
+      if (!expectedRaw) {
+        failures.push(`stock_raw_holding_missing:${stock.companyId}:${raw.managerId}:${raw.securityId}`);
+      }
+    }
+  }
+
+  const requiredStocks = [
+    ['nvidia', 'NVDA'],
+    ['microsoft', 'MICROSOFT'],
+    ['alphabet', 'ALPHABET'],
+  ];
+  for (const [companyId, query] of requiredStocks) {
+    const stock = stockById.get(companyId);
+    if (!stock) {
+      failures.push(`required_stock_missing:${companyId}`);
+      continue;
+    }
+    if (!stock.searchText?.includes(query)) {
+      failures.push(`required_stock_search_alias_missing:${companyId}:${query}`);
+    }
+    if (!stock.holders?.length) {
+      failures.push(`required_stock_without_current_holders:${companyId}`);
+    }
+  }
+
+  const alphabet = stockById.get('alphabet');
+  if (alphabet) {
+    const alphabetCusips = new Set(alphabet.rawCusips || []);
+    for (const cusip of ['02079K107', '02079K305']) {
+      if (!alphabetCusips.has(cusip)) {
+        failures.push(`alphabet_stock_index_missing_cusip:${cusip}`);
+      }
+    }
+  }
+};
+
+const verifySearchIndex = (snapshot, failures) => {
+  const searchIndex = snapshot.searchIndex || {};
+  if (!Array.isArray(searchIndex.stocks) || !Array.isArray(searchIndex.managers) || !Array.isArray(searchIndex.consensus)) {
+    failures.push('search_index_missing_sections');
+    return;
+  }
+
+  const match = (query) => {
+    const normalized = query.toUpperCase();
+    return (
+      searchIndex.stocks.some((item) => item.searchText?.includes(normalized)) ||
+      searchIndex.managers.some((item) => item.searchText?.includes(normalized)) ||
+      searchIndex.consensus.some((item) => item.searchText?.includes(normalized))
+    );
+  };
+
+  for (const query of ['NVDA', 'ALPHABET', 'MICROSOFT', 'BILL ACKMAN']) {
+    if (!match(query)) failures.push(`search_query_not_indexed:${query}`);
+  }
+
+  for (const manager of snapshot.managers || []) {
+    const indexed = searchIndex.managers.find((item) => item.id === manager.id);
+    if (!indexed) {
+      failures.push(`manager_not_in_search_index:${manager.id}`);
+    }
+  }
+
+  if (!searchIndex.consensus.some((item) => item.direction === 'increase') || !searchIndex.consensus.some((item) => item.direction === 'decrease')) {
+    failures.push('consensus_search_index_missing_direction');
+  }
+};
+
 const verify = async () => {
   const snapshot = await loadJson('data-generated/snapshots/latest.json');
   const managersConfig = await loadJson('data-source/managers.json');
@@ -371,6 +515,9 @@ const verify = async () => {
     }
     if (!Array.isArray(manager.latestCompanyChanges) || manager.latestCompanyChanges.length === 0) {
       failures.push(`empty_public_company_changes:${manager.id}`);
+    }
+    if (!manager.quarterlyCompanyChanges || Object.keys(manager.quarterlyCompanyChanges).length < 4) {
+      failures.push(`missing_public_quarterly_company_changes:${manager.id}`);
     }
 
     for (const holding of manager.holdings || []) {
@@ -440,6 +587,9 @@ const verify = async () => {
   }
 
   verifySecurityNormalization(snapshot, securitiesConfig, normalizedManagers, failures);
+  verifyManagerMetrics(snapshot, failures);
+  verifyStockIndex(snapshot, normalizedManagers, failures);
+  verifySearchIndex(snapshot, failures);
 
   const result = {
     status: failures.length ? 'failed' : 'passed',

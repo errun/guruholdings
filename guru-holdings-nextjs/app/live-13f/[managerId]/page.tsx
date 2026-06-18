@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import {
   AlertTriangle,
@@ -14,12 +15,15 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import snapshot from '@/data-generated/snapshots/latest.json';
+import { ManagerCharts } from '@/components/explorer/ManagerCharts';
+import { ManagerOperationsTable } from '@/components/explorer/ManagerOperationsTable';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   changeBadgeVariant,
   changeName,
+  concentrationName,
   directionTextClass,
   formatCurrency,
   formatDate,
@@ -27,6 +31,7 @@ import {
   formatPercent,
   formatSignedCurrency,
   formatSignedNumber,
+  formatWeight,
   themeName,
 } from '@/lib/sec13f-view';
 
@@ -65,7 +70,7 @@ function ChangeList({
   const iconClass = tone === 'increase' ? 'text-emerald-700' : 'text-red-700';
 
   return (
-    <Card className="border-stone-200">
+    <Card className="border-stone-200 bg-white">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Icon className={`h-5 w-5 ${iconClass}`} />
@@ -74,11 +79,11 @@ function ChangeList({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        {changes.slice(0, 10).map((change) => (
-          <div key={`${title}-${change.companyId}`} className="rounded-lg border border-stone-200 bg-white p-4">
+        {changes.slice(0, 8).map((change) => (
+          <Link key={`${title}-${change.companyId}`} href={`/stocks/${encodeURIComponent(change.companyId)}`} className="block rounded-lg border border-stone-200 bg-white p-4 hover:border-primary/40 hover:bg-stone-50">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <div className="font-semibold text-slate-950">{change.canonicalName || change.issuerName}</div>
+              <div className="min-w-0">
+                <div className="truncate font-semibold text-slate-950">{change.canonicalName || change.issuerName}</div>
                 <div className="mt-1 font-mono text-xs text-muted-foreground">{change.rawCusips?.join(', ') || change.cusip}</div>
               </div>
               <Badge variant={changeBadgeVariant(change.changeType)} className="w-fit rounded-md">
@@ -86,26 +91,11 @@ function ChangeList({
               </Badge>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div>
-                <div className="text-xs text-muted-foreground">股数变化</div>
-                <div className={`mt-1 font-mono text-sm font-semibold ${directionTextClass(change.shareChange)}`}>
-                  {formatSignedNumber(change.shareChange)}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">市值变化</div>
-                <div className={`mt-1 font-mono text-sm font-semibold ${directionTextClass(change.valueChange)}`}>
-                  {formatSignedCurrency(change.valueChange)}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">仓位变化</div>
-                <div className={`mt-1 font-mono text-sm font-semibold ${directionTextClass(change.weightChange)}`}>
-                  {formatPercent(change.weightChange)}
-                </div>
-              </div>
+              <Metric label="股数变化" value={formatSignedNumber(change.shareChange)} tone={directionTextClass(change.shareChange)} />
+              <Metric label="市值变化" value={formatSignedCurrency(change.valueChange)} tone={directionTextClass(change.valueChange)} />
+              <Metric label="仓位变化" value={formatPercent(change.weightChange)} tone={directionTextClass(change.weightChange)} />
             </div>
-          </div>
+          </Link>
         ))}
         {changes.length === 0 && (
           <div className="rounded-lg border border-dashed border-stone-300 p-4 text-sm text-muted-foreground">
@@ -122,7 +112,7 @@ function HoldingsTable({ manager }: { manager: Manager }) {
 
   return (
     <div className="max-w-full overflow-x-auto rounded-lg border border-stone-200 bg-white">
-      <table className="w-full min-w-[1120px] text-left text-sm">
+      <table className="w-full min-w-[1180px] text-left text-sm">
         <thead className="bg-stone-100 text-xs uppercase tracking-wider text-muted-foreground">
           <tr>
             <th className="px-4 py-3">Rank</th>
@@ -149,12 +139,14 @@ function HoldingsTable({ manager }: { manager: Manager }) {
                 </td>
                 <td className="px-4 py-3 font-mono text-xs text-slate-700">{holding.cusip}</td>
                 <td className="px-4 py-3">
-                  <div className="text-sm text-slate-800">{holding.canonicalName || holding.issuerName}</div>
+                  <Link href={`/stocks/${encodeURIComponent(holding.companyId)}`} className="text-sm font-medium text-slate-800 hover:text-primary hover:underline">
+                    {holding.canonicalName || holding.issuerName}
+                  </Link>
                   <div className="font-mono text-xs text-muted-foreground">{holding.canonicalCompanyId}</div>
                 </td>
                 <td className="px-4 py-3 text-right font-mono font-medium text-slate-950">{formatCurrency(holding.value, false)}</td>
                 <td className="px-4 py-3 text-right font-mono text-xs text-slate-700">{formatNumber(holding.shares)}</td>
-                <td className="px-4 py-3 text-right font-mono text-slate-700">{holding.weight.toFixed(2)}%</td>
+                <td className="px-4 py-3 text-right font-mono text-slate-700">{formatWeight(holding.weight)}</td>
                 <td className="px-4 py-3">
                   <Badge variant={changeBadgeVariant(change?.changeType)} className="rounded-md">
                     {change ? changeName(change.changeType) : 'n/a'}
@@ -191,6 +183,8 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
   const increases = changesByType(manager, ['increase', 'new']);
   const decreases = changesByType(manager, ['decrease', 'exit']);
   const nextManager = snapshot.managers[(snapshot.managers.findIndex((item) => item.id === manager.id) + 1) % snapshot.managers.length];
+  const largestIncrease = manager.metrics.largestIncrease;
+  const largestDecrease = manager.metrics.largestDecrease;
 
   return (
     <div className="min-h-screen bg-background">
@@ -209,7 +203,7 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
                 {manager.displayName}
               </h1>
               <p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground">
-                {manager.managerName}，CIK <span className="font-mono text-slate-800">{manager.cik}</span>。本页展示最新 13F 完整持仓、最近 4 个季度趋势和本季度新增、清仓、增持、减持。
+                {manager.managerName}，CIK <span className="font-mono text-slate-800">{manager.cik}</span>。本页展示最近 4 个季度趋势、持仓结构、季度操作明细和完整 SEC 原始 CUSIP 持仓表。
               </p>
             </div>
             <a
@@ -225,7 +219,7 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
         </div>
       </section>
 
-      <div className="container py-8 lg:py-10">
+      <main className="container py-8 lg:py-10">
         {manager.latestQuarter !== snapshot.latestQuarter && (
           <Alert variant="warning" className="mb-8">
             <AlertTriangle className="h-4 w-4" />
@@ -237,70 +231,41 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
         )}
 
         <section className="mb-8 grid gap-4 lg:grid-cols-4">
-          <Card className="border-stone-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Building2 className="h-4 w-4 text-primary" />
-                原始持仓行
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="font-mono text-2xl font-semibold text-slate-950">{formatNumber(manager.latestHoldingCount)}</div>
-              <p className="mt-2 text-sm text-muted-foreground">完整 SEC CUSIP 行。</p>
-            </CardContent>
-          </Card>
-          <Card className="border-stone-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <ArrowUpDown className="h-4 w-4 text-primary" />
-                归一化公司
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="font-mono text-2xl font-semibold text-slate-950">{formatNumber(manager.companyHoldings.length)}</div>
-              <p className="mt-2 text-sm text-muted-foreground">用于共同变化和主题分析。</p>
-            </CardContent>
-          </Card>
-          <Card className="border-stone-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <TrendingUp className="h-4 w-4 text-emerald-700" />
-                增持 / 新增
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="font-mono text-2xl font-semibold text-slate-950">{formatNumber(increases.length)}</div>
-              <p className="mt-2 text-sm text-muted-foreground">公司级变化。</p>
-            </CardContent>
-          </Card>
-          <Card className="border-stone-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <TrendingDown className="h-4 w-4 text-red-700" />
-                减持 / 清仓
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="font-mono text-2xl font-semibold text-slate-950">{formatNumber(decreases.length)}</div>
-              <p className="mt-2 text-sm text-muted-foreground">公司级变化。</p>
-            </CardContent>
-          </Card>
+          <MetricCard icon={<Building2 className="h-4 w-4 text-primary" />} title="公司级持仓" value={formatNumber(manager.companyHoldings.length)} description="合并同一公司的多 CUSIP 行。" />
+          <MetricCard icon={<ArrowUpDown className="h-4 w-4 text-primary" />} title="Top10 权重" value={formatWeight(manager.metrics.top10Weight)} description={concentrationName(manager.metrics.concentration)} />
+          <MetricCard icon={<TrendingUp className="h-4 w-4 text-emerald-700" />} title="新增 / 增持" value={formatNumber(increases.length)} description={`新增仓位 ${formatWeight(manager.metrics.newValueWeight)}`} />
+          <MetricCard icon={<TrendingDown className="h-4 w-4 text-red-700" />} title="清仓 / 减持" value={formatNumber(decreases.length)} description={`周转率 ${formatWeight(manager.metrics.turnoverRate)}`} />
+        </section>
+
+        <section className="mb-10 grid gap-5 xl:grid-cols-2">
+          <InsightCard title="最大增仓" change={largestIncrease} tone="increase" />
+          <InsightCard title="最大减仓" change={largestDecrease} tone="decrease" />
         </section>
 
         <section className="mb-10">
           <div className="mb-4 flex items-center gap-3">
             <FileText className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">最近 4 个季度</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">趋势与持仓结构</h2>
+          </div>
+          <ManagerCharts manager={manager} />
+        </section>
+
+        <section className="mb-10">
+          <div className="mb-4 flex items-center gap-3">
+            <FileText className="h-5 w-5 text-slate-700" />
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">最近 4 个季度摘要</h2>
           </div>
           <div className="max-w-full overflow-x-auto rounded-lg border border-stone-200 bg-white">
-            <table className="w-full min-w-[720px] text-left text-sm">
+            <table className="w-full min-w-[780px] text-left text-sm">
               <thead className="bg-stone-100 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3">季度</th>
                   <th className="px-4 py-3">Filing date</th>
                   <th className="px-4 py-3">Accession</th>
-                  <th className="px-4 py-3 text-right">持仓行</th>
+                  <th className="px-4 py-3 text-right">原始行</th>
+                  <th className="px-4 py-3 text-right">公司数</th>
                   <th className="px-4 py-3 text-right">总市值</th>
+                  <th className="px-4 py-3 text-right">Top10</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -310,7 +275,9 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
                     <td className="px-4 py-3">{formatDate(quarter.filingDate)}</td>
                     <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{quarter.accessionNumber}</td>
                     <td className="px-4 py-3 text-right font-mono">{formatNumber(quarter.holdingCount)}</td>
+                    <td className="px-4 py-3 text-right font-mono">{formatNumber(quarter.companyHoldingCount)}</td>
                     <td className="px-4 py-3 text-right font-mono">{formatCurrency(quarter.totalValue, false)}</td>
+                    <td className="px-4 py-3 text-right font-mono">{formatWeight(quarter.top10Weight)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -321,13 +288,13 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
         <section className="mb-10 grid gap-6 xl:grid-cols-2">
           <ChangeList
             title="本季度增持 / 新增"
-            description="按归一化公司聚合后，股数增加或新出现的仓位。"
+            description="按公司级持仓聚合后，股数增加或首次出现的仓位。"
             changes={increases}
             tone="increase"
           />
           <ChangeList
             title="本季度减持 / 清仓"
-            description="按归一化公司聚合后，股数减少或完全退出的仓位。"
+            description="按公司级持仓聚合后，股数减少或完全退出的仓位。"
             changes={decreases}
             tone="decrease"
           />
@@ -336,7 +303,15 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
         <section className="mb-10">
           <div className="mb-4 flex items-center gap-3">
             <Table2 className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">完整持仓表</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">季度操作筛选表</h2>
+          </div>
+          <ManagerOperationsTable manager={manager} />
+        </section>
+
+        <section className="mb-10">
+          <div className="mb-4 flex items-center gap-3">
+            <Table2 className="h-5 w-5 text-slate-700" />
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">完整原始持仓表</h2>
           </div>
           <HoldingsTable manager={manager} />
         </section>
@@ -355,7 +330,64 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </section>
-      </div>
+      </main>
     </div>
+  );
+}
+
+function Metric({ label, value, tone }: { label: string; value: string; tone?: string }) {
+  return (
+    <div>
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className={`mt-1 font-mono text-sm font-semibold ${tone || 'text-slate-950'}`}>{value}</div>
+    </div>
+  );
+}
+
+function MetricCard({ icon, title, value, description }: { icon: ReactNode; title: string; value: string; description: string }) {
+  return (
+    <Card className="border-stone-200 bg-white">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          {icon}
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="font-mono text-2xl font-semibold text-slate-950">{value}</div>
+        <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function InsightCard({ title, change, tone }: { title: string; change: CompanyChange | null; tone: 'increase' | 'decrease' }) {
+  return (
+    <Card className="border-stone-200 bg-white">
+      <CardHeader>
+        <CardTitle className="text-lg">{title}</CardTitle>
+        <CardDescription>规则型指标，来自本季度公司级变化。</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {change ? (
+          <Link href={`/stocks/${encodeURIComponent(change.companyId)}`} className="block rounded-lg border border-stone-200 bg-stone-50 p-4 hover:border-primary/40">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="font-semibold text-slate-950">{change.canonicalName || change.issuerName}</div>
+                <div className="mt-1 font-mono text-xs text-muted-foreground">{change.rawCusips?.join(', ') || change.cusip}</div>
+              </div>
+              <Badge variant={tone === 'increase' ? 'success' : 'destructive'} className="w-fit rounded-md">{changeName(change.changeType)}</Badge>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <Metric label="股数变化" value={formatSignedNumber(change.shareChange)} tone={directionTextClass(change.shareChange)} />
+              <Metric label="市值变化" value={formatSignedCurrency(change.valueChange)} tone={directionTextClass(change.valueChange)} />
+              <Metric label="仓位变化" value={formatPercent(change.weightChange)} tone={directionTextClass(change.weightChange)} />
+            </div>
+          </Link>
+        ) : (
+          <div className="rounded-lg border border-dashed border-stone-300 p-4 text-sm text-muted-foreground">暂无数据</div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
