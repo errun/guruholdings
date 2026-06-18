@@ -8,9 +8,18 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.next
+.next-dev-logs
+tsconfig.tsbuildinfo
 dist
 dist-ssr
 *.local
+
+# Generated 13F debugging artifacts. The site commits only the slim public
+# snapshot/report; raw SEC XML and normalized full detail are regenerated in CI.
+guru-holdings-nextjs/data-source/raw/
+guru-holdings-nextjs/data-source/raw-index/
+guru-holdings-nextjs/data-generated/normalized/
 
 # Editor directories and files
 .vscode/*

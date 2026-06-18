@@ -1,0 +1,67 @@
+name: Update 13F data
+
+on:
+  schedule:
+    # Runs monthly on the 16th at 02:00 UTC. The script decides whether new 13F data exists.
+    - cron: "0 2 16 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-13f-data
+  cancel-in-progress: false
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: guru-holdings-nextjs
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: guru-holdings-nextjs/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate latest 13F data
+        run: npm run data:build
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+
+      - name: Verify SEC sources and hashes
+        run: npm run data:verify
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+
+      - name: Build site
+        run: npm run build
+
+      - name: Commit generated data
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add guru-holdings-nextjs/data-generated/snapshots/latest.json
+          git add guru-holdings-nextjs/data-generated/reports/latest.md
+          git add guru-holdings-nextjs/data-source/managers.json
+          git add guru-holdings-nextjs/data-source/themes.json
+          if git diff --cached --quiet; then
+            echo "No generated data changes to commit."
+            exit 0
+          fi
+          git commit -m "Update generated 13F data"
+          git push origin HEAD:master

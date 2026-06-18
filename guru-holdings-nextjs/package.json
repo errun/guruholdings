@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "data:update": "node scripts/data/update-13f.mjs",
+    "data:build": "node scripts/data/update-13f.mjs",
+    "data:verify": "node scripts/data/verify-13f.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

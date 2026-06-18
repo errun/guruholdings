@@ -1,0 +1,98 @@
+[
+  {
+    "id": "technology",
+    "label": "科技",
+    "keywords": [
+      "ALPHABET",
+      "AMAZON",
+      "APPLE",
+      "BROADCOM",
+      "META",
+      "MICROSOFT",
+      "NETFLIX",
+      "NVIDIA",
+      "ORACLE",
+      "SALESFORCE",
+      "SEMICONDUCTOR",
+      "TAIWAN SEMICONDUCTOR",
+      "UBER"
+    ]
+  },
+  {
+    "id": "financials",
+    "label": "金融",
+    "keywords": [
+      "AMERICAN EXPRESS",
+      "BANK",
+      "CAPITAL ONE",
+      "CITIGROUP",
+      "FINANCIAL",
+      "FINL",
+      "JPMORGAN",
+      "MASTERCARD",
+      "MOODYS",
+      "VISA"
+    ]
+  },
+  {
+    "id": "consumer",
+    "label": "消费",
+    "keywords": [
+      "CHIPOTLE",
+      "COCA COLA",
+      "COSTCO",
+      "DOMINO",
+      "LOWES",
+      "MCDONALDS",
+      "NIKE",
+      "RESTAURANT",
+      "STARBUCKS",
+      "WALMART"
+    ]
+  },
+  {
+    "id": "china-assets",
+    "label": "中国资产",
+    "keywords": [
+      "ALIBABA",
+      "BAIDU",
+      "BILIBILI",
+      "BYD",
+      "JD",
+      "NETEASE",
+      "PDD",
+      "TENCENT",
+      "TRIP",
+      "YUM CHINA"
+    ]
+  },
+  {
+    "id": "energy",
+    "label": "能源",
+    "keywords": [
+      "CHEVRON",
+      "CONOCOPHILLIPS",
+      "ENERGY",
+      "EXXON",
+      "OCCIDENTAL",
+      "PETE",
+      "PETROLEUM"
+    ]
+  },
+  {
+    "id": "healthcare",
+    "label": "医疗健康",
+    "keywords": [
+      "ABBVIE",
+      "BIOTECH",
+      "BRISTOL",
+      "HEALTH",
+      "JOHNSON",
+      "LILLY",
+      "MERCK",
+      "PFIZER",
+      "THERAPEUTICS",
+      "UNITEDHEALTH"
+    ]
+  }
+]

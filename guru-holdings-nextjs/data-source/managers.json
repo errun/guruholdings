@@ -1,0 +1,44 @@
+[
+  {
+    "id": "berkshire",
+    "displayName": "Berkshire Hathaway",
+    "managerName": "BERKSHIRE HATHAWAY INC",
+    "leadInvestor": "Warren Buffett",
+    "cik": "0001067983"
+  },
+  {
+    "id": "himalaya",
+    "displayName": "Himalaya Capital",
+    "managerName": "Himalaya Capital Management LLC",
+    "leadInvestor": "Li Lu",
+    "cik": "0001709323"
+  },
+  {
+    "id": "bridgewater",
+    "displayName": "Bridgewater Associates",
+    "managerName": "Bridgewater Associates, LP",
+    "leadInvestor": "Ray Dalio / Bridgewater",
+    "cik": "0001350694"
+  },
+  {
+    "id": "pershing",
+    "displayName": "Pershing Square",
+    "managerName": "Pershing Square Capital Management, L.P.",
+    "leadInvestor": "Bill Ackman",
+    "cik": "0001336528"
+  },
+  {
+    "id": "scion",
+    "displayName": "Scion Asset Management",
+    "managerName": "Scion Asset Management, LLC",
+    "leadInvestor": "Michael Burry",
+    "cik": "0001649339"
+  },
+  {
+    "id": "tiger",
+    "displayName": "Tiger Global",
+    "managerName": "TIGER GLOBAL MANAGEMENT LLC",
+    "leadInvestor": "Tiger Global",
+    "cik": "0001167483"
+  }
+]

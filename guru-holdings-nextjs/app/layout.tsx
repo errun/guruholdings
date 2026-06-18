@@ -9,7 +9,10 @@ const sans = Space_Grotesk({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: 'Guru Holdings Tracker',
-  description: 'Track guru portfolios over the last four quarters. Focused coverage of Warren Buffett and Li Lu with quarterly holdings, charts, and AI summaries.',
+  description: 'Track real SEC 13F holdings, quarterly changes, consensus moves, and theme shifts across six investment managers.',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
