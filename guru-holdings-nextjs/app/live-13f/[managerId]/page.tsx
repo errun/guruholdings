@@ -346,7 +346,7 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
             <CheckCircle2 className="h-4 w-4" />
             <AlertTitle>数据证据链</AlertTitle>
             <AlertDescription>
-              当前 filing：{manager.latestFiling.accessionNumber}，提交日期 {formatDate(manager.latestFiling.filingDate)}。
+              校验状态：{snapshot.validation.status}。当前 filing：{manager.latestFiling.accessionNumber}，提交日期 {formatDate(manager.latestFiling.filingDate)}。
               校验脚本会重新请求 SEC XML，并比对远端、本地 raw 与 snapshot hash。
             </AlertDescription>
           </Alert>
