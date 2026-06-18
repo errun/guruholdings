@@ -106,8 +106,8 @@ export function ExplorerSearch({
   const hasFilters = query || managerId !== 'all' || changeType !== 'all' || theme !== 'all' || concentration !== 'all';
 
   return (
-    <Card className="border-stone-200 bg-white shadow-sm">
-      <CardHeader className="gap-3">
+    <Card className="overflow-hidden border-stone-200 bg-white shadow-sm">
+      <CardHeader className={compact ? 'gap-4 p-4 sm:p-5' : 'gap-3'}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 text-xl">
@@ -137,8 +137,8 @@ export function ExplorerSearch({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-5">
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+      <CardContent className={compact ? 'space-y-5 p-4 pt-0 sm:p-5 sm:pt-0' : 'space-y-5'}>
+        <div className="grid gap-3">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -149,13 +149,13 @@ export function ExplorerSearch({
               placeholder="搜索 NVDA、Alphabet、Microsoft、Bill Ackman、CUSIP"
             />
           </div>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid min-w-0 gap-2 sm:grid-cols-2 xl:grid-cols-4">
             <label className="sr-only" htmlFor="explorer-manager">机构</label>
             <select
               id="explorer-manager"
               value={managerId}
               onChange={(event) => setManagerId(event.target.value)}
-              className="h-11 rounded-md border border-input bg-background px-3 text-sm"
+              className="h-11 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm"
             >
               <option value="all">全部机构</option>
               {managers.map((manager) => (
@@ -168,7 +168,7 @@ export function ExplorerSearch({
               id="explorer-change"
               value={changeType}
               onChange={(event) => setChangeType(event.target.value)}
-              className="h-11 rounded-md border border-input bg-background px-3 text-sm"
+              className="h-11 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm"
             >
               <option value="all">全部变化</option>
               <option value="new">筛选新增</option>
@@ -183,7 +183,7 @@ export function ExplorerSearch({
               id="explorer-theme"
               value={theme}
               onChange={(event) => setTheme(event.target.value)}
-              className="h-11 rounded-md border border-input bg-background px-3 text-sm"
+              className="h-11 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm"
             >
               <option value="all">全部主题</option>
               {themes.map((item) => (
@@ -196,7 +196,7 @@ export function ExplorerSearch({
               id="explorer-concentration"
               value={concentration}
               onChange={(event) => setConcentration(event.target.value)}
-              className="h-11 rounded-md border border-input bg-background px-3 text-sm"
+              className="h-11 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm"
             >
               <option value="all">全部集中度</option>
               <option value="focused">持仓数量少 / Top10 高</option>
@@ -211,7 +211,7 @@ export function ExplorerSearch({
             搜索索引加载中
           </div>
         ) : (
-        <div className="grid gap-4 xl:grid-cols-3">
+        <div className={compact ? 'grid gap-4 lg:grid-cols-2' : 'grid gap-4 xl:grid-cols-3'}>
           <section data-testid="stock-results" className="min-w-0 rounded-lg border border-stone-200 bg-stone-50 p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-950">
@@ -303,7 +303,7 @@ export function ExplorerSearch({
             </div>
           </section>
 
-          <section data-testid="consensus-results" className="min-w-0 rounded-lg border border-stone-200 bg-stone-50 p-4">
+          <section data-testid="consensus-results" className={`min-w-0 rounded-lg border border-stone-200 bg-stone-50 p-4 ${compact ? 'lg:col-span-2' : ''}`}>
             <div className="mb-3 flex items-center justify-between gap-3">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-950">
                 <Filter className="h-4 w-4 text-primary" />

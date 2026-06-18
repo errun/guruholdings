@@ -104,18 +104,21 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <section className="border-b border-stone-200 bg-[linear-gradient(180deg,#fbfaf7_0%,#f4f0e8_100%)]">
         <div className="container py-8 lg:py-12">
-          <div className="grid gap-8 xl:grid-cols-[0.82fr_1.18fr] xl:items-start">
-            <div>
-              <Badge variant="info" className="mb-4 rounded-md">
-                SEC EDGAR 13F
-              </Badge>
-              <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
-                投资机构持仓与共同变化
-              </h1>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                搜索股票、机构或投资人，直接看到持有机构、季度变化、共同增持和共同减持。持仓事实只来自 SEC 13F，披露存在时间延迟。
-              </p>
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="space-y-7">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
+              <div className="max-w-3xl">
+                <Badge variant="info" className="mb-4 rounded-md">
+                  SEC EDGAR 13F
+                </Badge>
+                <h1 className="text-3xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-5xl">
+                  投资机构持仓与共同变化
+                </h1>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+                  搜索股票、机构或投资人，直接看到持有机构、季度变化、共同增持和共同减持。持仓事实只来自 SEC 13F，披露存在时间延迟。
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2">
                 <Stat label="最新季度" value={snapshot.latestQuarter} />
                 <Stat label="机构" value={formatNumber(snapshot.managers.length)} />
                 <Stat label="股票索引" value={formatNumber(snapshot.stocks.length)} />

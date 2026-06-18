@@ -36,10 +36,18 @@ interface StockPageProps {
   params: Promise<{ companyId: string }>;
 }
 
-export const dynamicParams = false;
-
 export function generateStaticParams() {
-  return snapshot.stocks.map((stock) => ({ companyId: stock.companyId }));
+  const priorityIds = new Set([
+    'alphabet',
+    'microsoft',
+    'nvidia',
+    ...snapshot.consensus.sharedIncrease.slice(0, 10).map((item) => item.companyId),
+    ...snapshot.consensus.sharedDecrease.slice(0, 10).map((item) => item.companyId),
+  ]);
+
+  return snapshot.stocks
+    .filter((stock) => priorityIds.has(stock.companyId))
+    .map((stock) => ({ companyId: stock.companyId }));
 }
 
 export default async function StockPage({ params }: StockPageProps) {
