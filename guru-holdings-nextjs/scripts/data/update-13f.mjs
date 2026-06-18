@@ -176,18 +176,35 @@ const fetchFilingFiles = async (manager, filing) => {
   const baseUrl = filingBaseUrl(manager.cik, filing.accessionNumber);
   const indexUrl = `${baseUrl}/index.json`;
   const index = await (await secFetch(indexUrl)).json();
-  const xmlCandidates = (index.directory?.item || [])
+  const allXmlCandidates = (index.directory?.item || [])
     .map((item) => item.name)
-    .filter((name) => name.toLowerCase().endsWith('.xml') && name.toLowerCase() !== 'primary_doc.xml');
+    .filter((name) => name.toLowerCase().endsWith('.xml'));
+  const xmlCandidates = [
+    ...allXmlCandidates.filter((name) => name.toLowerCase() !== 'primary_doc.xml'),
+    ...allXmlCandidates.filter((name) => name.toLowerCase() === 'primary_doc.xml'),
+  ];
 
   let infoTableFile = null;
   let infoTableXml = '';
+  let sourceFormat = 'xml';
   for (const name of xmlCandidates) {
     const xml = await (await secFetch(`${baseUrl}/${name}`)).text();
     if (xml.includes('<infoTable') || xml.includes(':infoTable')) {
       infoTableFile = name;
       infoTableXml = xml;
       break;
+    }
+  }
+
+  const completeSubmissionUrl = `${baseUrl}/${filing.accessionNumber}.txt`;
+  if (!infoTableFile) {
+    const completeSubmissionText = await (await secFetch(completeSubmissionUrl)).text();
+    const xmlDocuments = [...completeSubmissionText.matchAll(/<XML>([\s\S]*?)<\/XML>/gi)].map((match) => match[1].trim());
+    const infoTableDocument = xmlDocuments.find((xml) => xml.includes('<infoTable') || xml.includes(':infoTable'));
+    if (infoTableDocument) {
+      infoTableFile = `${filing.accessionNumber}.txt#infotable`;
+      infoTableXml = infoTableDocument;
+      sourceFormat = 'complete-submission-text';
     }
   }
 
@@ -200,8 +217,9 @@ const fetchFilingFiles = async (manager, filing) => {
     indexUrl,
     index,
     infoTableFile,
-    infoTableUrl: `${baseUrl}/${infoTableFile}`,
+    infoTableUrl: sourceFormat === 'xml' ? `${baseUrl}/${infoTableFile}` : completeSubmissionUrl,
     infoTableXml,
+    sourceFormat,
   };
 };
 
@@ -604,6 +622,7 @@ const main = async () => {
         indexUrl: files.indexUrl,
         infoTableUrl: files.infoTableUrl,
         infoTableFile: files.infoTableFile,
+        sourceFormat: files.sourceFormat,
         infoTableSha256: sha256(files.infoTableXml),
         fetchedAt: runStartedAt,
         holdingCount: holdings.length,
@@ -618,6 +637,7 @@ const main = async () => {
         ...filing,
         sourceUrl: files.infoTableUrl,
         indexUrl: files.indexUrl,
+        sourceFormat: files.sourceFormat,
         infoTableSha256: metadata.infoTableSha256,
         holdingCount: holdings.length,
       });

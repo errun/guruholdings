@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-18T02:35:41.470Z",
-  "dataFingerprint": "b7184b1fef3092643ac0e83d6a601f189064de0049b3f165e7aaab49cef9c34f",
+  "generatedAt": "2026-06-18T03:10:55.950Z",
+  "dataFingerprint": "196ad9ae87be12b060c8c1fe343bc98c70a33b879a8e5d3570dad44fef82b76e",
   "dataSource": "SEC EDGAR 13F filings",
   "latestQuarter": "2026Q1",
   "managers": [
@@ -21,6 +21,7 @@
         "isAmendment": false,
         "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526226661/53405.xml",
         "indexUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526226661/index.json",
+        "sourceFormat": "xml",
         "infoTableSha256": "47b2bdae43512763cbd6459b6980827fc0a4fdc05515b4609950a7ab52b55316",
         "holdingCount": 29
       },
@@ -77,6 +78,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526226661/53405.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526226661/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "47b2bdae43512763cbd6459b6980827fc0a4fdc05515b4609950a7ab52b55316",
           "holdingCount": 29
         },
@@ -90,6 +92,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526054580/50240.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526054580/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "15f564eb4311fd9102fba53bbb85fcd3d3775add6ff6b0f0989fae0aec6ad73d",
           "holdingCount": 42
         },
@@ -103,6 +106,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312525282901/46994.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000119312525282901/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "f4d920922845d288143468bdd93a3b262a443112297f54742ac26ff15ca40f9e",
           "holdingCount": 41
         },
@@ -116,6 +120,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000095012325008343/43977.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000095012325008343/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "624de4bca99049e02b5564c81ce96e4c3fefd51c85ff79c11619a5981a7efca5",
           "holdingCount": 41
         }
@@ -2593,6 +2598,7 @@
         "isAmendment": false,
         "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1709323/000204358526000013/13fhciq126.xml",
         "indexUrl": "https://www.sec.gov/Archives/edgar/data/1709323/000204358526000013/index.json",
+        "sourceFormat": "xml",
         "infoTableSha256": "e841881b3ef1f33ce2c270f9b742d23e59640aef6db29878e6871b7ef10beb98",
         "holdingCount": 14
       },
@@ -2649,6 +2655,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1709323/000204358526000013/13fhciq126.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1709323/000204358526000013/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "e841881b3ef1f33ce2c270f9b742d23e59640aef6db29878e6871b7ef10beb98",
           "holdingCount": 14
         },
@@ -2662,6 +2669,7 @@
           "isAmendment": true,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1709323/000204358526000012/13fhciq425v2.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1709323/000204358526000012/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "3e51c1e245bc66d09e6543ae099a025ee96de19ed6bff2c4134d95e79835667a",
           "holdingCount": 9
         },
@@ -2675,6 +2683,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1709323/000204358525000015/13fhciq325.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1709323/000204358525000015/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "a6adcbe12ab1dd64a5ef64eb267a765498c1b31b5ef9468e395317ebfb60acc7",
           "holdingCount": 9
         },
@@ -2688,6 +2697,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1709323/000204358525000010/13fhciq225.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1709323/000204358525000010/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "091fdc5c33b5f9a4836237415ebec7d3c21d48bf1f432b479e77476ee9c00d2b",
           "holdingCount": 9
         }
@@ -3810,6 +3820,7 @@
         "isAmendment": false,
         "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1350694/000135069426000002/infotable.xml",
         "indexUrl": "https://www.sec.gov/Archives/edgar/data/1350694/000135069426000002/index.json",
+        "sourceFormat": "xml",
         "infoTableSha256": "3d12419747dd9e36a859dc2fff527d3adec43ab3385dab53958d59639244f872",
         "holdingCount": 993
       },
@@ -3866,6 +3877,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1350694/000135069426000002/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1350694/000135069426000002/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "3d12419747dd9e36a859dc2fff527d3adec43ab3385dab53958d59639244f872",
           "holdingCount": 993
         },
@@ -3879,6 +3891,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1350694/000135069426000001/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1350694/000135069426000001/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "2bd6688029f6d600e26d2cb3b43133973a1aa91e2e7efdf7c81131ca23964a37",
           "holdingCount": 1040
         },
@@ -3892,6 +3905,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1350694/000117266125004777/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1350694/000117266125004777/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "1dd4a4a1c3fda86c9d58c082c5db9e85b1ffec8d043842a440cdcee9dd4754d0",
           "holdingCount": 1014
         },
@@ -3905,6 +3919,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1350694/000117266125003151/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1350694/000117266125003151/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "bb9ae77795ad788f42f47bf2351e0c6817c0e29c70d5d6a81ade82871d2e74cb",
           "holdingCount": 585
         }
@@ -55998,6 +56013,7 @@
         "isAmendment": false,
         "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1336528/000117266126002336/infotable.xml",
         "indexUrl": "https://www.sec.gov/Archives/edgar/data/1336528/000117266126002336/index.json",
+        "sourceFormat": "xml",
         "infoTableSha256": "dd90778af69fcee4b7d5107e2893686e371d8ce856a62a8ac79fb144e9dc6dcd",
         "holdingCount": 11
       },
@@ -56054,6 +56070,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1336528/000117266126002336/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1336528/000117266126002336/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "dd90778af69fcee4b7d5107e2893686e371d8ce856a62a8ac79fb144e9dc6dcd",
           "holdingCount": 11
         },
@@ -56067,6 +56084,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1336528/000117266126001091/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1336528/000117266126001091/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "1d5e5891dd2e814407c210c9df3199cac55d776deac230de0eff79350852d66b",
           "holdingCount": 11
         },
@@ -56080,6 +56098,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1336528/000117266125005039/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1336528/000117266125005039/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "cd37e1e8e0a8898b68dcbef75a07c7db917f2a682776b90a6a9163979ab7e147",
           "holdingCount": 11
         },
@@ -56093,6 +56112,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1336528/000117266125003509/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1336528/000117266125003509/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "081b6dd2cdad59604b0d6a5d03b8ec7745407721f75033dc6e67656144c3abb6",
           "holdingCount": 11
         }
@@ -57139,6 +57159,7 @@
         "isAmendment": false,
         "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1649339/000164933925000007/infotable.xml",
         "indexUrl": "https://www.sec.gov/Archives/edgar/data/1649339/000164933925000007/index.json",
+        "sourceFormat": "xml",
         "infoTableSha256": "51bad29039048163a873e90e19f1bb07bf484e243ad1da33bad8e2c786e34f1b",
         "holdingCount": 8
       },
@@ -57195,6 +57216,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1649339/000164933925000007/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1649339/000164933925000007/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "51bad29039048163a873e90e19f1bb07bf484e243ad1da33bad8e2c786e34f1b",
           "holdingCount": 8
         },
@@ -57208,6 +57230,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1649339/000187920225000038/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1649339/000187920225000038/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "aa33c7432e8a01dbff3d5e0e2c844d3f1b100faa5a29a9995e955c6b0f1c27e2",
           "holdingCount": 15
         },
@@ -57221,6 +57244,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1649339/000187920225000025/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1649339/000187920225000025/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "bdc916fd508d0b89cfae98c3dfc3fefbdac46d0eed3a16f66d7ee8022088b6ab",
           "holdingCount": 7
         },
@@ -57234,6 +57258,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1649339/000187920225000012/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1649339/000187920225000012/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "c1c06459f74b9d61cb6da002af6e01361d7dadb20e4a461da5c65dc24c21a92c",
           "holdingCount": 13
         }
@@ -58656,6 +58681,7 @@
         "isAmendment": false,
         "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1167483/000091957426003362/infotable.xml",
         "indexUrl": "https://www.sec.gov/Archives/edgar/data/1167483/000091957426003362/index.json",
+        "sourceFormat": "xml",
         "infoTableSha256": "a8b43f8ef11e5945b0196668953badd026c0e8e93265eb55035ebf7a56bf3fcb",
         "holdingCount": 54
       },
@@ -58712,6 +58738,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1167483/000091957426003362/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1167483/000091957426003362/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "a8b43f8ef11e5945b0196668953badd026c0e8e93265eb55035ebf7a56bf3fcb",
           "holdingCount": 54
         },
@@ -58725,6 +58752,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1167483/000091957426001143/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1167483/000091957426001143/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "9f90f67beb8971a253b8412a047ad92565477d007277307e8a855eede1a3ae96",
           "holdingCount": 54
         },
@@ -58738,6 +58766,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1167483/000091957425006931/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1167483/000091957425006931/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "a362a242690f6adc1cd19a1df3a3fb89143c38ada0f392b50aa02610889e2e0d",
           "holdingCount": 56
         },
@@ -58751,6 +58780,7 @@
           "isAmendment": false,
           "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1167483/000091957425004870/infotable.xml",
           "indexUrl": "https://www.sec.gov/Archives/edgar/data/1167483/000091957425004870/index.json",
+          "sourceFormat": "xml",
           "infoTableSha256": "febf75783f18ad703146ed21730273250f2edc954d6394c91d23743a699169ff",
           "holdingCount": 50
         }

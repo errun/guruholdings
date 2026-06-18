@@ -115,6 +115,12 @@ const validateManagerValueUnits = (manager, failures) => {
   }
 };
 
+const extractInfoTableXml = (sourceText, sourceFormat) => {
+  if (sourceFormat !== 'complete-submission-text') return sourceText;
+  const xmlDocuments = [...sourceText.matchAll(/<XML>([\s\S]*?)<\/XML>/gi)].map((match) => match[1].trim());
+  return xmlDocuments.find((xml) => xml.includes('<infoTable') || xml.includes(':infoTable')) || '';
+};
+
 const expectedChangeType = (current, previous) => {
   if (current && !previous) return 'new';
   if (!current && previous) return 'exit';
@@ -250,7 +256,8 @@ const verify = async () => {
 
     let sourceXml = '';
     try {
-      sourceXml = await (await secFetch(filing.sourceUrl)).text();
+      const sourceText = await (await secFetch(filing.sourceUrl)).text();
+      sourceXml = extractInfoTableXml(sourceText, filing.sourceFormat);
     } catch (error) {
       failures.push(`sec_http_failed:${manager.id}:${error.message}`);
       continue;
