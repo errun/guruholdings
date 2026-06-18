@@ -1,5 +1,4 @@
 import {
-  AlertTriangle,
   CheckCircle2,
   ClipboardCheck,
   Database,
@@ -13,9 +12,11 @@ import {
   UploadCloud,
   XCircle,
 } from 'lucide-react';
+import snapshot from '@/data-generated/snapshots/latest.json';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatDateTime } from '@/lib/sec13f-view';
 
 const workflowSteps = [
   {
@@ -25,15 +26,15 @@ const workflowSteps = [
     icon: RefreshCw,
     goal: '每月 16 日自动启动 13F 数据更新，也支持手动 workflow_dispatch。',
     verification: '检查 workflow run 的触发时间、分支、提交 SHA 和任务状态。',
-    failure: '不进入数据发布步骤，线上继续使用旧 snapshot。',
+    failure: '不进入数据发布步骤，线上继续使用上一版快照。',
   },
   {
     step: '02',
     title: '拉取仓库代码',
     actor: 'GitHub Actions',
     icon: GitBranch,
-    goal: '拿到 master 上的数据规则、固定 CIK、主题映射、页面代码和依赖锁文件。',
-    verification: 'checkout 成功，npm ci 成功，工作目录与 Vercel 项目目录一致。',
+    goal: '取得数据规则、固定 CIK、主题映射、证券归一化配置、页面代码和依赖锁文件。',
+    verification: 'checkout 成功，依赖安装成功，工作目录与 Vercel 项目目录一致。',
     failure: '停止更新，不提交任何数据。',
   },
   {
@@ -41,9 +42,9 @@ const workflowSteps = [
     title: '抓取 SEC 原始数据',
     actor: '数据脚本',
     icon: Database,
-    goal: '按固定 CIK 抓取 6 个机构最近 4 个 13F 披露季度。',
+    goal: '按固定 CIK 抓取 7 个机构最近 4 个 13F 披露季度。',
     verification: '每个 filing 都必须有 CIK、accession number、filing date、report period 和 SEC XML URL。',
-    failure: '关键机构缺失、CIK 不匹配或 SEC 访问连续失败时阻断发布。',
+    failure: '关键机构缺失、CIK 不匹配或 SEC 连续访问失败时阻断发布。',
   },
   {
     step: '04',
@@ -56,12 +57,12 @@ const workflowSteps = [
   },
   {
     step: '05',
-    title: '标准化与合并',
+    title: '标准化与归一化',
     actor: '数据脚本',
     icon: ServerCog,
-    goal: '统一 CUSIP、公司、股数、市值、权重和主题分类，生成页面可用的瘦身 snapshot。',
-    verification: 'schema 完整，持仓非空，value/share 单位落在合理区间。',
-    failure: '字段缺失、空持仓、单位异常时阻断发布。',
+    goal: '保留原始 CUSIP 行，同时用 securities.json 生成公司级归一化视图，例如 Alphabet 合并 02079K107 和 02079K305。',
+    verification: 'schema 完整，持仓非空，value/share 单位合理，公司级汇总可由原始持仓复算。',
+    failure: '字段缺失、空持仓、单位异常或归一化无法复算时阻断发布。',
   },
   {
     step: '06',
@@ -77,8 +78,8 @@ const workflowSteps = [
     title: '计算共同变化',
     actor: '数据脚本',
     icon: FileSearch,
-    goal: '生成共同增持、共同减持和行业/主题变化。',
-    verification: '每条共同变化至少命中 2 个机构，并按 companyId/CUSIP 聚合。',
+    goal: '生成共同增持、共同减持和行业 / 主题变化，并列出股数、市值、仓位占比变化。',
+    verification: '每条共同变化至少命中 2 个机构，并按归一化公司聚合。',
     failure: '共同变化规则异常时阻断发布；没有信号时可以展示为空状态。',
   },
   {
@@ -86,20 +87,21 @@ const workflowSteps = [
     title: '发布到线上',
     actor: 'GitHub Actions bot / Vercel',
     icon: UploadCloud,
-    goal: 'data:build、data:verify、build 全部通过后，bot 直接提交 master 触发 Vercel。',
+    goal: 'data:build、data:verify、build 全部通过后，bot 提交 master 并同步 main，触发 Vercel 部署。',
     verification: '只提交 latest snapshot、latest report 和配置文件，不提交 raw XML 与 normalized 明细。',
-    failure: '任一 fatal 校验失败时不提交 master，Vercel 不会发布坏数据。',
+    failure: '任一 fatal 校验失败时不提交 master/main，Vercel 不会发布坏数据。',
   },
 ];
 
 const validationGates = [
-  ['固定 CIK', '6 个机构必须来自 data-source/managers.json，不能按名称模糊匹配。'],
+  ['固定 CIK', '7 个机构必须来自 data-source/managers.json，不按名称模糊匹配。'],
   ['SEC 来源', '最新 XML 必须 HTTP 200，且包含 infoTable。'],
   ['hash 一致', '远端 XML、本地 raw XML、snapshot 中的 sha256 必须一致。'],
   ['schema 完整', 'manager、filing、holding、change、consensus 的必填字段必须存在。'],
   ['单位合理', 'value/share 的中位数和异常比例必须落在合理范围。'],
   ['变化可复算', '新增、清仓、增持、减持必须由季度 shares 自动推导。'],
-  ['共同变化', '共同增持/减持每条至少包含 2 个机构。'],
+  ['Google 合并', '02079K107 与 02079K305 必须归一化为 Alphabet，同时完整表保留原始 CUSIP。'],
+  ['共同变化', '共同增持 / 减持每条至少包含 2 个机构，并展示变化金额。'],
   ['构建通过', 'Next.js build 必须通过，避免数据更新破坏页面。'],
 ];
 
@@ -109,106 +111,102 @@ const proofArtifacts = [
   'data-source/raw/sec-13f/：CI 中临时生成的 SEC 原始 XML，默认不提交 Git。',
   'data-generated/normalized/：CI 中临时生成的完整调试明细，默认不提交 Git。',
   'GitHub Actions run log：触发时间、脚本输出、校验失败原因和提交结果。',
-  'Vercel deployment：master 更新后的线上构建和部署记录。',
+  'Vercel deployment：master/main 更新后的线上构建和部署记录。',
 ];
 
 export default function DataAutomationCheckPage() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
+      <section className="border-b border-stone-200 bg-white">
+        <div className="container py-8 lg:py-10">
+          <Badge variant="info" className="mb-4 rounded-md">
+            流程验证页
+          </Badge>
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+            13F 数据自动化发布验证
+          </h1>
+          <p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground">
+            这里定义自动化流程的完成标准：谁执行、怎么验证、失败时是否阻断发布。目标是让数据更新能自动运行，但不能自动发布无法证明正确的数据。
+          </p>
+        </div>
+      </section>
+
       <div className="container py-8 lg:py-10">
-        <section className="mb-8 border-b border-slate-200 pb-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-4xl">
-              <Badge variant="info" className="mb-4 rounded-md">
-                流程验证页
-              </Badge>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                13F 数据自动化发布验证
-              </h1>
-              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
-                这个页面用于定义自动化流程的完成标准：谁执行、怎么验证、失败时是否阻断发布。它帮助确认机器能可靠地替代人工更新数据。
-              </p>
-            </div>
-
-            <div className="grid min-w-[280px] grid-cols-2 gap-3">
-              <div className="rounded-lg border border-slate-200 bg-white p-4">
-                <div className="text-xs font-medium uppercase tracking-wider text-slate-500">发布方式</div>
-                <div className="mt-2 text-lg font-semibold text-slate-950">自动提交 master</div>
+        <section className="mb-8 grid gap-4 lg:grid-cols-4">
+          <Card className="border-stone-200">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">当前快照</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-semibold text-slate-950">{snapshot.latestQuarter}</div>
+              <p className="mt-2 text-sm text-muted-foreground">{formatDateTime(snapshot.generatedAt)}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-stone-200">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">机构数</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-semibold text-slate-950">{snapshot.managers.length}</div>
+              <p className="mt-2 text-sm text-muted-foreground">固定 CIK 覆盖。</p>
+            </CardContent>
+          </Card>
+          <Card className="border-stone-200">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">校验状态</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2 text-2xl font-semibold text-emerald-700">
+                <CheckCircle2 className="h-5 w-5" />
+                {snapshot.validation.status}
               </div>
-              <div className="rounded-lg border border-slate-200 bg-white p-4">
-                <div className="text-xs font-medium uppercase tracking-wider text-slate-500">核心原则</div>
-                <div className="mt-2 text-lg font-semibold text-emerald-700">校验先于发布</div>
-              </div>
-            </div>
-          </div>
+              <p className="mt-2 text-sm text-muted-foreground">失败则不发布。</p>
+            </CardContent>
+          </Card>
+          <Card className="border-stone-200">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">归一化规则</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-semibold text-slate-950">{snapshot.securityNormalization.canonicalCompanies.length}</div>
+              <p className="mt-2 text-sm text-muted-foreground">当前包含 Alphabet 双 CUSIP。</p>
+            </CardContent>
+          </Card>
         </section>
 
-        <section className="mb-8 grid gap-4 lg:grid-cols-3">
-          <Alert variant="success" className="rounded-lg">
-            <CheckCircle2 className="h-4 w-4" />
-            <AlertTitle>工作目标</AlertTitle>
-            <AlertDescription>
-              定期自动生成最新 13F 持仓、机构自身变化、共同变化和主题变化，并在校验通过后发布到 Vercel。
-            </AlertDescription>
-          </Alert>
-
-          <Alert variant="warning" className="rounded-lg">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>发布原则</AlertTitle>
-            <AlertDescription>
-              宁可不上新数据，也不发布无法追溯、无法校验或明显异常的数据。失败时保留旧 snapshot。
-            </AlertDescription>
-          </Alert>
-
-          <Alert className="rounded-lg border-blue-200 bg-blue-50 text-blue-900 [&>svg]:text-blue-700">
-            <ShieldCheck className="h-4 w-4" />
-            <AlertTitle>验证方式</AlertTitle>
-            <AlertDescription>
-              发布前必须通过 data:build、data:verify 和 Next.js build；warning 可以展示，fatal 必须阻断。
-            </AlertDescription>
-          </Alert>
-        </section>
+        <Alert className="mb-8 border-primary/20 bg-white text-slate-900 [&>svg]:text-primary">
+          <ShieldCheck className="h-4 w-4" />
+          <AlertTitle>发布闸门</AlertTitle>
+          <AlertDescription>
+            自动化可以直接提交 master/main，但只有在数据生成、SEC 校验和 Next.js 构建全部通过后才会提交。warning 可以展示，fatal 必须阻断。
+          </AlertDescription>
+        </Alert>
 
         <section className="mb-10">
-          <div className="mb-4 flex items-center gap-3">
-            <ShieldCheck className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold text-slate-950">流程拆解</h2>
-          </div>
-
-          <div className="grid gap-4">
+          <h2 className="mb-4 text-2xl font-semibold tracking-tight text-slate-950">执行步骤</h2>
+          <div className="grid gap-4 lg:grid-cols-2">
             {workflowSteps.map((item) => {
               const Icon = item.icon;
               return (
-                <Card key={item.step} className="rounded-lg border-slate-200 shadow-sm">
-                  <CardContent className="p-5">
-                    <div className="grid gap-5 lg:grid-cols-[130px_1.1fr_1fr_1fr] lg:items-start">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-900 text-white">
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-semibold text-slate-500">STEP {item.step}</div>
-                          <Badge variant="outline" className="mt-1 rounded-md border-slate-300">
-                            {item.actor}
-                          </Badge>
-                        </div>
-                      </div>
-
+                <Card key={item.step} className="border-stone-200">
+                  <CardHeader>
+                    <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h3 className="text-lg font-semibold text-slate-950">{item.title}</h3>
-                        <p className="mt-2 text-sm leading-6 text-slate-600">{item.goal}</p>
+                        <CardTitle className="flex items-center gap-2 text-lg">
+                          <Icon className="h-5 w-5 text-primary" />
+                          {item.step}. {item.title}
+                        </CardTitle>
+                        <CardDescription className="mt-1">执行主体：{item.actor}</CardDescription>
                       </div>
-
-                      <div>
-                        <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">验证方式</div>
-                        <p className="mt-2 text-sm leading-6 text-slate-700">{item.verification}</p>
-                      </div>
-
-                      <div>
-                        <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">异常路径</div>
-                        <p className="mt-2 text-sm leading-6 text-red-700">{item.failure}</p>
-                      </div>
+                      <Badge variant="outline" className="rounded-md border-stone-300">
+                        自动化
+                      </Badge>
                     </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm leading-6 text-muted-foreground">
+                    <p><span className="font-medium text-slate-900">目标：</span>{item.goal}</p>
+                    <p><span className="font-medium text-slate-900">验证：</span>{item.verification}</p>
+                    <p><span className="font-medium text-slate-900">失败路径：</span>{item.failure}</p>
                   </CardContent>
                 </Card>
               );
@@ -216,88 +214,59 @@ export default function DataAutomationCheckPage() {
           </div>
         </section>
 
-        <section className="mb-10">
-          <div className="mb-4 flex items-center gap-3">
-            <LockKeyhole className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold text-slate-950">自动发布闸门</h2>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {validationGates.map(([name, description]) => (
-              <Card key={name} className="rounded-lg border-slate-200 shadow-sm">
-                <CardHeader className="p-5 pb-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <CardTitle className="text-base">{name}</CardTitle>
-                    <Badge variant="destructive" className="shrink-0 rounded-md">
-                      fatal
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-5 pt-0">
-                  <p className="text-sm leading-6 text-slate-700">{description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        <section className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
-          <Card className="rounded-lg border-slate-200 shadow-sm">
+        <section className="mb-10 grid gap-6 lg:grid-cols-2">
+          <Card className="border-stone-200">
             <CardHeader>
-              <h2 className="flex items-center gap-2 text-xl font-semibold tracking-tight">
-                <ClipboardCheck className="h-5 w-5 text-emerald-700" />
-                验收标准
-              </h2>
-              <CardDescription>
-                下面这些条件都满足，才算自动化流程可以替代人工更新。
-              </CardDescription>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <LockKeyhole className="h-5 w-5 text-primary" />
+                必须通过的校验
+              </CardTitle>
+              <CardDescription>这些条件不通过时，不能发布新数据。</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  '同一输入重复运行，输出快照保持一致。',
-                  '任一 fatal 校验失败时，不提交 master。',
-                  '线上每条数据都能追溯到 SEC 来源和 hash。',
-                  '新增、清仓、增持、减持全部由程序计算。',
-                  '共同增持/共同减持至少命中 2 个机构。',
-                  'Vercel 构建失败时，线上仍保留旧版本。',
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-3">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                    <span className="text-sm leading-6 text-slate-700">{item}</span>
+            <CardContent className="space-y-3">
+              {validationGates.map(([title, description]) => (
+                <div key={title} className="flex gap-3 rounded-md border border-stone-200 bg-white p-3">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+                  <div>
+                    <div className="font-medium text-slate-950">{title}</div>
+                    <div className="mt-1 text-sm leading-6 text-muted-foreground">{description}</div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
 
-          <Card className="rounded-lg border-slate-200 shadow-sm">
+          <Card className="border-stone-200">
             <CardHeader>
-              <h2 className="flex items-center gap-2 text-xl font-semibold tracking-tight">
-                <FileSearch className="h-5 w-5 text-blue-700" />
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <FileArchive className="h-5 w-5 text-primary" />
                 可复现证据
-              </h2>
-              <CardDescription>数据被质疑时，应能从这些位置反查全过程。</CardDescription>
+              </CardTitle>
+              <CardDescription>以后调试数据时优先看这些产物。</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {proofArtifacts.map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-sm leading-6 text-slate-700">
-                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
+            <CardContent className="space-y-3">
+              {proofArtifacts.map((artifact) => (
+                <div key={artifact} className="rounded-md border border-stone-200 bg-white p-3 text-sm leading-6 text-muted-foreground">
+                  {artifact}
+                </div>
+              ))}
             </CardContent>
           </Card>
         </section>
 
-        <section className="mt-8">
-          <Alert className="rounded-lg border-slate-300 bg-white">
-            <XCircle className="h-4 w-4" />
-            <AlertTitle>页面边界</AlertTitle>
+        <section className="grid gap-5 lg:grid-cols-2">
+          <Alert variant="success">
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertTitle>通过时</AlertTitle>
             <AlertDescription>
-              这个页面定义流程验收标准；真实抓取结果请看 /live-13f。自动任务失败时，页面不会替代报警或日志，需要看 GitHub Actions run log。
+              GitHub Actions bot 创建数据提交，推送 master 并同步 main；Vercel 自动构建后，线上页面展示最新 snapshot。
+            </AlertDescription>
+          </Alert>
+          <Alert variant="destructive">
+            <XCircle className="h-4 w-4" />
+            <AlertTitle>失败时</AlertTitle>
+            <AlertDescription>
+              不提交新 snapshot，不触发新数据发布。失败原因保留在 workflow log 和 failed report 中，方便改脚本或切换备用方式。
             </AlertDescription>
           </Alert>
         </section>

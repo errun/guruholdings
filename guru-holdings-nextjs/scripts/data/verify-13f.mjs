@@ -71,6 +71,7 @@ const readText = async (file, failures, failureCode) => {
 const requiredString = (value) => typeof value === 'string' && value.trim().length > 0;
 const requiredNumber = (value) => typeof value === 'number' && Number.isFinite(value);
 const positiveNumber = (value) => requiredNumber(value) && value > 0;
+const unique = (values) => Array.from(new Set(values.filter(Boolean)));
 
 const median = (values) => {
   if (!values.length) return null;
@@ -80,7 +81,20 @@ const median = (values) => {
 };
 
 const validateHoldingSchema = (holding, context, failures) => {
-  const required = ['securityId', 'companyId', 'cusip', 'issuerName', 'value', 'shares', 'weight', 'quarter', 'accessionNumber'];
+  const required = [
+    'securityId',
+    'companyId',
+    'canonicalCompanyId',
+    'canonicalName',
+    'cusip',
+    'issuerName',
+    'positionType',
+    'value',
+    'shares',
+    'weight',
+    'quarter',
+    'accessionNumber',
+  ];
   for (const key of required) {
     const value = holding?.[key];
     if (typeof value === 'number') {
@@ -129,20 +143,26 @@ const expectedChangeType = (current, previous) => {
   return 'unchanged';
 };
 
-const verifyChangesFromShares = (normalizedManager, failures) => {
-  const quarters = Object.keys(normalizedManager.holdingsByQuarter || {}).sort(compareQuarter);
+const verifyChangesFromShares = (normalizedManager, failures, options = {}) => {
+  const holdingsKey = options.holdingsKey || 'holdingsByQuarter';
+  const changesKey = options.changesKey || 'changesByQuarter';
+  const idKey = options.idKey || 'securityId';
+  const label = options.label || 'security';
+  const holdingsByQuarter = normalizedManager[holdingsKey] || {};
+  const changesByQuarter = normalizedManager[changesKey] || {};
+  const quarters = Object.keys(holdingsByQuarter).sort(compareQuarter);
   for (let index = 0; index < quarters.length; index += 1) {
     const quarter = quarters[index];
     const previousQuarter = quarters[index - 1] || null;
-    const currentMap = new Map((normalizedManager.holdingsByQuarter[quarter] || []).map((holding) => [holding.securityId, holding]));
+    const currentMap = new Map((holdingsByQuarter[quarter] || []).map((holding) => [holding[idKey], holding]));
     const previousMap = previousQuarter
-      ? new Map((normalizedManager.holdingsByQuarter[previousQuarter] || []).map((holding) => [holding.securityId, holding]))
+      ? new Map((holdingsByQuarter[previousQuarter] || []).map((holding) => [holding[idKey], holding]))
       : new Map();
-    const actualMap = new Map((normalizedManager.changesByQuarter?.[quarter] || []).map((change) => [change.securityId, change]));
+    const actualMap = new Map((changesByQuarter?.[quarter] || []).map((change) => [change[idKey], change]));
     const securityIds = new Set([...currentMap.keys(), ...previousMap.keys()]);
 
     if (actualMap.size !== securityIds.size) {
-      failures.push(`change_count_mismatch:${normalizedManager.id}:${quarter}:expected_${securityIds.size}:actual_${actualMap.size}`);
+      failures.push(`${label}_change_count_mismatch:${normalizedManager.id}:${quarter}:expected_${securityIds.size}:actual_${actualMap.size}`);
     }
 
     for (const securityId of securityIds) {
@@ -150,7 +170,7 @@ const verifyChangesFromShares = (normalizedManager, failures) => {
       const previous = previousMap.get(securityId) || null;
       const actual = actualMap.get(securityId);
       if (!actual) {
-        failures.push(`missing_change:${normalizedManager.id}:${quarter}:${securityId}`);
+        failures.push(`missing_${label}_change:${normalizedManager.id}:${quarter}:${securityId}`);
         continue;
       }
 
@@ -159,13 +179,13 @@ const verifyChangesFromShares = (normalizedManager, failures) => {
       const expected = expectedChangeType(current, previous);
 
       if (actual.changeType !== expected) {
-        failures.push(`change_type_mismatch:${normalizedManager.id}:${quarter}:${securityId}:${actual.changeType}:${expected}`);
+        failures.push(`${label}_change_type_mismatch:${normalizedManager.id}:${quarter}:${securityId}:${actual.changeType}:${expected}`);
       }
       if (actual.currentShares !== currentShares || actual.previousShares !== previousShares) {
-        failures.push(`change_share_mismatch:${normalizedManager.id}:${quarter}:${securityId}`);
+        failures.push(`${label}_change_share_mismatch:${normalizedManager.id}:${quarter}:${securityId}`);
       }
       if (actual.shareChange !== currentShares - previousShares) {
-        failures.push(`change_delta_mismatch:${normalizedManager.id}:${quarter}:${securityId}`);
+        failures.push(`${label}_change_delta_mismatch:${normalizedManager.id}:${quarter}:${securityId}`);
       }
     }
   }
@@ -183,11 +203,113 @@ const verifyConsensus = (snapshot, failures) => {
     if (!Array.isArray(item.increaseManagers) || item.increaseManagers.length < 2) {
       failures.push(`shared_increase_less_than_2:${item.companyId || item.issuerName}`);
     }
+    if (!Array.isArray(item.managers) || item.managers.some((manager) => !requiredNumber(manager.shareChange) || !requiredNumber(manager.valueChange) || !requiredNumber(manager.weightChange))) {
+      failures.push(`shared_increase_missing_change_amounts:${item.companyId || item.issuerName}`);
+    }
+    if (!Array.isArray(item.rawCusips) || item.rawCusips.length === 0) {
+      failures.push(`shared_increase_missing_raw_cusips:${item.companyId || item.issuerName}`);
+    }
   }
 
   for (const item of sharedDecrease) {
     if (!Array.isArray(item.decreaseManagers) || item.decreaseManagers.length < 2) {
       failures.push(`shared_decrease_less_than_2:${item.companyId || item.issuerName}`);
+    }
+    if (!Array.isArray(item.managers) || item.managers.some((manager) => !requiredNumber(manager.shareChange) || !requiredNumber(manager.valueChange) || !requiredNumber(manager.weightChange))) {
+      failures.push(`shared_decrease_missing_change_amounts:${item.companyId || item.issuerName}`);
+    }
+    if (!Array.isArray(item.rawCusips) || item.rawCusips.length === 0) {
+      failures.push(`shared_decrease_missing_raw_cusips:${item.companyId || item.issuerName}`);
+    }
+  }
+};
+
+const verifyCompanyHoldingsFromRaw = (normalizedManager, failures) => {
+  for (const quarter of Object.keys(normalizedManager.holdingsByQuarter || {})) {
+    const rawHoldings = normalizedManager.holdingsByQuarter[quarter] || [];
+    const companyHoldings = normalizedManager.companyHoldingsByQuarter?.[quarter] || [];
+    const expected = new Map();
+
+    for (const holding of rawHoldings) {
+      const key = holding.companyId;
+      if (!expected.has(key)) {
+        expected.set(key, {
+          value: 0,
+          shares: 0,
+          rawCusips: [],
+        });
+      }
+      const row = expected.get(key);
+      row.value += holding.value;
+      row.shares += holding.shares;
+      row.rawCusips.push(holding.cusip);
+    }
+
+    const actual = new Map(companyHoldings.map((holding) => [holding.companyId, holding]));
+    if (actual.size !== expected.size) {
+      failures.push(`company_holding_count_mismatch:${normalizedManager.id}:${quarter}:expected_${expected.size}:actual_${actual.size}`);
+    }
+
+    for (const [companyId, expectedRow] of expected.entries()) {
+      const actualRow = actual.get(companyId);
+      if (!actualRow) {
+        failures.push(`missing_company_holding:${normalizedManager.id}:${quarter}:${companyId}`);
+        continue;
+      }
+
+      if (actualRow.value !== expectedRow.value || actualRow.shares !== expectedRow.shares) {
+        failures.push(`company_holding_sum_mismatch:${normalizedManager.id}:${quarter}:${companyId}`);
+      }
+
+      const actualCusips = unique(actualRow.rawCusips || [actualRow.cusip]).sort().join(',');
+      const expectedCusips = unique(expectedRow.rawCusips).sort().join(',');
+      if (actualCusips !== expectedCusips) {
+        failures.push(`company_holding_cusip_mismatch:${normalizedManager.id}:${quarter}:${companyId}`);
+      }
+    }
+  }
+};
+
+const verifySecurityNormalization = (snapshot, securitiesConfig, normalizedManagers, failures) => {
+  const alphabetConfig = securitiesConfig.find((security) => security.canonicalCompanyId === 'alphabet');
+  if (!alphabetConfig) {
+    failures.push('missing_alphabet_security_config');
+    return;
+  }
+
+  const alphabetCusips = new Set((alphabetConfig.cusips || []).map((cusip) => cusip.replace(/\s+/g, '').toUpperCase()));
+  for (const expectedCusip of ['02079K107', '02079K305']) {
+    if (!alphabetCusips.has(expectedCusip)) {
+      failures.push(`missing_alphabet_cusip:${expectedCusip}`);
+    }
+  }
+
+  const snapshotConfig = snapshot.securityNormalization?.canonicalCompanies?.find((security) => security.canonicalCompanyId === 'alphabet');
+  if (!snapshotConfig) {
+    failures.push('missing_alphabet_snapshot_config');
+  }
+
+  for (const manager of normalizedManagers) {
+    for (const [quarter, holdings] of Object.entries(manager.holdingsByQuarter || {})) {
+      const alphabetRows = holdings.filter((holding) => alphabetCusips.has(holding.cusip));
+      for (const holding of alphabetRows) {
+        if (holding.canonicalCompanyId !== 'alphabet' || holding.companyId !== 'alphabet') {
+          failures.push(`alphabet_raw_holding_not_normalized:${manager.id}:${quarter}:${holding.cusip}`);
+        }
+      }
+
+      const groupedRawCusips = unique(alphabetRows.map((holding) => holding.cusip)).sort();
+      if (groupedRawCusips.length > 0) {
+        const companyHolding = manager.companyHoldingsByQuarter?.[quarter]?.find((holding) => holding.companyId === 'alphabet');
+        if (!companyHolding) {
+          failures.push(`missing_alphabet_company_holding:${manager.id}:${quarter}`);
+        } else {
+          const groupedCompanyCusips = unique(companyHolding.rawCusips || [companyHolding.cusip]).sort();
+          if (groupedCompanyCusips.join(',') !== groupedRawCusips.join(',')) {
+            failures.push(`alphabet_company_holding_cusips_not_merged:${manager.id}:${quarter}`);
+          }
+        }
+      }
     }
   }
 };
@@ -195,8 +317,10 @@ const verifyConsensus = (snapshot, failures) => {
 const verify = async () => {
   const snapshot = await loadJson('data-generated/snapshots/latest.json');
   const managersConfig = await loadJson('data-source/managers.json');
+  const securitiesConfig = await loadJson('data-source/securities.json');
   const failures = [];
   const checks = [];
+  const normalizedManagers = [];
 
   if (snapshot.validation?.status !== 'passed') {
     failures.push(`snapshot_validation_not_passed:${snapshot.validation?.status}`);
@@ -228,6 +352,7 @@ const verify = async () => {
     }
 
     const normalizedManager = await loadJson(`data-generated/normalized/${manager.id}.json`);
+    normalizedManagers.push(normalizedManager);
     if (normalizedManager.cik !== expectedCik) {
       failures.push(`normalized_cik_mismatch:${manager.id}`);
     }
@@ -241,12 +366,28 @@ const verify = async () => {
     if (manager.holdings?.length !== manager.latestHoldingCount) {
       failures.push(`public_holding_count_mismatch:${manager.id}:${manager.holdings?.length || 0}:${manager.latestHoldingCount}`);
     }
+    if (!Array.isArray(manager.companyHoldings) || manager.companyHoldings.length === 0) {
+      failures.push(`empty_public_company_holdings:${manager.id}`);
+    }
+    if (!Array.isArray(manager.latestCompanyChanges) || manager.latestCompanyChanges.length === 0) {
+      failures.push(`empty_public_company_changes:${manager.id}`);
+    }
 
     for (const holding of manager.holdings || []) {
       validateHoldingSchema(holding, `${manager.id}:${holding?.securityId || 'unknown'}`, failures);
     }
+    for (const holding of manager.companyHoldings || []) {
+      validateHoldingSchema(holding, `${manager.id}:company:${holding?.companyId || 'unknown'}`, failures);
+    }
     validateManagerValueUnits(manager, failures);
     verifyChangesFromShares(normalizedManager, failures);
+    verifyCompanyHoldingsFromRaw(normalizedManager, failures);
+    verifyChangesFromShares(normalizedManager, failures, {
+      holdingsKey: 'companyHoldingsByQuarter',
+      changesKey: 'companyChangesByQuarter',
+      idKey: 'companyId',
+      label: 'company',
+    });
 
     const filing = manager.latestFiling;
     if (!filing?.sourceUrl || !filing?.infoTableSha256 || !filing?.accessionNumber || !filing?.quarter) {
@@ -297,6 +438,8 @@ const verify = async () => {
       hash: filing.infoTableSha256,
     });
   }
+
+  verifySecurityNormalization(snapshot, securitiesConfig, normalizedManagers, failures);
 
   const result = {
     status: failures.length ? 'failed' : 'passed',

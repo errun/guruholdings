@@ -12,7 +12,7 @@ import {
 import { Language } from '@/lib/types';
 
 export function LanguageSelector() {
-  const { language, changeLanguage, t } = useLanguage();
+  const { language, changeLanguage } = useLanguage();
 
   return (
     <div className="flex items-center space-x-2">
@@ -22,11 +22,10 @@ export function LanguageSelector() {
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="en">{String(t('common.languageNames.en'))}</SelectItem>
-          <SelectItem value="zh">{String(t('common.languageNames.zh'))}</SelectItem>
+          <SelectItem value="en">English</SelectItem>
+          <SelectItem value="zh">中文</SelectItem>
         </SelectContent>
       </Select>
     </div>
   );
 }
-

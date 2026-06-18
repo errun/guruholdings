@@ -1,0 +1,11 @@
+[
+  {
+    "canonicalCompanyId": "alphabet",
+    "canonicalName": "Alphabet Inc.",
+    "ticker": "GOOG / GOOGL",
+    "cusips": ["02079K107", "02079K305"],
+    "issuerAliases": ["ALPHABET INC", "GOOGLE INC"],
+    "themes": ["technology"],
+    "note": "SEC 13F may report Alphabet Class A and Class C under different CUSIPs. Consensus analytics treat them as one company while raw holdings keep their original CUSIP rows."
+  }
+]

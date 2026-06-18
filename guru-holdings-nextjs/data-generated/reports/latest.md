@@ -1,8 +1,9 @@
 # 13F Data Update Report
 
-Generated at: 2026-06-18T03:10:55.950Z
+Generated at: 2026-06-18T07:14:56.774Z
 Latest quarter: 2026Q1
 Validation: passed
+Canonical companies: 1
 
 ## Managers
 
@@ -14,12 +15,13 @@ Validation: passed
 | Pershing Square | 2026Q1 | 2026-05-15 | 11 | 13,714,299,861 | 0001172661-26-002336 |
 | Scion Asset Management | 2025Q3 | 2025-11-03 | 8 | 1,381,198,076 | 0001649339-25-000007 |
 | Tiger Global | 2026Q1 | 2026-05-15 | 54 | 22,845,413,829 | 0000919574-26-003362 |
+| Palliser Capital | 2026Q1 | 2026-05-14 | 5 | 128,845,217 | 0001881490-26-000004 |
 
 ## Consensus
 
 Shared increases: 10
-Shared decreases: 23
-Divergent signals: 27
+Shared decreases: 24
+Divergent signals: 28
 
 ## Validation
 

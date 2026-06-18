@@ -40,5 +40,12 @@
     "managerName": "TIGER GLOBAL MANAGEMENT LLC",
     "leadInvestor": "Tiger Global",
     "cik": "0001167483"
+  },
+  {
+    "id": "palliser",
+    "displayName": "Palliser Capital",
+    "managerName": "Palliser Capital (UK) Ltd",
+    "leadInvestor": "Palliser Capital",
+    "cik": "0001881490"
   }
 ]

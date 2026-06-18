@@ -132,6 +132,43 @@ const classifyThemes = (issuerName, themes) => {
   return matches.length ? matches : ['unclassified'];
 };
 
+const unique = (values) => Array.from(new Set(values.filter(Boolean)));
+
+const createSecurityResolver = (securities = []) => {
+  const canonicalCompanies = securities.map((security) => ({
+    canonicalCompanyId: security.canonicalCompanyId,
+    canonicalName: security.canonicalName,
+    ticker: security.ticker || null,
+    cusips: (security.cusips || []).map((cusip) => cusip.replace(/\s+/g, '').toUpperCase()),
+    issuerAliases: (security.issuerAliases || []).map(normalizeIssuer),
+    themes: security.themes || [],
+    note: security.note || null,
+  }));
+
+  const byCusip = new Map();
+  for (const company of canonicalCompanies) {
+    for (const cusip of company.cusips) {
+      byCusip.set(cusip, company);
+    }
+  }
+
+  const resolve = (issuerName, cusip) => {
+    const normalizedCusip = cusip.replace(/\s+/g, '').toUpperCase();
+    const byExactCusip = byCusip.get(normalizedCusip);
+    if (byExactCusip) return byExactCusip;
+
+    const normalizedIssuer = normalizeIssuer(issuerName);
+    return canonicalCompanies.find((company) =>
+      company.issuerAliases.some((alias) => normalizedIssuer.includes(alias))
+    ) || null;
+  };
+
+  return {
+    canonicalCompanies,
+    resolve,
+  };
+};
+
 const pickFilings = (submission, count = 4) => {
   const recent = submission.filings?.recent;
   if (!recent?.form) return [];
@@ -223,7 +260,7 @@ const fetchFilingFiles = async (manager, filing) => {
   };
 };
 
-const parseInfoTable = (xml, manager, filing, themes) => {
+const parseInfoTable = (xml, manager, filing, themes, securityResolver) => {
   const blocks = xml.match(/<(?:[A-Za-z0-9_]+:)?infoTable\b[^>]*>[\s\S]*?<\/(?:[A-Za-z0-9_]+:)?infoTable>/gi) || [];
   const aggregated = new Map();
 
@@ -240,6 +277,12 @@ const parseInfoTable = (xml, manager, filing, themes) => {
     }
 
     const securityId = putCall ? `${cusip}:${putCall}` : cusip;
+    const canonicalSecurity = securityResolver.resolve(issuerName, cusip);
+    const canonicalCompanyId = canonicalSecurity?.canonicalCompanyId || cusip;
+    const companyId = putCall ? `${canonicalCompanyId}:${putCall}` : canonicalCompanyId;
+    const positionType = putCall || 'SHARE';
+    const detectedThemes = classifyThemes(issuerName, themes);
+    const mergedThemes = unique([...detectedThemes, ...(canonicalSecurity?.themes || [])]);
     const existing = aggregated.get(securityId);
     if (existing) {
       existing.value += value;
@@ -248,15 +291,21 @@ const parseInfoTable = (xml, manager, filing, themes) => {
     } else {
       aggregated.set(securityId, {
         securityId,
-        companyId: cusip,
+        companyId,
+        rawCompanyId: cusip,
+        canonicalCompanyId,
+        canonicalName: canonicalSecurity?.canonicalName || issuerName.trim(),
+        canonicalTicker: canonicalSecurity?.ticker || null,
+        canonicalCusips: canonicalSecurity?.cusips || [cusip],
         cusip,
         issuerName: issuerName.trim(),
         normalizedIssuerName: normalizeIssuer(issuerName),
         titleOfClass,
         putCall: putCall || null,
+        positionType,
         value,
         shares,
-        themes: classifyThemes(issuerName, themes),
+        themes: mergedThemes,
         sourceRows: 1,
         managerId: manager.id,
         quarter: filing.quarter,
@@ -277,22 +326,95 @@ const parseInfoTable = (xml, manager, filing, themes) => {
   }));
 };
 
-const computeManagerChanges = (manager, quarterHoldings) => {
+const aggregateCompanyHoldings = (holdings) => {
+  const aggregated = new Map();
+
+  for (const holding of holdings) {
+    const companyId = holding.companyId || holding.securityId;
+    const existing = aggregated.get(companyId);
+    if (existing) {
+      existing.value += holding.value;
+      existing.shares += holding.shares;
+      existing.sourceRows += holding.sourceRows || 1;
+      existing.securityIds.push(holding.securityId);
+      existing.rawCusips.push(holding.cusip);
+      existing.issuerNames.push(holding.issuerName);
+      existing.titleClasses.push(holding.titleOfClass);
+      existing.themes = unique([...existing.themes, ...(holding.themes || [])]);
+      existing.accessionNumbers.push(holding.accessionNumber);
+    } else {
+      aggregated.set(companyId, {
+        securityId: companyId,
+        companyId,
+        rawCompanyId: holding.rawCompanyId,
+        canonicalCompanyId: holding.canonicalCompanyId || companyId,
+        canonicalName: holding.canonicalName || holding.issuerName,
+        canonicalTicker: holding.canonicalTicker || null,
+        canonicalCusips: holding.canonicalCusips || [holding.cusip],
+        cusip: holding.cusip,
+        rawCusips: [holding.cusip],
+        issuerName: holding.canonicalName || holding.issuerName,
+        issuerNames: [holding.issuerName],
+        normalizedIssuerName: normalizeIssuer(holding.canonicalName || holding.issuerName),
+        titleOfClass: holding.titleOfClass,
+        titleClasses: [holding.titleOfClass],
+        putCall: holding.putCall,
+        positionType: holding.positionType || holding.putCall || 'SHARE',
+        value: holding.value,
+        shares: holding.shares,
+        themes: holding.themes || ['unclassified'],
+        sourceRows: holding.sourceRows || 1,
+        securityIds: [holding.securityId],
+        managerId: holding.managerId,
+        quarter: holding.quarter,
+        accessionNumber: holding.accessionNumber,
+        accessionNumbers: [holding.accessionNumber],
+        filingDate: holding.filingDate,
+        reportDate: holding.reportDate,
+      });
+    }
+  }
+
+  const rows = Array.from(aggregated.values()).map((holding) => ({
+    ...holding,
+    rawCusips: unique(holding.rawCusips),
+    issuerNames: unique(holding.issuerNames),
+    titleClasses: unique(holding.titleClasses),
+    securityIds: unique(holding.securityIds),
+    accessionNumbers: unique(holding.accessionNumbers),
+    cusip: unique(holding.rawCusips).join(', '),
+    titleOfClass: unique(holding.titleClasses).length > 1 ? 'Aggregated classes' : holding.titleOfClass,
+  })).sort((a, b) => b.value - a.value);
+
+  const totalValue = rows.reduce((sum, item) => sum + item.value, 0);
+  return rows.map((holding, index) => ({
+    ...holding,
+    rank: index + 1,
+    weight: totalValue > 0 ? (holding.value / totalValue) * 100 : 0,
+  }));
+};
+
+const buildCompanyHoldingsByQuarter = (holdingsByQuarter) =>
+  Object.fromEntries(
+    Object.entries(holdingsByQuarter).map(([quarter, holdings]) => [quarter, aggregateCompanyHoldings(holdings)])
+  );
+
+const computeManagerChanges = (manager, quarterHoldings, keyField = 'securityId') => {
   const quarters = Object.keys(quarterHoldings).sort(compareQuarter);
   const changesByQuarter = {};
 
   for (let i = 0; i < quarters.length; i += 1) {
     const quarter = quarters[i];
     const previousQuarter = quarters[i - 1] || null;
-    const currentMap = new Map((quarterHoldings[quarter] || []).map((item) => [item.securityId, item]));
+    const currentMap = new Map((quarterHoldings[quarter] || []).map((item) => [item[keyField], item]));
     const previousMap = previousQuarter
-      ? new Map((quarterHoldings[previousQuarter] || []).map((item) => [item.securityId, item]))
+      ? new Map((quarterHoldings[previousQuarter] || []).map((item) => [item[keyField], item]))
       : new Map();
     const ids = new Set([...currentMap.keys(), ...previousMap.keys()]);
 
-    changesByQuarter[quarter] = Array.from(ids).map((securityId) => {
-      const current = currentMap.get(securityId) || null;
-      const previous = previousMap.get(securityId) || null;
+    changesByQuarter[quarter] = Array.from(ids).map((id) => {
+      const current = currentMap.get(id) || null;
+      const previous = previousMap.get(id) || null;
       let changeType = 'unchanged';
 
       if (current && !previous) changeType = 'new';
@@ -312,12 +434,21 @@ const computeManagerChanges = (manager, quarterHoldings) => {
         managerName: manager.displayName,
         quarter,
         previousQuarter,
-        securityId,
+        securityId: current?.securityId || previous?.securityId || id,
         companyId: current?.companyId || previous?.companyId,
+        rawCompanyId: current?.rawCompanyId || previous?.rawCompanyId,
+        canonicalCompanyId: current?.canonicalCompanyId || previous?.canonicalCompanyId,
+        canonicalName: current?.canonicalName || previous?.canonicalName,
+        canonicalTicker: current?.canonicalTicker || previous?.canonicalTicker || null,
+        canonicalCusips: current?.canonicalCusips || previous?.canonicalCusips || [],
         cusip: current?.cusip || previous?.cusip,
+        rawCusips: current?.rawCusips || previous?.rawCusips || [current?.cusip || previous?.cusip].filter(Boolean),
+        issuerNames: current?.issuerNames || previous?.issuerNames || [current?.issuerName || previous?.issuerName].filter(Boolean),
+        securityIds: current?.securityIds || previous?.securityIds || [current?.securityId || previous?.securityId].filter(Boolean),
         issuerName: current?.issuerName || previous?.issuerName,
         titleOfClass: current?.titleOfClass || previous?.titleOfClass,
         putCall: current?.putCall || previous?.putCall || null,
+        positionType: current?.positionType || previous?.positionType || 'SHARE',
         themes: current?.themes || previous?.themes || ['unclassified'],
         changeType,
         currentShares,
@@ -340,7 +471,7 @@ const computeManagerChanges = (manager, quarterHoldings) => {
 };
 
 const computeConsensus = (managers, latestQuarter) => {
-  const changes = managers.flatMap((manager) => manager.changesByQuarter[latestQuarter] || []);
+  const changes = managers.flatMap((manager) => manager.companyChangesByQuarter[latestQuarter] || []);
   const byCompany = new Map();
 
   for (const change of changes) {
@@ -348,8 +479,14 @@ const computeConsensus = (managers, latestQuarter) => {
     if (!byCompany.has(change.companyId)) {
       byCompany.set(change.companyId, {
         companyId: change.companyId,
+        canonicalCompanyId: change.canonicalCompanyId,
+        canonicalName: change.canonicalName || change.issuerName,
+        canonicalTicker: change.canonicalTicker || null,
+        canonicalCusips: change.canonicalCusips || [],
         cusip: change.cusip,
+        rawCusips: [],
         issuerName: change.issuerName,
+        issuerNames: [],
         themes: change.themes,
         managers: [],
         increaseManagers: [],
@@ -357,16 +494,28 @@ const computeConsensus = (managers, latestQuarter) => {
         newManagers: [],
         exitManagers: [],
         divergent: false,
+        currentShares: 0,
+        previousShares: 0,
+        netShareChange: 0,
         netValueChange: 0,
         netWeightChange: 0,
       });
     }
 
     const record = byCompany.get(change.companyId);
+    record.rawCusips.push(...(change.rawCusips || [change.cusip].filter(Boolean)));
+    record.issuerNames.push(...(change.issuerNames || [change.issuerName].filter(Boolean)));
+    record.currentShares += change.currentShares;
+    record.previousShares += change.previousShares;
+    record.netShareChange += change.shareChange;
     record.managers.push({
       managerId: change.managerId,
       managerName: change.managerName,
       changeType: change.changeType,
+      currentShares: change.currentShares,
+      previousShares: change.previousShares,
+      shareChange: change.shareChange,
+      shareChangePercent: change.shareChangePercent,
       valueChange: change.valueChange,
       weightChange: change.weightChange,
       currentValue: change.currentValue,
@@ -383,6 +532,9 @@ const computeConsensus = (managers, latestQuarter) => {
 
   const records = Array.from(byCompany.values()).map((record) => ({
     ...record,
+    rawCusips: unique(record.rawCusips),
+    issuerNames: unique(record.issuerNames),
+    netShareChangePercent: record.previousShares > 0 ? (record.netShareChange / record.previousShares) * 100 : null,
     divergent: record.increaseManagers.length > 0 && record.decreaseManagers.length > 0,
   }));
 
@@ -445,10 +597,19 @@ const toPublicHolding = (holding) => ({
   rank: holding.rank,
   securityId: holding.securityId,
   companyId: holding.companyId,
+  rawCompanyId: holding.rawCompanyId,
+  canonicalCompanyId: holding.canonicalCompanyId,
+  canonicalName: holding.canonicalName,
+  canonicalTicker: holding.canonicalTicker,
+  canonicalCusips: holding.canonicalCusips,
   cusip: holding.cusip,
+  rawCusips: holding.rawCusips,
+  issuerNames: holding.issuerNames,
+  securityIds: holding.securityIds,
   issuerName: holding.issuerName,
   titleOfClass: holding.titleOfClass,
   putCall: holding.putCall,
+  positionType: holding.positionType,
   value: holding.value,
   shares: holding.shares,
   weight: holding.weight,
@@ -463,10 +624,19 @@ const toPublicHolding = (holding) => ({
 const toPublicChange = (change) => ({
   securityId: change.securityId,
   companyId: change.companyId,
+  rawCompanyId: change.rawCompanyId,
+  canonicalCompanyId: change.canonicalCompanyId,
+  canonicalName: change.canonicalName,
+  canonicalTicker: change.canonicalTicker,
+  canonicalCusips: change.canonicalCusips,
   cusip: change.cusip,
+  rawCusips: change.rawCusips,
+  issuerNames: change.issuerNames,
+  securityIds: change.securityIds,
   issuerName: change.issuerName,
   titleOfClass: change.titleOfClass,
   putCall: change.putCall,
+  positionType: change.positionType,
   themes: change.themes,
   changeType: change.changeType,
   currentShares: change.currentShares,
@@ -498,19 +668,26 @@ const toPublicManager = (manager) => ({
   quarterSummaries: manager.quarterSummaries,
   filings: manager.filings,
   holdings: manager.latestHoldings.map(toPublicHolding),
+  companyHoldings: manager.latestCompanyHoldings.map(toPublicHolding),
   latestChanges: manager.latestChanges.map(toPublicChange),
+  latestCompanyChanges: manager.latestCompanyChanges.map(toPublicChange),
   topHoldings: manager.topHoldings,
   topIncreases: manager.topIncreases,
   topDecreases: manager.topDecreases,
 });
 
-const validateSnapshot = (snapshot) => {
+const validateSnapshot = (snapshot, expectedManagerCount) => {
   const fatal = [];
   const warnings = [];
 
-  if (snapshot.managers.length !== 6) fatal.push('manager_count_not_6');
+  if (snapshot.managers.length !== expectedManagerCount) {
+    fatal.push(`manager_count_mismatch:expected_${expectedManagerCount}:actual_${snapshot.managers.length}`);
+  }
   if (!snapshot.latestQuarter) fatal.push('missing_latest_quarter');
   if (!snapshot.consensus) fatal.push('missing_consensus');
+  if (!snapshot.securityNormalization?.canonicalCompanies?.length) {
+    fatal.push('missing_security_normalization_config');
+  }
 
   for (const manager of snapshot.managers) {
     if (!manager.latestQuarter) fatal.push(`missing_latest_quarter:${manager.id}`);
@@ -520,6 +697,12 @@ const validateSnapshot = (snapshot) => {
     if (manager.latestHoldingCount <= 0) fatal.push(`empty_latest_holdings:${manager.id}`);
     if (!Array.isArray(manager.holdings) || manager.holdings.length !== manager.latestHoldingCount) {
       fatal.push(`public_holdings_incomplete:${manager.id}`);
+    }
+    if (!Array.isArray(manager.companyHoldings) || manager.companyHoldings.length === 0) {
+      fatal.push(`missing_company_holdings:${manager.id}`);
+    }
+    if (!Array.isArray(manager.latestCompanyChanges) || manager.latestCompanyChanges.length === 0) {
+      fatal.push(`missing_company_changes:${manager.id}`);
     }
     if (!Array.isArray(manager.quarterSummaries) || manager.quarterSummaries.length < 4) {
       fatal.push(`quarter_history_below_4:${manager.id}`);
@@ -550,6 +733,7 @@ const buildReport = (snapshot) => {
     `Generated at: ${snapshot.generatedAt}`,
     `Latest quarter: ${snapshot.latestQuarter}`,
     `Validation: ${snapshot.validation.status}`,
+    `Canonical companies: ${snapshot.securityNormalization?.canonicalCompanies?.length || 0}`,
     '',
     '## Managers',
     '',
@@ -578,6 +762,7 @@ const buildReport = (snapshot) => {
 const fingerprintSnapshot = (snapshot) =>
   sha256(JSON.stringify({
     dataSource: snapshot.dataSource,
+    securityNormalization: snapshot.securityNormalization,
     latestQuarter: snapshot.latestQuarter,
     managers: snapshot.managers,
     consensus: snapshot.consensus,
@@ -595,6 +780,8 @@ const main = async () => {
 
   const managersConfig = await readJson(path.join(dataSourceDir, 'managers.json'));
   const themes = await readJson(path.join(dataSourceDir, 'themes.json'));
+  const securities = await readJson(path.join(dataSourceDir, 'securities.json'));
+  const securityResolver = createSecurityResolver(securities);
   const runStartedAt = new Date().toISOString();
   const managerOutputs = [];
   const rawIndex = [];
@@ -608,7 +795,7 @@ const main = async () => {
 
     for (const filing of filings) {
       const files = await fetchFilingFiles(manager, filing);
-      const holdings = parseInfoTable(files.infoTableXml, manager, filing, themes);
+      const holdings = parseInfoTable(files.infoTableXml, manager, filing, themes, securityResolver);
       const quarterDir = path.join(rawDir, filing.quarter, manager.id, filing.accessionNumber);
       const metadata = {
         managerId: manager.id,
@@ -644,11 +831,15 @@ const main = async () => {
       rawIndex.push(metadata);
     }
 
-    const changesByQuarter = computeManagerChanges(manager, holdingsByQuarter);
+    const companyHoldingsByQuarter = buildCompanyHoldingsByQuarter(holdingsByQuarter);
+    const changesByQuarter = computeManagerChanges(manager, holdingsByQuarter, 'securityId');
+    const companyChangesByQuarter = computeManagerChanges(manager, companyHoldingsByQuarter, 'companyId');
     const quarters = Object.keys(holdingsByQuarter).sort(compareQuarter).reverse();
     const latestQuarter = quarters[0] || null;
     const latestHoldings = latestQuarter ? holdingsByQuarter[latestQuarter] : [];
     const latestChanges = latestQuarter ? changesByQuarter[latestQuarter] || [] : [];
+    const latestCompanyHoldings = latestQuarter ? companyHoldingsByQuarter[latestQuarter] || [] : [];
+    const latestCompanyChanges = latestQuarter ? companyChangesByQuarter[latestQuarter] || [] : [];
     const latestTotalValue = latestHoldings.reduce((sum, item) => sum + item.value, 0);
     const quarterSummaries = quarters.map((quarter) => {
       const quarterHoldings = holdingsByQuarter[quarter] || [];
@@ -677,15 +868,19 @@ const main = async () => {
       quarterSummaries,
       filings: filingsOutput,
       holdingsByQuarter,
+      companyHoldingsByQuarter,
       changesByQuarter,
+      companyChangesByQuarter,
       latestHoldings,
+      latestCompanyHoldings,
       latestChanges,
+      latestCompanyChanges,
       topHoldings: latestHoldings.slice(0, 12),
-      topIncreases: latestChanges
+      topIncreases: latestCompanyChanges
         .filter((change) => ['increase', 'new'].includes(change.changeType))
         .sort((a, b) => b.valueChange - a.valueChange)
         .slice(0, 10),
-      topDecreases: latestChanges
+      topDecreases: latestCompanyChanges
         .filter((change) => ['decrease', 'exit'].includes(change.changeType))
         .sort((a, b) => a.valueChange - b.valueChange)
         .slice(0, 10),
@@ -700,12 +895,16 @@ const main = async () => {
   const consensus = computeConsensus(managerOutputs, latestQuarter);
   const baseSnapshot = {
     dataSource: 'SEC EDGAR 13F filings',
+    securityNormalization: {
+      source: 'data-source/securities.json',
+      canonicalCompanies: securityResolver.canonicalCompanies,
+    },
     latestQuarter,
     managers: managerOutputs.map(toPublicManager),
     consensus,
     validation: null,
   };
-  baseSnapshot.validation = validateSnapshot(baseSnapshot);
+  baseSnapshot.validation = validateSnapshot(baseSnapshot, managersConfig.length);
 
   const dataFingerprint = fingerprintSnapshot(baseSnapshot);
   const snapshotPath = path.join(snapshotsDir, 'latest.json');

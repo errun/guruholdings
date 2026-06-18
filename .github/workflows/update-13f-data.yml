@@ -59,6 +59,7 @@ jobs:
           git add guru-holdings-nextjs/data-generated/reports/latest.md
           git add guru-holdings-nextjs/data-source/managers.json
           git add guru-holdings-nextjs/data-source/themes.json
+          git add guru-holdings-nextjs/data-source/securities.json
           if git diff --cached --quiet; then
             echo "No generated data changes to commit."
             exit 0
