@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import '../globals.css';
 import { fontVariables } from '@/components/layout/fonts';
-import { SiteShell } from '@/components/layout';
+import { SiteShell, Analytics } from '@/components/layout';
 import { SITE_URL } from '@/lib/i18n/metadata';
 import {
   isLocalizedLocale,
@@ -31,6 +31,9 @@ export default async function LocalizedRootLayout({
 
   return (
     <html lang={localeTags[locale]}>
+      <head>
+        <Analytics />
+      </head>
       <body className={`${fontVariables} min-h-screen bg-background font-sans antialiased`}>
         <SiteShell locale={locale}>{children}</SiteShell>
       </body>
