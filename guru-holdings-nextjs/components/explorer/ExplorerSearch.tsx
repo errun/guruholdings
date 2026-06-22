@@ -1,23 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowDownRight, ArrowRight, ArrowUpRight, Building2, Filter, Search, SlidersHorizontal, X } from 'lucide-react';
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { ArrowDownRight, ArrowRight, ArrowUpRight, Building2, Filter, LoaderCircle, Search, SlidersHorizontal, X } from 'lucide-react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
   changeBadgeVariant,
-  changeName,
-  concentrationName,
-  formatCurrency,
-  formatNumber,
-  formatSignedCurrency,
-  formatSignedNumber,
-  formatWeight,
-  themeName,
+  getViewFormatters,
 } from '@/lib/sec13f-view';
+import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
 
 type AnyRecord = Record<string, any>;
 
@@ -31,6 +25,7 @@ type ExplorerSearchProps = {
   searchIndex?: AnyRecord;
   initialQuery?: string;
   compact?: boolean;
+  locale: Locale;
 };
 
 const normalize = (value: string) => value.trim().toUpperCase();
@@ -52,19 +47,27 @@ export function ExplorerSearch({
   managerTotal,
   initialQuery = '',
   compact = false,
+  locale,
 }: ExplorerSearchProps) {
   const [query, setQuery] = useState(initialQuery);
   const [managerId, setManagerId] = useState('all');
   const [changeType, setChangeType] = useState('all');
   const [theme, setTheme] = useState('all');
   const [concentration, setConcentration] = useState('all');
-  const [mounted, setMounted] = useState(false);
   const deferredQuery = useDeferredValue(query);
   const normalizedQuery = normalize(deferredQuery);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isFiltering = query !== deferredQuery;
+  const {
+    changeName,
+    concentrationName,
+    formatCurrency,
+    formatNumber,
+    formatQuarter,
+    formatSignedCurrency,
+    formatSignedNumber,
+    formatWeight,
+    themeName,
+  } = getViewFormatters(locale);
 
   const themes = useMemo(
     () => providedThemes || Array.from(new Set(stocks.flatMap((stock) => stock.themes || []))).sort(),
@@ -112,10 +115,13 @@ export function ExplorerSearch({
           <div>
             <CardTitle className="flex items-center gap-2 text-xl">
               <Search className="h-5 w-5 text-primary" />
-              投研搜索
+              {translate(locale, 'search.title')}
             </CardTitle>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              {formatNumber(stockTotal ?? stocks.length)} 只股票，{formatNumber(managerTotal ?? managers.length)} 家机构，数据来自已校验 13F 快照。
+              {translate(locale, 'search.subtitle', {
+                stocks: formatNumber(stockTotal ?? stocks.length),
+                managers: formatNumber(managerTotal ?? managers.length),
+              })}
             </p>
           </div>
           {hasFilters && (
@@ -131,7 +137,7 @@ export function ExplorerSearch({
               }}
             >
               <X className="h-4 w-4" />
-              清空
+              {translate(locale, 'search.clear')}
             </Button>
           )}
         </div>
@@ -140,83 +146,86 @@ export function ExplorerSearch({
       <CardContent className={compact ? 'space-y-5 p-4 pt-0 sm:p-5 sm:pt-0' : 'space-y-5'}>
         <div className="grid gap-3">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            {isFiltering ? (
+              <LoaderCircle className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-primary" aria-hidden="true" />
+            ) : (
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            )}
             <Input
               data-testid="explorer-search-input"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               className="h-11 pl-9"
-              placeholder="搜索 NVDA、Alphabet、Microsoft、Bill Ackman、CUSIP"
+              placeholder={translate(locale, 'search.placeholder')}
+              aria-busy={isFiltering}
             />
+            <span className="sr-only" aria-live="polite">
+              {isFiltering ? translate(locale, 'search.loading') : ''}
+            </span>
           </div>
           <div className="grid min-w-0 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-            <label className="sr-only" htmlFor="explorer-manager">机构</label>
+            <label className="sr-only" htmlFor="explorer-manager">{translate(locale, 'search.manager')}</label>
             <select
               id="explorer-manager"
               value={managerId}
               onChange={(event) => setManagerId(event.target.value)}
               className="h-11 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm"
             >
-              <option value="all">全部机构</option>
+              <option value="all">{translate(locale, 'search.allManagers')}</option>
               {managers.map((manager) => (
                 <option key={manager.id} value={manager.id}>{manager.displayName}</option>
               ))}
             </select>
 
-            <label className="sr-only" htmlFor="explorer-change">变化类型</label>
+            <label className="sr-only" htmlFor="explorer-change">{translate(locale, 'search.changeType')}</label>
             <select
               id="explorer-change"
               value={changeType}
               onChange={(event) => setChangeType(event.target.value)}
               className="h-11 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm"
             >
-              <option value="all">全部变化</option>
-              <option value="new">筛选新增</option>
-              <option value="increase">筛选增持</option>
-              <option value="decrease">筛选减持</option>
-              <option value="exit">筛选清仓</option>
-              <option value="unchanged">筛选持平</option>
+              <option value="all">{translate(locale, 'search.allChanges')}</option>
+              <option value="new">{translate(locale, 'search.filterNew')}</option>
+              <option value="increase">{translate(locale, 'search.filterIncrease')}</option>
+              <option value="decrease">{translate(locale, 'search.filterDecrease')}</option>
+              <option value="exit">{translate(locale, 'search.filterExit')}</option>
+              <option value="unchanged">{translate(locale, 'search.filterUnchanged')}</option>
             </select>
 
-            <label className="sr-only" htmlFor="explorer-theme">主题</label>
+            <label className="sr-only" htmlFor="explorer-theme">{translate(locale, 'search.theme')}</label>
             <select
               id="explorer-theme"
               value={theme}
               onChange={(event) => setTheme(event.target.value)}
               className="h-11 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm"
             >
-              <option value="all">全部主题</option>
+              <option value="all">{translate(locale, 'search.allThemes')}</option>
               {themes.map((item) => (
                 <option key={item} value={item}>{themeName(item)}</option>
               ))}
             </select>
 
-            <label className="sr-only" htmlFor="explorer-concentration">集中度</label>
+            <label className="sr-only" htmlFor="explorer-concentration">{translate(locale, 'search.concentration')}</label>
             <select
               id="explorer-concentration"
               value={concentration}
               onChange={(event) => setConcentration(event.target.value)}
               className="h-11 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm"
             >
-              <option value="all">全部集中度</option>
-              <option value="focused">持仓数量少 / Top10 高</option>
-              <option value="balanced">相对均衡</option>
-              <option value="diversified">较分散</option>
+              <option value="all">{translate(locale, 'search.allConcentrations')}</option>
+              <option value="focused">{translate(locale, 'search.focused')}</option>
+              <option value="balanced">{translate(locale, 'search.balanced')}</option>
+              <option value="diversified">{translate(locale, 'search.diversified')}</option>
             </select>
           </div>
         </div>
 
-        {!mounted ? (
-          <div className="rounded-lg border border-dashed border-stone-300 bg-stone-50 p-6 text-sm text-muted-foreground">
-            搜索索引加载中
-          </div>
-        ) : (
         <div className={compact ? 'grid gap-4 lg:grid-cols-2' : 'grid gap-4 xl:grid-cols-3'}>
           <section data-testid="stock-results" className="min-w-0 rounded-lg border border-stone-200 bg-stone-50 p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-950">
                 <SlidersHorizontal className="h-4 w-4 text-primary" />
-                股票结果
+                {translate(locale, 'search.stockResults')}
               </h3>
               <Badge variant="outline" className="rounded-md bg-white">{results.stockResults.length}</Badge>
             </div>
@@ -224,14 +233,14 @@ export function ExplorerSearch({
               {results.stockResults.map((stock) => (
                 <Link
                   key={stock.companyId}
-                  href={stock.href}
+                  href={localizedPath(locale, stock.href)}
                   data-testid="stock-result"
                   className="block rounded-md border border-stone-200 bg-white p-3 transition-colors hover:border-primary/40 hover:bg-stone-50"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="truncate font-semibold text-slate-950">{stock.canonicalName}</div>
-                      <div className="mt-1 truncate font-mono text-xs text-muted-foreground">
+                      <div className="break-words font-semibold text-slate-950">{stock.canonicalName}</div>
+                      <div className="mt-1 break-all font-mono text-xs text-muted-foreground">
                         {stock.canonicalTicker || stock.rawCusips?.join(', ')}
                       </div>
                     </div>
@@ -239,11 +248,11 @@ export function ExplorerSearch({
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <span className="text-muted-foreground">机构</span>
+                      <span className="text-muted-foreground">{translate(locale, 'common.managers')}</span>
                       <div className="font-mono font-semibold">{stock.latestHolderCount}</div>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">合计市值</span>
+                      <span className="text-muted-foreground">{translate(locale, 'home.combinedValue')}</span>
                       <div className="font-mono font-semibold">{formatCurrency(stock.latestTotalValue)}</div>
                     </div>
                   </div>
@@ -256,7 +265,7 @@ export function ExplorerSearch({
                   </div>
                 </Link>
               ))}
-              {results.stockResults.length === 0 && <EmptyResult label="没有股票命中" />}
+              {results.stockResults.length === 0 && <EmptyResult label={translate(locale, 'search.noStocks')} />}
             </div>
           </section>
 
@@ -264,7 +273,7 @@ export function ExplorerSearch({
             <div className="mb-3 flex items-center justify-between gap-3">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-950">
                 <Building2 className="h-4 w-4 text-primary" />
-                机构结果
+                {translate(locale, 'search.managerResults')}
               </h3>
               <Badge variant="outline" className="rounded-md bg-white">{results.managerResults.length}</Badge>
             </div>
@@ -272,34 +281,34 @@ export function ExplorerSearch({
               {results.managerResults.map((manager) => (
                 <Link
                   key={manager.id}
-                  href={`/live-13f/${manager.id}`}
+                  href={localizedPath(locale, `/live-13f/${manager.id}`)}
                   data-testid="manager-result"
                   className="block rounded-md border border-stone-200 bg-white p-3 transition-colors hover:border-primary/40 hover:bg-stone-50"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="truncate font-semibold text-slate-950">{manager.displayName}</div>
-                      <div className="mt-1 truncate text-xs text-muted-foreground">{manager.leadInvestor}</div>
+                      <div className="break-words font-semibold text-slate-950">{manager.displayName}</div>
+                      <div className="mt-1 break-words text-xs text-muted-foreground">{manager.leadInvestor}</div>
                     </div>
                     <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-primary" />
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <span className="text-muted-foreground">总市值</span>
+                      <span className="text-muted-foreground">{translate(locale, 'common.totalValue')}</span>
                       <div className="font-mono font-semibold">{formatCurrency(manager.latestTotalValue)}</div>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Top10</span>
+                      <span className="text-muted-foreground">{translate(locale, 'home.top10')}</span>
                       <div className="font-mono font-semibold">{formatWeight(manager.metrics?.top10Weight || 0)}</div>
                     </div>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1">
                     <Badge variant="outline" className="rounded-md bg-white">{concentrationName(manager.metrics?.concentration || 'unknown')}</Badge>
-                    <Badge variant="secondary" className="rounded-md">{manager.latestQuarter}</Badge>
+                    <Badge variant="secondary" className="rounded-md">{formatQuarter(manager.latestQuarter)}</Badge>
                   </div>
                 </Link>
               ))}
-              {results.managerResults.length === 0 && <EmptyResult label="没有机构命中" />}
+              {results.managerResults.length === 0 && <EmptyResult label={translate(locale, 'search.noManagers')} />}
             </div>
           </section>
 
@@ -307,7 +316,7 @@ export function ExplorerSearch({
             <div className="mb-3 flex items-center justify-between gap-3">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-950">
                 <Filter className="h-4 w-4 text-primary" />
-                共同变化
+                {translate(locale, 'search.consensusResults')}
               </h3>
               <Badge variant="outline" className="rounded-md bg-white">{results.consensusResults.length}</Badge>
             </div>
@@ -319,7 +328,7 @@ export function ExplorerSearch({
                 return (
                   <Link
                     key={`${item.direction}-${item.companyId}`}
-                    href={`/stocks/${encodeURIComponent(item.companyId)}`}
+                    href={localizedPath(locale, `/stocks/${encodeURIComponent(item.companyId)}`)}
                     data-testid="consensus-result"
                     className="block rounded-md border border-stone-200 bg-white p-3 transition-colors hover:border-primary/40 hover:bg-stone-50"
                   >
@@ -327,36 +336,35 @@ export function ExplorerSearch({
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <Icon className={`h-4 w-4 ${isIncrease ? 'text-emerald-700' : 'text-red-700'}`} />
-                          <div className="truncate font-semibold text-slate-950">{item.canonicalName || item.issuerName}</div>
+                          <div className="break-words font-semibold text-slate-950">{item.canonicalName || item.issuerName}</div>
                         </div>
-                        <div className="mt-1 truncate font-mono text-xs text-muted-foreground">{item.rawCusips?.join(', ') || item.cusip}</div>
+                        <div className="mt-1 break-all font-mono text-xs text-muted-foreground">{item.rawCusips?.join(', ') || item.cusip}</div>
                       </div>
                       <Badge variant={isIncrease ? 'success' : 'destructive'} className="rounded-md">
-                        {isIncrease ? '共同增持' : '共同减持'}
+                        {translate(locale, isIncrease ? 'home.sharedIncrease' : 'home.sharedDecrease')}
                       </Badge>
                     </div>
                     <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
                       <div>
-                        <span className="text-muted-foreground">机构</span>
+                        <span className="text-muted-foreground">{translate(locale, 'common.managers')}</span>
                         <div className="font-mono font-semibold">{managersCount}</div>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">股数</span>
+                        <span className="text-muted-foreground">{translate(locale, 'common.shares')}</span>
                         <div className="font-mono font-semibold">{formatSignedNumber(item.netShareChange)}</div>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">市值</span>
+                        <span className="text-muted-foreground">{translate(locale, 'common.marketValue')}</span>
                         <div className="font-mono font-semibold">{formatSignedCurrency(item.netValueChange)}</div>
                       </div>
                     </div>
                   </Link>
                 );
               })}
-              {results.consensusResults.length === 0 && <EmptyResult label="没有共同变化命中" />}
+              {results.consensusResults.length === 0 && <EmptyResult label={translate(locale, 'search.noConsensus')} />}
             </div>
           </section>
         </div>
-        )}
       </CardContent>
     </Card>
   );

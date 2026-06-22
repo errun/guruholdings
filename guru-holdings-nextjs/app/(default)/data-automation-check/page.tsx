@@ -18,6 +18,12 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDateTime } from '@/lib/sec13f-view';
 
+export const metadata: Metadata = {
+  title: '13F 数据自动化验证',
+  description: '内部数据抓取与校验状态页面。',
+  robots: { index: false, follow: false },
+};
+
 const workflowSteps = [
   {
     step: '01',
@@ -274,3 +280,4 @@ export default function DataAutomationCheckPage() {
     </div>
   );
 }
+import type { Metadata } from 'next';

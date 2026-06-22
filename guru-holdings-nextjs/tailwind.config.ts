@@ -67,8 +67,13 @@ const config: Config = {
         sans: [
           "var(--font-sans)",
           "Noto Sans CJK SC",
+          "Noto Sans CJK JP",
+          "Noto Sans CJK KR",
           "Microsoft YaHei",
           "PingFang SC",
+          "Yu Gothic UI",
+          "Yu Gothic",
+          "Malgun Gothic",
           "ui-sans-serif",
           "system-ui",
           "sans-serif",

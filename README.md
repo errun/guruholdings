@@ -1,88 +1,66 @@
-# 大师持仓追踪 - Guru Holdings Tracker
+# Guru Holdings
 
-一个专注于追踪投资大师持仓变化的网站，聚焦巴菲特（Berkshire Hathaway）和李录（Himalaya Capital），展示最近3个季度的美股持仓变化。
+Guru Holdings 是一个基于 SEC EDGAR 13F 报告的机构持仓研究站点。当前跟踪 Berkshire Hathaway、Himalaya Capital、Bridgewater Associates、Pershing Square、Scion Asset Management、Tiger Global 和 Palliser Capital。
 
-## 🎯 项目特色
+生产地址：[https://guruholdings.net](https://guruholdings.net)
 
-- **数据可视化**：使用图表直观展示持仓分布和变化趋势
-- **AI智能分析**：自动生成持仓变化摘要和投资洞察
-- **响应式设计**：完美适配桌面端和移动端
-- **实时更新**：基于SEC 13F报告数据
+## 核心能力
 
-## 🚀 技术栈
+- 查看机构完整 13F 持仓和最近四个季度变化。
+- 按股票、机构、投资人、Ticker 或 CUSIP 搜索。
+- 对比新增、增持、减持、清仓、共同持仓和共同变化。
+- 保留 SEC 原始 Issuer、CUSIP、申报编号和 XML 来源。
+- 每月自动抓取、校验并发布新的 13F 数据。
+- 支持英文、简体中文、日文和韩文的服务端页面与多语言 SEO。
 
-- **前端框架**：React 18 + Vite
-- **样式框架**：TailwindCSS
-- **图表库**：Recharts
-- **路由**：React Router
-- **图标**：Heroicons
-- **部署**：GitHub Pages
+## 技术栈
 
-## 📦 安装和运行
+- Next.js 15 App Router、React 19、TypeScript
+- Tailwind CSS、Radix UI、Recharts
+- GitHub Actions 数据自动化
+- Vercel 生产部署
 
-```bash
-# 克隆项目
-git clone https://github.com/your-username/guru-holdings-tracker.git
+应用目录为 `guru-holdings-nextjs`。
 
-# 进入项目目录
-cd guru-holdings-tracker
+## 本地运行
 
-# 安装依赖
-npm install
-
-# 启动开发服务器
+```powershell
+Set-Location "C:\Users\edwin\Documents\augment-projects\guruHoldings\repo\guru-holdings-nextjs"
+npm ci
 npm run dev
-
-# 构建生产版本
-npm run build
 ```
 
-## 🌐 在线访问
+生产验证：
 
-访问地址：[https://your-username.github.io/guru-holdings-tracker/](https://your-username.github.io/guru-holdings-tracker/)
-
-## 📊 功能特性
-
-### 1. 大师选择页
-- 展示巴菲特和李录的投资简介
-- 显示最新持仓总市值和更新时间
-- 投资亮点和特色介绍
-
-### 2. 持仓详情页
-- 最近3个季度持仓对比表格
-- 持仓变化标记（增持/减持/新增/清仓）
-- 饼图展示当前持仓分布
-- 总市值趋势图
-- AI生成的投资洞察摘要
-
-### 3. 订阅功能
-- 邮件订阅季度更新
-- 本地存储订阅信息
-- 订阅状态反馈
-
-## 📝 数据说明
-
-- **数据来源**：SEC EDGAR 13F季度报告
-- **数据延迟**：约45天，非实时持仓
-- **覆盖范围**：价值超过$200,000且持股超过10,000股的美股持仓
-- **免责声明**：本数据仅供参考，不构成投资建议
-
-## 🔧 开发
-
-```bash
-# 开发模式
-npm run dev
-
-# 类型检查
-npm run lint
-
-# 构建
+```powershell
+npm run i18n:check
+npm run typecheck
 npm run build
-
-# 预览构建结果
-npm run preview
+npm run seo:check
 ```
 
-## 📄 许可证
+`seo:check` 需要已有生产构建。它会启动本地生产服务器，检查四种语言的代表页面、canonical、`hreflang`、Open Graph、Twitter、robots、重定向、404 和 Sitemap。
 
-MIT License
+## 多语言网址
+
+- 英文：无语言前缀，例如 `/live-13f/berkshire`
+- 简体中文：`/zh/...`
+- 日文：`/ja/...`
+- 韩文：`/ko/...`
+- `/en/...` 永久重定向到无前缀英文网址
+
+翻译统一维护在 `guru-holdings-nextjs/lib/i18n/site.ts`。新增文案时必须同时补齐四种语言，并确保插值占位符一致。金融关键词和术语表位于 `lib/i18n/seo-keywords.ts`。
+
+## SEO 规则
+
+- 所有可收录页面均在服务端输出当前语言内容。
+- 每个页面具有自引用 canonical 和完整、双向的 `hreflang`。
+- `x-default` 指向无前缀英文页面。
+- Sitemap 根据最新快照自动生成，不包含内部验证页和旧持仓网址。
+- `/data-automation-check` 是公开可访问的运维信息页，但设置为 `noindex,nofollow`；这不构成访问控制。
+
+## 数据更新
+
+`.github/workflows/update-13f-data.yml` 每月 16 日运行：抓取 SEC 数据、验证远端与本地哈希、执行站点检查，全部通过后才提交生成数据。Vercel 在 `master` 更新后自动部署。
+
+13F 通常存在约 45 天披露延迟，本站信息不代表实时持仓，也不构成投资建议。

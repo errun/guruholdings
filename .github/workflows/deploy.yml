@@ -1,56 +1,47 @@
-name: Deploy to GitHub Pages
+name: Validate site
 
 on:
   push:
-    branches: [ master ]
+    branches: [master, main]
+  pull_request:
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: validate-site-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  validate:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: guru-holdings-nextjs
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: 'guru-holdings-nextjs/package-lock.json'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: guru-holdings-nextjs/package-lock.json
 
-    - name: Install dependencies
-      run: npm ci
-      working-directory: guru-holdings-nextjs
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Build
-      run: npm run build
-      working-directory: guru-holdings-nextjs
+      - name: Check translations
+        run: npm run i18n:check
 
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
+      - name: Check types
+        run: npm run typecheck
 
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: 'guru-holdings-nextjs/dist'
+      - name: Build production site
+        run: npm run build
 
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+      - name: Check multilingual SEO
+        run: npm run seo:check

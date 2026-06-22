@@ -17,26 +17,15 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   changeBadgeVariant,
-  changeName,
   directionTextClass,
-  formatCurrency,
-  formatDate,
-  formatNumber,
-  formatPercent,
-  formatSignedCurrency,
-  formatSignedNumber,
-  formatWeight,
-  themeName,
+  getViewFormatters,
 } from '@/lib/sec13f-view';
 import { getStockChartData } from '@/lib/sec13f-lite';
+import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
 
 type Stock = typeof snapshot.stocks[number];
 
-interface StockPageProps {
-  params: Promise<{ companyId: string }>;
-}
-
-export function generateStaticParams() {
+export function getStockStaticParams() {
   const priorityIds = new Set([
     'alphabet',
     'microsoft',
@@ -50,11 +39,12 @@ export function generateStaticParams() {
     .map((stock) => ({ companyId: stock.companyId }));
 }
 
-export default async function StockPage({ params }: StockPageProps) {
-  const { companyId } = await params;
+export async function StockPage({ companyId, locale }: { companyId: string; locale: Locale }) {
   const decodedCompanyId = decodeURIComponent(companyId);
   const stock = snapshot.stocks.find((item) => item.companyId === decodedCompanyId);
   if (!stock) notFound();
+
+  const { formatCurrency, formatNumber, formatQuarter, themeName } = getViewFormatters(locale);
 
   const increaseSignals = stock.consensusSignals.filter((item) => item.direction === 'increase');
   const decreaseSignals = stock.consensusSignals.filter((item) => item.direction === 'decrease');
@@ -63,45 +53,48 @@ export default async function StockPage({ params }: StockPageProps) {
     <div className="min-h-screen bg-background">
       <section className="border-b border-stone-200 bg-white">
         <div className="container py-8 lg:py-10">
-          <Link href="/live-13f" className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
+          <Link href={localizedPath(locale, '/live-13f')} className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
             <ArrowLeft className="h-4 w-4" />
-            返回 13F 数据
+            {translate(locale, 'common.back13f')}
           </Link>
           <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
               <Badge variant="info" className="mb-4 rounded-md">
-                {stock.latestQuarter}
+                {formatQuarter(stock.latestQuarter)}
               </Badge>
               <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
                 {stock.canonicalName}
               </h1>
               <p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground">
-                {stock.canonicalTicker ? `${stock.canonicalTicker}，` : ''}原始 CUSIP：<span className="font-mono text-slate-800">{stock.rawCusips.join(', ')}</span>。本页展示当前持有机构、季度变化和 SEC 原始来源。
+                {translate(locale, 'stock.intro', {
+                  ticker: stock.canonicalTicker ? `${stock.canonicalTicker}, ` : '',
+                  cusips: stock.rawCusips.join(', '),
+                })}
               </p>
             </div>
             <div className="grid min-w-[280px] grid-cols-2 gap-3">
-              <HeaderStat label="持有机构" value={formatNumber(stock.latestHolderCount)} />
-              <HeaderStat label="合计市值" value={formatCurrency(stock.latestTotalValue)} />
+              <HeaderStat label={translate(locale, 'stock.currentManagers')} value={formatNumber(stock.latestHolderCount)} />
+              <HeaderStat label={translate(locale, 'home.combinedValue')} value={formatCurrency(stock.latestTotalValue)} />
             </div>
           </div>
         </div>
       </section>
 
-      <main className="container py-8 lg:py-10">
+      <div className="container py-8 lg:py-10">
         <section className="mb-8 grid gap-4 lg:grid-cols-4">
-          <MetricCard title="当前持有机构" value={formatNumber(stock.latestHolderCount)} description="按各机构最新可用 13F 计算。" />
-          <MetricCard title="合计股数" value={formatNumber(stock.latestTotalShares)} description="公司级聚合，保留原始 CUSIP 明细。" />
-          <MetricCard title="合计市值" value={formatCurrency(stock.latestTotalValue)} description="不同机构同一季度市值相加。" />
-          <MetricCard title="主题" value={(stock.themes || []).map(themeName).join(' / ')} description="本地映射只用于搜索和分类。" />
+          <MetricCard title={translate(locale, 'stock.currentManagers')} value={formatNumber(stock.latestHolderCount)} description={translate(locale, 'stock.currentManagers.description')} />
+          <MetricCard title={translate(locale, 'stock.totalShares')} value={formatNumber(stock.latestTotalShares)} description={translate(locale, 'stock.totalShares.description')} />
+          <MetricCard title={translate(locale, 'home.combinedValue')} value={formatCurrency(stock.latestTotalValue)} description={translate(locale, 'stock.totalValue.description')} />
+          <MetricCard title={translate(locale, 'stock.themes')} value={(stock.themes || []).map(themeName).join(' / ')} description={translate(locale, 'stock.themes.description')} />
         </section>
 
         {(increaseSignals.length > 0 || decreaseSignals.length > 0) && (
           <section className="mb-8 grid gap-4 lg:grid-cols-2">
             {increaseSignals.map((signal) => (
-              <SignalCard key={`inc-${stock.companyId}`} signal={signal} direction="increase" />
+              <SignalCard key={`inc-${stock.companyId}`} signal={signal} direction="increase" locale={locale} />
             ))}
             {decreaseSignals.map((signal) => (
-              <SignalCard key={`dec-${stock.companyId}`} signal={signal} direction="decrease" />
+              <SignalCard key={`dec-${stock.companyId}`} signal={signal} direction="decrease" locale={locale} />
             ))}
           </section>
         )}
@@ -109,43 +102,43 @@ export default async function StockPage({ params }: StockPageProps) {
         <section className="mb-10">
           <div className="mb-4 flex items-center gap-3">
             <Layers3 className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">最近 4 个季度趋势</h2>
+            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'stock.trends')}</h2>
           </div>
-          <StockTrendChart stock={getStockChartData(stock)} />
+          <StockTrendChart stock={getStockChartData(stock)} locale={locale} />
         </section>
 
         <section className="mb-10">
           <div className="mb-4 flex items-center gap-3">
             <Table2 className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">当前哪些机构持有</h2>
+            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'stock.holders')}</h2>
           </div>
-          <HoldersTable stock={stock} />
+          <HoldersTable stock={stock} locale={locale} />
         </section>
 
         <section className="mb-10">
           <div className="mb-4 flex items-center gap-3">
             <FileText className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">原始 CUSIP 明细</h2>
+            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'stock.rawCusip')}</h2>
           </div>
-          <RawHoldingsTable stock={stock} />
+          <RawHoldingsTable stock={stock} locale={locale} />
         </section>
 
         <section className="mb-10">
           <div className="mb-4 flex items-center gap-3">
             <Table2 className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">季度持有明细</h2>
+            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'stock.quarterDetails')}</h2>
           </div>
-          <QuarterTable stock={stock} />
+          <QuarterTable stock={stock} locale={locale} />
         </section>
 
         <Alert className="border-primary/20 bg-white text-slate-900 [&>svg]:text-primary">
           <CheckCircle2 className="h-4 w-4" />
-          <AlertTitle>数据来源</AlertTitle>
+          <AlertTitle>{translate(locale, 'stock.source.title')}</AlertTitle>
           <AlertDescription>
-            持仓事实来自 SEC 13F information table。ticker、公司别名和主题只用于搜索与归一化展示，不作为持仓来源。
+            {translate(locale, 'stock.source.body')}
           </AlertDescription>
         </Alert>
-      </main>
+      </div>
     </div>
   );
 }
@@ -154,7 +147,7 @@ function HeaderStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-stone-200 bg-stone-50 p-4">
       <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="mt-2 truncate font-mono text-lg font-semibold text-slate-950">{value}</div>
+      <div className="mt-2 break-words font-mono text-lg font-semibold leading-tight text-slate-950">{value}</div>
     </div>
   );
 }
@@ -166,16 +159,17 @@ function MetricCard({ title, value, description }: { title: string; value: strin
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="truncate font-mono text-2xl font-semibold text-slate-950">{value}</div>
+        <div className="break-words font-mono text-xl font-semibold leading-tight text-slate-950 sm:text-2xl">{value}</div>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
       </CardContent>
     </Card>
   );
 }
 
-function SignalCard({ signal, direction }: { signal: Record<string, any>; direction: 'increase' | 'decrease' }) {
+function SignalCard({ signal, direction, locale }: { signal: Record<string, any>; direction: 'increase' | 'decrease'; locale: Locale }) {
   const Icon = direction === 'increase' ? ArrowUpRight : ArrowDownRight;
-  const title = direction === 'increase' ? '本季度共同增持' : '本季度共同减持';
+  const title = translate(locale, direction === 'increase' ? 'home.sharedIncrease' : 'home.sharedDecrease');
+  const { formatPercent, formatSignedCurrency, formatSignedNumber } = getViewFormatters(locale);
   return (
     <Card className="border-stone-200 bg-white">
       <CardHeader className="pb-3">
@@ -183,12 +177,12 @@ function SignalCard({ signal, direction }: { signal: Record<string, any>; direct
           <Icon className={`h-5 w-5 ${direction === 'increase' ? 'text-emerald-700' : 'text-red-700'}`} />
           {title}
         </CardTitle>
-        <CardDescription>{signal.managerCount} 家机构同向变化。</CardDescription>
+        <CardDescription>{translate(locale, 'stock.sameDirection', { count: signal.managerCount })}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3 sm:grid-cols-3">
-        <Metric label="股数变化" value={formatSignedNumber(signal.netShareChange)} tone={directionTextClass(signal.netShareChange)} />
-        <Metric label="市值变化" value={formatSignedCurrency(signal.netValueChange)} tone={directionTextClass(signal.netValueChange)} />
-        <Metric label="仓位变化" value={formatPercent(signal.netWeightChange)} tone={directionTextClass(signal.netWeightChange)} />
+        <Metric label={translate(locale, 'common.shareChange')} value={formatSignedNumber(signal.netShareChange)} tone={directionTextClass(signal.netShareChange)} />
+        <Metric label={translate(locale, 'common.valueChange')} value={formatSignedCurrency(signal.netValueChange)} tone={directionTextClass(signal.netValueChange)} />
+        <Metric label={translate(locale, 'common.weightChange')} value={formatPercent(signal.netWeightChange)} tone={directionTextClass(signal.netWeightChange)} />
       </CardContent>
     </Card>
   );
@@ -203,33 +197,34 @@ function Metric({ label, value, tone }: { label: string; value: string; tone?: s
   );
 }
 
-function HoldersTable({ stock }: { stock: Stock }) {
+function HoldersTable({ stock, locale }: { stock: Stock; locale: Locale }) {
+  const { changeName, formatCurrency, formatDate, formatNumber, formatPercent, formatQuarter, formatSignedCurrency, formatSignedNumber, formatWeight } = getViewFormatters(locale);
   return (
     <div className="max-w-full overflow-x-auto rounded-lg border border-stone-200 bg-white">
       <table className="w-full min-w-[1040px] text-left text-sm">
         <thead className="bg-stone-100 text-xs uppercase tracking-wider text-muted-foreground">
           <tr>
-            <th className="px-4 py-3">机构</th>
-            <th className="px-4 py-3">季度</th>
-            <th className="px-4 py-3 text-right">市值</th>
-            <th className="px-4 py-3 text-right">股数</th>
-            <th className="px-4 py-3 text-right">仓位占比</th>
-            <th className="px-4 py-3">本季度变化</th>
-            <th className="px-4 py-3 text-right">股数变化</th>
-            <th className="px-4 py-3 text-right">市值变化</th>
-            <th className="px-4 py-3">SEC 来源</th>
+            <th className="px-4 py-3">{translate(locale, 'common.manager')}</th>
+            <th className="px-4 py-3">{translate(locale, 'common.quarter')}</th>
+            <th className="px-4 py-3 text-right">{translate(locale, 'common.marketValue')}</th>
+            <th className="px-4 py-3 text-right">{translate(locale, 'common.shares')}</th>
+            <th className="px-4 py-3 text-right">{translate(locale, 'common.positionWeight')}</th>
+            <th className="px-4 py-3">{translate(locale, 'stock.currentChange')}</th>
+            <th className="px-4 py-3 text-right">{translate(locale, 'common.shareChange')}</th>
+            <th className="px-4 py-3 text-right">{translate(locale, 'common.valueChange')}</th>
+            <th className="px-4 py-3">{translate(locale, 'stock.secSource')}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-stone-100">
           {stock.holders.map((holder) => (
             <tr key={`${stock.companyId}-${holder.managerId}`} className="align-top hover:bg-stone-50">
               <td className="px-4 py-3">
-                <Link href={`/live-13f/${holder.managerId}`} className="font-semibold text-slate-950 hover:text-primary hover:underline">
+                <Link href={localizedPath(locale, `/live-13f/${holder.managerId}`)} className="font-semibold text-slate-950 hover:text-primary hover:underline">
                   {holder.managerName}
                 </Link>
                 <div className="mt-1 text-xs text-muted-foreground">{holder.leadInvestor}</div>
               </td>
-              <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{holder.quarter}</td>
+              <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{formatQuarter(holder.quarter)}</td>
               <td className="px-4 py-3 text-right font-mono font-medium">{formatCurrency(holder.value, false)}</td>
               <td className="px-4 py-3 text-right font-mono">{formatNumber(holder.shares)}</td>
               <td className="px-4 py-3 text-right font-mono">{formatWeight(holder.weight)}</td>
@@ -254,20 +249,21 @@ function HoldersTable({ stock }: { stock: Stock }) {
   );
 }
 
-function RawHoldingsTable({ stock }: { stock: Stock }) {
+function RawHoldingsTable({ stock, locale }: { stock: Stock; locale: Locale }) {
+  const { formatCurrency, formatNumber, formatWeight } = getViewFormatters(locale);
   return (
     <div className="max-w-full overflow-x-auto rounded-lg border border-stone-200 bg-white">
       <table className="w-full min-w-[900px] text-left text-sm">
         <thead className="bg-stone-100 text-xs uppercase tracking-wider text-muted-foreground">
           <tr>
-            <th className="px-4 py-3">机构</th>
-            <th className="px-4 py-3">Issuer</th>
+            <th className="px-4 py-3">{translate(locale, 'common.manager')}</th>
+            <th className="px-4 py-3">{translate(locale, 'common.issuer')}</th>
             <th className="px-4 py-3">CUSIP</th>
-            <th className="px-4 py-3">Class</th>
-            <th className="px-4 py-3 text-right">市值</th>
-            <th className="px-4 py-3 text-right">股数</th>
-            <th className="px-4 py-3 text-right">权重</th>
-            <th className="px-4 py-3">来源</th>
+            <th className="px-4 py-3">{translate(locale, 'common.class')}</th>
+            <th className="px-4 py-3 text-right">{translate(locale, 'common.marketValue')}</th>
+            <th className="px-4 py-3 text-right">{translate(locale, 'common.shares')}</th>
+            <th className="px-4 py-3 text-right">{translate(locale, 'common.weight')}</th>
+            <th className="px-4 py-3">{translate(locale, 'common.source')}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-stone-100">
@@ -294,23 +290,24 @@ function RawHoldingsTable({ stock }: { stock: Stock }) {
   );
 }
 
-function QuarterTable({ stock }: { stock: Stock }) {
+function QuarterTable({ stock, locale }: { stock: Stock; locale: Locale }) {
+  const { changeName, formatCurrency, formatNumber, formatQuarter } = getViewFormatters(locale);
   return (
     <div className="max-w-full overflow-x-auto rounded-lg border border-stone-200 bg-white">
       <table className="w-full min-w-[780px] text-left text-sm">
         <thead className="bg-stone-100 text-xs uppercase tracking-wider text-muted-foreground">
           <tr>
-            <th className="px-4 py-3">季度</th>
-            <th className="px-4 py-3 text-right">持有机构</th>
-            <th className="px-4 py-3 text-right">合计市值</th>
-            <th className="px-4 py-3 text-right">合计股数</th>
-            <th className="px-4 py-3">机构明细</th>
+            <th className="px-4 py-3">{translate(locale, 'common.quarter')}</th>
+            <th className="px-4 py-3 text-right">{translate(locale, 'stock.currentManagers')}</th>
+            <th className="px-4 py-3 text-right">{translate(locale, 'home.combinedValue')}</th>
+            <th className="px-4 py-3 text-right">{translate(locale, 'stock.totalShares')}</th>
+            <th className="px-4 py-3">{translate(locale, 'stock.holderDetails')}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-stone-100">
           {stock.quarters.map((quarter) => (
             <tr key={quarter.quarter} className="align-top hover:bg-stone-50">
-              <td className="px-4 py-3 font-semibold text-slate-950">{quarter.quarter}</td>
+              <td className="px-4 py-3 font-semibold text-slate-950">{formatQuarter(quarter.quarter)}</td>
               <td className="px-4 py-3 text-right font-mono">{formatNumber(quarter.holderCount)}</td>
               <td className="px-4 py-3 text-right font-mono">{formatCurrency(quarter.totalValue, false)}</td>
               <td className="px-4 py-3 text-right font-mono">{formatNumber(quarter.totalShares)}</td>

@@ -1,77 +1,103 @@
-export const themeLabels: Record<string, string> = {
-  technology: '科技',
-  financials: '金融',
-  consumer: '消费',
-  'china-assets': '中国资产',
-  energy: '能源',
-  healthcare: '医疗健康',
-  unclassified: '未分类',
+import { intlLocales, translate, type Locale, type MessageKey } from '@/lib/i18n/site';
+
+const themeMessageKeys: Record<string, MessageKey> = {
+  technology: 'theme.technology',
+  financials: 'theme.financials',
+  consumer: 'theme.consumer',
+  'china-assets': 'theme.china-assets',
+  energy: 'theme.energy',
+  healthcare: 'theme.healthcare',
+  unclassified: 'theme.unclassified',
 };
 
-export const changeLabels: Record<string, string> = {
-  new: '新增',
-  exit: '清仓',
-  increase: '增持',
-  decrease: '减持',
-  unchanged: '持平',
-};
-
-export const concentrationLabels: Record<string, string> = {
-  focused: '持仓集中',
-  balanced: '相对均衡',
-  diversified: '较分散',
-  unknown: '未分类',
-};
-
-export const formatCurrency = (value: number, compact = true) =>
-  new Intl.NumberFormat('en-US', {
+export const formatCurrency = (value: number, compact = true, locale: Locale = 'en') =>
+  new Intl.NumberFormat(intlLocales[locale], {
     style: 'currency',
     currency: 'USD',
     notation: compact ? 'compact' : 'standard',
+    minimumFractionDigits: compact ? 1 : 0,
     maximumFractionDigits: compact ? 1 : 0,
   }).format(value || 0);
 
-export const formatSignedCurrency = (value: number, compact = true) => {
-  const formatted = formatCurrency(Math.abs(value || 0), compact);
+export const formatSignedCurrency = (value: number, compact = true, locale: Locale = 'en') => {
+  const formatted = formatCurrency(Math.abs(value || 0), compact, locale);
   if (value > 0) return `+${formatted}`;
   if (value < 0) return `-${formatted}`;
   return formatted;
 };
 
-export const formatNumber = (value: number) =>
-  new Intl.NumberFormat('en-US', {
+export const formatNumber = (value: number, locale: Locale = 'en') =>
+  new Intl.NumberFormat(intlLocales[locale], {
     maximumFractionDigits: 0,
   }).format(value || 0);
 
-export const formatSignedNumber = (value: number) => {
-  const formatted = formatNumber(Math.abs(value || 0));
+export const formatSignedNumber = (value: number, locale: Locale = 'en') => {
+  const formatted = formatNumber(Math.abs(value || 0), locale);
   if (value > 0) return `+${formatted}`;
   if (value < 0) return `-${formatted}`;
   return formatted;
 };
 
-export const formatPercent = (value: number | null | undefined, digits = 2) => {
+export const formatPercent = (
+  value: number | null | undefined,
+  digits = 2,
+  locale: Locale = 'en',
+) => {
   if (value === null || value === undefined || Number.isNaN(value)) return 'n/a';
-  return `${value >= 0 ? '+' : ''}${value.toFixed(digits)}%`;
+  const formatted = new Intl.NumberFormat(intlLocales[locale], {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(Math.abs(value));
+  return `${value >= 0 ? '+' : '-'}${formatted}%`;
 };
 
-export const formatWeight = (value: number | null | undefined, digits = 2) => {
+export const formatWeight = (
+  value: number | null | undefined,
+  digits = 2,
+  locale: Locale = 'en',
+) => {
   if (value === null || value === undefined || Number.isNaN(value)) return 'n/a';
-  return `${value.toFixed(digits)}%`;
+  return `${new Intl.NumberFormat(intlLocales[locale], {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(value)}%`;
 };
 
-export const formatDate = (value: string | null | undefined) => {
+export const formatDate = (value: string | null | undefined, locale: Locale = 'en') => {
   if (!value) return 'n/a';
-  const [year, month, day] = value.slice(0, 10).split('-');
-  if (!year || !month || !day) return value;
-  return `${year}/${month}/${day}`;
+  const date = new Date(`${value.slice(0, 10)}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(intlLocales[locale], {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: 'UTC',
+  }).format(date);
 };
 
-export const formatDateTime = (value: string) => {
+export const formatDateTime = (value: string, locale: Locale = 'en') => {
   if (!value) return 'n/a';
-  const normalized = value.replace('T', ' ');
-  const [date, time = ''] = normalized.split('.');
-  return `${date.slice(0, 16)} UTC`;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return `${new Intl.DateTimeFormat(intlLocales[locale], {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  }).format(date)} UTC`;
+};
+
+export const formatQuarter = (value: string, locale: Locale = 'en') => {
+  const match = /^(\d{4})Q([1-4])$/.exec(value);
+  if (!match) return value;
+  const [, year, quarter] = match;
+  if (locale === 'zh') return `${year} 年第 ${quarter} 季度`;
+  if (locale === 'ja') return `${year}年第${quarter}四半期`;
+  if (locale === 'ko') return `${year}년 ${quarter}분기`;
+  return `Q${quarter} ${year}`;
 };
 
 export const changeBadgeVariant = (changeType?: string) => {
@@ -92,6 +118,38 @@ export const changeTypeClass = (changeType?: string) => {
   return 'text-slate-600';
 };
 
-export const themeName = (theme: string) => themeLabels[theme] || theme;
-export const changeName = (changeType: string) => changeLabels[changeType] || changeType;
-export const concentrationName = (value: string) => concentrationLabels[value] || value;
+export const themeName = (theme: string, locale: Locale = 'en') => {
+  const key = themeMessageKeys[theme];
+  return key ? translate(locale, key) : theme;
+};
+
+export const changeName = (changeType: string, locale: Locale = 'en') => {
+  const supported = ['new', 'exit', 'increase', 'decrease', 'unchanged'] as const;
+  return supported.includes(changeType as (typeof supported)[number])
+    ? translate(locale, `change.${changeType}` as `change.${(typeof supported)[number]}`)
+    : changeType;
+};
+
+export const concentrationName = (value: string, locale: Locale = 'en') => {
+  const supported = ['focused', 'balanced', 'diversified', 'unknown'] as const;
+  return supported.includes(value as (typeof supported)[number])
+    ? translate(locale, `concentration.${value}` as `concentration.${(typeof supported)[number]}`)
+    : value;
+};
+
+export function getViewFormatters(locale: Locale) {
+  return {
+    changeName: (value: string) => changeName(value, locale),
+    concentrationName: (value: string) => concentrationName(value, locale),
+    formatCurrency: (value: number, compact = true) => formatCurrency(value, compact, locale),
+    formatDate: (value: string | null | undefined) => formatDate(value, locale),
+    formatDateTime: (value: string) => formatDateTime(value, locale),
+    formatNumber: (value: number) => formatNumber(value, locale),
+    formatPercent: (value: number | null | undefined, digits = 2) => formatPercent(value, digits, locale),
+    formatQuarter: (value: string) => formatQuarter(value, locale),
+    formatSignedCurrency: (value: number, compact = true) => formatSignedCurrency(value, compact, locale),
+    formatSignedNumber: (value: number) => formatSignedNumber(value, locale),
+    formatWeight: (value: number | null | undefined, digits = 2) => formatWeight(value, digits, locale),
+    themeName: (value: string) => themeName(value, locale),
+  };
+}

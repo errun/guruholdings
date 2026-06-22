@@ -1,7 +1,7 @@
 'use client';
 
 import { Globe } from 'lucide-react';
-import { useLanguage } from '@/lib/i18n';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Select,
   SelectContent,
@@ -9,21 +9,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Language } from '@/lib/types';
+import {
+  languageNames,
+  localizedPath,
+  locales,
+  translate,
+  type Locale,
+} from '@/lib/i18n/site';
 
-export function LanguageSelector() {
-  const { language, changeLanguage } = useLanguage();
+export function LanguageSelector({ locale }: { locale: Locale }) {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const changeLanguage = (nextLocale: Locale) => {
+    const query = typeof window === 'undefined' ? '' : window.location.search;
+    const hash = typeof window === 'undefined' ? '' : window.location.hash;
+    const target = localizedPath(nextLocale, `${pathname}${query}${hash}`);
+    router.push(target);
+  };
 
   return (
-    <div className="flex items-center space-x-2">
-      <Globe className="h-4 w-4 text-muted-foreground" />
-      <Select value={language} onValueChange={(value) => changeLanguage(value as Language)}>
-        <SelectTrigger className="w-24 h-8 text-sm">
+    <div className="flex items-center gap-1.5">
+      <Globe className="hidden h-4 w-4 text-muted-foreground sm:block" aria-hidden="true" />
+      <Select value={locale} onValueChange={(value) => changeLanguage(value as Locale)}>
+        <SelectTrigger className="h-9 w-[104px] text-sm" aria-label={translate(locale, 'language.label')}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="en">English</SelectItem>
-          <SelectItem value="zh">中文</SelectItem>
+          {locales.map((item) => (
+            <SelectItem key={item} value={item}>{languageNames[item]}</SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>

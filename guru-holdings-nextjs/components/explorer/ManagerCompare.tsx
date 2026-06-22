@@ -2,27 +2,19 @@
 
 import Link from 'next/link';
 import { ArrowDownRight, ArrowRight, ArrowUpRight, GitCompareArrows } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  changeName,
-  concentrationName,
-  formatCurrency,
-  formatNumber,
-  formatSignedNumber,
-  formatWeight,
+  getViewFormatters,
 } from '@/lib/sec13f-view';
+import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
 
 type AnyRecord = Record<string, any>;
 
-export function ManagerCompare({ managers }: { managers: AnyRecord[] }) {
+export function ManagerCompare({ managers, locale }: { managers: AnyRecord[]; locale: Locale }) {
+  const { concentrationName, formatCurrency, formatNumber, formatWeight } = getViewFormatters(locale);
   const [selectedIds, setSelectedIds] = useState<string[]>(managers.slice(0, 3).map((manager) => manager.id));
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const selectedManagers = useMemo(
     () => managers.filter((manager) => selectedIds.includes(manager.id)),
@@ -99,16 +91,11 @@ export function ManagerCompare({ managers }: { managers: AnyRecord[] }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
           <GitCompareArrows className="h-5 w-5 text-primary" />
-          机构快速对比
+          {translate(locale, 'compare.title')}
         </CardTitle>
-        <p className="text-sm leading-6 text-muted-foreground">选择 2-3 家机构，比较集中度、变化数量、共同持仓和同向操作。</p>
+        <p className="text-sm leading-6 text-muted-foreground">{translate(locale, 'compare.subtitle')}</p>
       </CardHeader>
       <CardContent className="space-y-5">
-        {!mounted ? (
-          <div className="rounded-lg border border-dashed border-stone-300 bg-stone-50 p-6 text-sm text-muted-foreground">
-            机构对比加载中
-          </div>
-        ) : (
         <>
         <div className="flex flex-wrap gap-2">
           {managers.map((manager) => {
@@ -130,7 +117,7 @@ export function ManagerCompare({ managers }: { managers: AnyRecord[] }) {
 
         <div className="grid gap-3 lg:grid-cols-3">
           {selectedManagers.map((manager) => (
-            <Link key={manager.id} href={`/live-13f/${manager.id}`} className="rounded-lg border border-stone-200 bg-stone-50 p-4 hover:border-primary/40">
+            <Link key={manager.id} href={localizedPath(locale, `/live-13f/${manager.id}`)} className="rounded-lg border border-stone-200 bg-stone-50 p-4 hover:border-primary/40">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="font-semibold text-slate-950">{manager.displayName}</div>
@@ -139,28 +126,27 @@ export function ManagerCompare({ managers }: { managers: AnyRecord[] }) {
                 <ArrowRight className="h-4 w-4 text-primary" />
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
-                <Metric label="总市值" value={formatCurrency(manager.latestTotalValue)} />
-                <Metric label="公司数" value={formatNumber(manager.companyHoldingCount ?? manager.companyHoldings.length)} />
-                <Metric label="Top10 权重" value={formatWeight(manager.metrics?.top10Weight || 0)} />
-                <Metric label="集中度" value={concentrationName(manager.metrics?.concentration || 'unknown')} />
+                <Metric label={translate(locale, 'common.totalValue')} value={formatCurrency(manager.latestTotalValue)} />
+                <Metric label={translate(locale, 'common.companyCount')} value={formatNumber(manager.companyHoldingCount ?? manager.companyHoldings.length)} />
+                <Metric label={translate(locale, 'manager.top10Weight')} value={formatWeight(manager.metrics?.top10Weight || 0)} />
+                <Metric label={translate(locale, 'search.concentration')} value={concentrationName(manager.metrics?.concentration || 'unknown')} />
               </div>
               <div className="mt-4 grid grid-cols-4 gap-1 text-center text-xs">
-                <CountBadge label="新增" value={manager.metrics?.changeCounts?.new || 0} tone="green" />
-                <CountBadge label="清仓" value={manager.metrics?.changeCounts?.exit || 0} tone="red" />
-                <CountBadge label="增持" value={manager.metrics?.changeCounts?.increase || 0} tone="green" />
-                <CountBadge label="减持" value={manager.metrics?.changeCounts?.decrease || 0} tone="red" />
+                <CountBadge label={translate(locale, 'change.new')} value={manager.metrics?.changeCounts?.new || 0} tone="green" />
+                <CountBadge label={translate(locale, 'change.exit')} value={manager.metrics?.changeCounts?.exit || 0} tone="red" />
+                <CountBadge label={translate(locale, 'change.increase')} value={manager.metrics?.changeCounts?.increase || 0} tone="green" />
+                <CountBadge label={translate(locale, 'change.decrease')} value={manager.metrics?.changeCounts?.decrease || 0} tone="red" />
               </div>
             </Link>
           ))}
         </div>
 
         <div className="grid gap-4 xl:grid-cols-3">
-          <SignalList title="共同持仓" items={comparison.commonHoldings} kind="holding" />
-          <SignalList title="同向增持" items={comparison.sharedIncrease} kind="increase" />
-          <SignalList title="同向减持" items={comparison.sharedDecrease} kind="decrease" />
+          <SignalList title={translate(locale, 'compare.commonHoldings')} items={comparison.commonHoldings} kind="holding" locale={locale} />
+          <SignalList title={translate(locale, 'compare.sharedIncrease')} items={comparison.sharedIncrease} kind="increase" locale={locale} />
+          <SignalList title={translate(locale, 'compare.sharedDecrease')} items={comparison.sharedDecrease} kind="decrease" locale={locale} />
         </div>
         </>
-        )}
       </CardContent>
     </Card>
   );
@@ -170,7 +156,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <div className="text-muted-foreground">{label}</div>
-      <div className="mt-1 truncate font-mono font-semibold text-slate-950">{value}</div>
+      <div className="mt-1 break-words font-mono font-semibold leading-tight text-slate-950">{value}</div>
     </div>
   );
 }
@@ -185,8 +171,9 @@ function CountBadge({ label, value, tone }: { label: string; value: number; tone
   );
 }
 
-function SignalList({ title, items, kind }: { title: string; items: AnyRecord[]; kind: 'holding' | 'increase' | 'decrease' }) {
+function SignalList({ title, items, kind, locale }: { title: string; items: AnyRecord[]; kind: 'holding' | 'increase' | 'decrease'; locale: Locale }) {
   const Icon = kind === 'decrease' ? ArrowDownRight : ArrowUpRight;
+  const { changeName, formatCurrency, formatSignedNumber } = getViewFormatters(locale);
   return (
     <section className="min-w-0 rounded-lg border border-stone-200 bg-stone-50 p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
@@ -198,8 +185,8 @@ function SignalList({ title, items, kind }: { title: string; items: AnyRecord[];
       </div>
       <div className="space-y-2">
         {items.map((item) => (
-          <Link key={`${kind}-${item.companyId}`} href={`/stocks/${encodeURIComponent(item.companyId)}`} className="block rounded-md border border-stone-200 bg-white p-3 hover:border-primary/40">
-            <div className="truncate font-semibold text-slate-950">{item.canonicalName}</div>
+          <Link key={`${kind}-${item.companyId}`} href={localizedPath(locale, `/stocks/${encodeURIComponent(item.companyId)}`)} className="block rounded-md border border-stone-200 bg-white p-3 hover:border-primary/40">
+            <div className="break-words font-semibold text-slate-950">{item.canonicalName}</div>
             {kind === 'holding' ? (
               <div className="mt-1 font-mono text-xs text-muted-foreground">{formatCurrency(item.totalValue)}</div>
             ) : (
@@ -213,7 +200,7 @@ function SignalList({ title, items, kind }: { title: string; items: AnyRecord[];
             )}
           </Link>
         ))}
-        {items.length === 0 && <div className="rounded-md border border-dashed border-stone-300 bg-white p-4 text-sm text-muted-foreground">暂无匹配</div>}
+        {items.length === 0 && <div className="rounded-md border border-dashed border-stone-300 bg-white p-4 text-sm text-muted-foreground">{translate(locale, 'compare.noMatch')}</div>}
       </div>
     </section>
   );

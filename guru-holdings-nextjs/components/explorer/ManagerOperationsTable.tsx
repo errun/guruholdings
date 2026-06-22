@@ -7,20 +7,23 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
   changeBadgeVariant,
-  changeName,
   directionTextClass,
-  formatCurrency,
-  formatNumber,
-  formatPercent,
-  formatSignedCurrency,
-  formatSignedNumber,
-  formatWeight,
-  themeName,
+  getViewFormatters,
 } from '@/lib/sec13f-view';
+import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
 
 type AnyRecord = Record<string, any>;
 
-export function ManagerOperationsTable({ manager }: { manager: AnyRecord }) {
+export function ManagerOperationsTable({ manager, locale }: { manager: AnyRecord; locale: Locale }) {
+  const {
+    changeName,
+    formatCurrency,
+    formatNumber,
+    formatPercent,
+    formatSignedCurrency,
+    formatSignedNumber,
+    themeName,
+  } = getViewFormatters(locale);
   const quarters = Object.keys(manager.quarterlyCompanyChanges || {});
   const [quarter, setQuarter] = useState(quarters[0] || manager.latestQuarter);
   const [changeType, setChangeType] = useState('all');
@@ -61,16 +64,16 @@ export function ManagerOperationsTable({ manager }: { manager: AnyRecord }) {
           onChange={(event) => setChangeType(event.target.value)}
           className="h-10 rounded-md border border-input bg-background px-3 text-sm"
         >
-          <option value="all">全部变化</option>
-          <option value="new">筛选新增</option>
-          <option value="increase">筛选增持</option>
-          <option value="decrease">筛选减持</option>
-          <option value="exit">筛选清仓</option>
-          <option value="unchanged">筛选持平</option>
+          <option value="all">{translate(locale, 'search.allChanges')}</option>
+          <option value="new">{translate(locale, 'search.filterNew')}</option>
+          <option value="increase">{translate(locale, 'search.filterIncrease')}</option>
+          <option value="decrease">{translate(locale, 'search.filterDecrease')}</option>
+          <option value="exit">{translate(locale, 'search.filterExit')}</option>
+          <option value="unchanged">{translate(locale, 'search.filterUnchanged')}</option>
         </select>
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={query} onChange={(event) => setQuery(event.target.value)} className="pl-9" placeholder="搜索股票、CUSIP、公司名" />
+          <Input value={query} onChange={(event) => setQuery(event.target.value)} className="pl-9" placeholder={translate(locale, 'operations.searchPlaceholder')} />
         </div>
       </div>
 
@@ -78,23 +81,23 @@ export function ManagerOperationsTable({ manager }: { manager: AnyRecord }) {
         <table className="w-full min-w-[1120px] text-left text-sm">
           <thead className="bg-stone-100 text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
-              <th className="px-4 py-3">公司</th>
+              <th className="px-4 py-3">{translate(locale, 'common.company')}</th>
               <th className="px-4 py-3">CUSIP</th>
-              <th className="px-4 py-3">变化</th>
-              <th className="px-4 py-3 text-right">当前股数</th>
-              <th className="px-4 py-3 text-right">股数变化</th>
-              <th className="px-4 py-3 text-right">股数变化%</th>
-              <th className="px-4 py-3 text-right">当前市值</th>
-              <th className="px-4 py-3 text-right">市值变化</th>
-              <th className="px-4 py-3 text-right">仓位变化</th>
-              <th className="px-4 py-3">主题</th>
+              <th className="px-4 py-3">{translate(locale, 'common.change')}</th>
+              <th className="px-4 py-3 text-right">{translate(locale, 'operations.currentShares')}</th>
+              <th className="px-4 py-3 text-right">{translate(locale, 'common.shareChange')}</th>
+              <th className="px-4 py-3 text-right">{translate(locale, 'operations.shareChangePercent')}</th>
+              <th className="px-4 py-3 text-right">{translate(locale, 'operations.currentValue')}</th>
+              <th className="px-4 py-3 text-right">{translate(locale, 'common.valueChange')}</th>
+              <th className="px-4 py-3 text-right">{translate(locale, 'common.weightChange')}</th>
+              <th className="px-4 py-3">{translate(locale, 'common.theme')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-stone-100">
             {rows.map((change: AnyRecord) => (
               <tr key={`${quarter}-${change.companyId}`} className="align-top hover:bg-stone-50">
                 <td className="px-4 py-3">
-                  <Link href={`/stocks/${encodeURIComponent(change.companyId)}`} className="font-semibold text-slate-950 hover:text-primary hover:underline">
+                  <Link href={localizedPath(locale, `/stocks/${encodeURIComponent(change.companyId)}`)} className="font-semibold text-slate-950 hover:text-primary hover:underline">
                     {change.canonicalName || change.issuerName}
                   </Link>
                   <div className="mt-1 font-mono text-xs text-muted-foreground">{change.canonicalTicker || change.companyId}</div>
@@ -123,7 +126,7 @@ export function ManagerOperationsTable({ manager }: { manager: AnyRecord }) {
             {rows.length === 0 && (
               <tr>
                 <td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">
-                  当前筛选没有结果
+                  {translate(locale, 'operations.empty')}
                 </td>
               </tr>
             )}
@@ -132,7 +135,10 @@ export function ManagerOperationsTable({ manager }: { manager: AnyRecord }) {
       </div>
 
       <div className="border-t border-stone-200 px-4 py-3 text-xs text-muted-foreground">
-        已显示 {rows.length} 条，当前季度总变化 {manager.quarterlyCompanyChanges?.[quarter]?.length || 0} 条。仓位占比为该机构当季 13F 总市值中的比例。
+        {translate(locale, 'operations.footer', {
+          shown: rows.length,
+          total: manager.quarterlyCompanyChanges?.[quarter]?.length || 0,
+        })}
       </div>
     </div>
   );
