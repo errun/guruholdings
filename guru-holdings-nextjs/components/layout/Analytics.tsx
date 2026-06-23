@@ -1,26 +1,28 @@
 import Script from 'next/script';
+import { GA_MEASUREMENT_ID } from '@/lib/analytics';
 
-// Google Analytics 4 measurement ID.
-const GA_MEASUREMENT_ID = 'G-Q0X5T11MVY';
-
-/**
- * Google Analytics (gtag.js) scripts.
- * Rendered inside <html> in both root layouts so the library loads once for the whole site.
- */
 export function Analytics() {
   return (
     <>
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        strategy="afterInteractive"
+        strategy="beforeInteractive"
       />
-      <Script id="google-analytics" strategy="afterInteractive">
+      <Script id="google-analytics" strategy="beforeInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-
           gtag('config', '${GA_MEASUREMENT_ID}');
+          window.addEventListener('pageshow', function(event) {
+            if (!event.persisted) return;
+
+            gtag('event', 'page_view', {
+              send_to: '${GA_MEASUREMENT_ID}',
+              page_location: window.location.href,
+              page_title: document.title
+            });
+          });
         `}
       </Script>
     </>
