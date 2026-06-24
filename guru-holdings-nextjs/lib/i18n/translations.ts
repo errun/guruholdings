@@ -182,7 +182,7 @@ export const translations = {
       hero: { title: '追踪大师最近四个季度的持仓变化', subtitle: '聚焦巴菲特与李录的季度持仓、图表与AI摘要，让13F信息更易理解。' },
       features: { secData: 'SEC 13F 数据', visualCharts: '可视化图表', aiSummary: 'AI 智能摘要' },
       versionLabel: '版本',
-      cards: { totalValue: '总市值', latestUpdate: '最新更新', investmentHighlights: '投资亮点', viewHoldings: '查看持仓详情' }
+      cards: { totalValue: '总持仓价值', latestUpdate: '最新更新', investmentHighlights: '投资亮点', viewHoldings: '查看持仓详情' }
     },
 	    shareholderLetters: {
 	      title: '巴菲特致股东信',
@@ -207,14 +207,14 @@ export const translations = {
       back: '返回首页',
       title: '{{name}} 持仓分析',
       subtitle: '{{company}}｜最新更新：{{update}}',
-      totalValueLabel: '总持仓市值',
+      totalValueLabel: '总持仓价值',
       quarterChange: { title: '季度环比变化', description: '与 {{previousQuarter}} 比较', increase: '上涨 {{amount}}（{{percent}}）', decrease: '下降 {{amount}}（{{percent}}）', noChange: '与 {{previousQuarter}} 持平', noPrevious: '暂无上一季度可供比较。' },
-      charts: { currentAllocation: '当前持仓分布', totalValueTrend: '总市值趋势' },
+      charts: { currentAllocation: '当前持仓分布', totalValueTrend: '总持仓价值趋势' },
       resources: { title: '原始资料', shareholderLetters: { title: '股东信', subtitle: '伯克希尔·哈撒韦官方每年致股东公开信。' }, meetingTranscripts: { title: '股东大会问答实录', subtitle: '查看伯克希尔·哈撒韦股东大会的完整问答内容。' } },
       dataNotice: { title: '数据说明', items: ['数据来源：SEC EDGAR 13F 季度报告', '13F 数据通常滞后约45天，非实时持仓', '仅统计价值超过20万美元且持股超过1万股的美股仓位', '以上信息仅供参考，不构成投资建议'] }
     },
     holdingsTable: { title: '持仓详情对比', subtitle: '最近四个季度持仓变化', stockInfo: '股票信息', noHoldings: '无持仓', sharesLabel: '{{count}} 股', weightLabel: '仓位占比 {{weight}}%', legend: { increase: '增持', decrease: '减持', new: '新增', exit: '退出', unchanged: '不变' } },
     aiInsights: { title: 'AI 智能分析', summaryTitle: '本季度亮点', keyChangesTitle: '关键变化', riskLevel: '风险水平', diversification: '分散化程度', disclaimer: '* AI 分析基于公开的 13F 数据，仅供参考，不构成投资建议。' },
-    charts: { pie: { tooltipValue: '市值', tooltipWeight: '仓位占比' }, line: { tooltipValue: '总市值' } }
+    charts: { pie: { tooltipValue: '持仓市值', tooltipWeight: '仓位占比' }, line: { tooltipValue: '总持仓价值' } }
   }
 } as const;

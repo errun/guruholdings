@@ -9,10 +9,10 @@ import {
 } from 'lucide-react';
 import snapshot from '@/data-generated/snapshots/latest.json';
 import { ExplorerSearchDisclosure } from '@/components/explorer/ExplorerSearchDisclosure';
-import { FilingExpectation } from '@/components/explorer/FilingExpectation';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { buildHoldingChangeModel } from '@/lib/holding-change.mjs';
+import { getCompanyMarketCaps, type CompanyMarketCap } from '@/lib/market-data';
 import { getExplorerData } from '@/lib/sec13f-lite';
 import {
   directionTextClass,
@@ -36,13 +36,25 @@ const directionalManagers = (item: ConsensusItem, direction: 'increase' | 'decre
       : manager.changeType === 'decrease' || manager.changeType === 'exit'
   );
 
-function ConsensusCard({ item, direction, locale }: { item: ConsensusItem; direction: 'increase' | 'decrease'; locale: Locale }) {
+function ConsensusCard({
+  item,
+  direction,
+  locale,
+  marketCap,
+}: {
+  item: ConsensusItem;
+  direction: 'increase' | 'decrease';
+  locale: Locale;
+  marketCap?: CompanyMarketCap;
+}) {
   const rows = directionalManagers(item, direction);
   const Icon = direction === 'increase' ? ArrowUpRight : ArrowDownRight;
   const title = item.canonicalName || item.issuerName;
   const {
     changeName,
     formatSignedCurrency,
+    formatCurrency,
+    formatDateTime,
     formatNumber,
     formatWeight,
   } = getViewFormatters(locale);
@@ -62,10 +74,23 @@ function ConsensusCard({ item, direction, locale }: { item: ConsensusItem; direc
             {item.canonicalTicker || item.rawCusips?.join(', ') || item.cusip}
           </p>
         </div>
-        <div className="shrink-0 text-right">
-          <div className="text-xs text-muted-foreground">{translate(locale, 'common.valueChange')}</div>
-          <div className={'font-mono text-sm font-semibold ' + directionTextClass(item.netValueChange)}>
-            {formatSignedCurrency(item.netValueChange)}
+        <div className="grid shrink-0 gap-2 text-right">
+          <div>
+            <div className="text-xs text-muted-foreground">{translate(locale, 'stock.companyMarketCap')}</div>
+            <div className="font-mono text-sm font-semibold text-slate-950">
+              {marketCap?.status === 'available' ? formatCurrency(marketCap.value) : translate(locale, 'stock.marketCap.unavailable')}
+            </div>
+            {marketCap?.status === 'available' && (
+              <div className="mt-0.5 text-[10px] text-muted-foreground">
+                {translate(locale, 'stock.marketCap.shortSource', { source: marketCap.sourceName, date: formatDateTime(marketCap.retrievedAt) })}
+              </div>
+            )}
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">{translate(locale, 'common.valueChange')}</div>
+            <div className={'font-mono text-sm font-semibold ' + directionTextClass(item.netValueChange)}>
+              {formatSignedCurrency(item.netValueChange)}
+            </div>
           </div>
         </div>
       </div>
@@ -138,13 +163,17 @@ function EmptySignal({ text }: { text: string }) {
   return <div className="rounded-md border border-dashed border-stone-300 px-4 py-5 text-sm leading-6 text-muted-foreground">{text}</div>;
 }
 
-export function HomePage({ locale }: { locale: Locale }) {
+export async function HomePage({ locale }: { locale: Locale }) {
   const explorerData = getExplorerData();
   const { formatNumber, formatQuarter } = getViewFormatters(locale);
   const topSharedIncrease = snapshot.consensus.sharedIncrease.slice(0, 4);
   const topSharedDecrease = snapshot.consensus.sharedDecrease.slice(0, 4);
   const sharedNew = snapshot.consensus.sharedIncrease.filter((item) => item.newManagers.length >= 2).slice(0, 4);
   const sharedExit = snapshot.consensus.sharedDecrease.filter((item) => item.exitManagers.length >= 2).slice(0, 4);
+  const marketCaps = await getCompanyMarketCaps([
+    ...topSharedIncrease.map((item) => item.companyId),
+    ...topSharedDecrease.map((item) => item.companyId),
+  ]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -162,7 +191,6 @@ export function HomePage({ locale }: { locale: Locale }) {
               <Stat label={translate(locale, 'common.managers')} value={formatNumber(snapshot.managers.length)} />
             </div>
           </div>
-          <FilingExpectation locale={locale} className="mt-5" />
         </div>
       </section>
 
@@ -186,10 +214,13 @@ export function HomePage({ locale }: { locale: Locale }) {
                   <ArrowUpRight className="h-5 w-5 text-emerald-700" />
                   {translate(locale, 'home.sharedIncrease')}
                 </h3>
-                <Badge variant="success" className="rounded-sm">{snapshot.consensus.sharedIncrease.length}</Badge>
+                <Badge variant="success" className="rounded-sm">
+                  {translate(locale, 'home.sharedStockCount', { count: formatNumber(snapshot.consensus.sharedIncrease.length) })}
+                </Badge>
               </div>
+              <p className="mb-3 text-xs text-muted-foreground">{translate(locale, 'home.consensus.showingTop', { shown: formatNumber(topSharedIncrease.length), total: formatNumber(snapshot.consensus.sharedIncrease.length) })}</p>
               <div className="space-y-3">
-                {topSharedIncrease.map((item) => <ConsensusCard key={'inc-' + item.companyId} item={item} direction="increase" locale={locale} />)}
+                {topSharedIncrease.map((item) => <ConsensusCard key={'inc-' + item.companyId} item={item} direction="increase" locale={locale} marketCap={marketCaps.get(item.companyId)} />)}
               </div>
             </div>
 
@@ -199,10 +230,13 @@ export function HomePage({ locale }: { locale: Locale }) {
                   <ArrowDownRight className="h-5 w-5 text-red-700" />
                   {translate(locale, 'home.sharedDecrease')}
                 </h3>
-                <Badge variant="destructive" className="rounded-sm">{snapshot.consensus.sharedDecrease.length}</Badge>
+                <Badge variant="destructive" className="rounded-sm">
+                  {translate(locale, 'home.sharedStockCount', { count: formatNumber(snapshot.consensus.sharedDecrease.length) })}
+                </Badge>
               </div>
+              <p className="mb-3 text-xs text-muted-foreground">{translate(locale, 'home.consensus.showingTop', { shown: formatNumber(topSharedDecrease.length), total: formatNumber(snapshot.consensus.sharedDecrease.length) })}</p>
               <div className="space-y-3">
-                {topSharedDecrease.map((item) => <ConsensusCard key={'dec-' + item.companyId} item={item} direction="decrease" locale={locale} />)}
+                {topSharedDecrease.map((item) => <ConsensusCard key={'dec-' + item.companyId} item={item} direction="decrease" locale={locale} marketCap={marketCaps.get(item.companyId)} />)}
               </div>
             </div>
           </div>

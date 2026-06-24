@@ -1,0 +1,610 @@
+{
+  "berkshire": {
+    "overview": {
+      "en": "Berkshire Hathaway is Warren Buffett's investment and operating conglomerate, combining insurance float, public equities, and wholly owned businesses.",
+      "zh": "Berkshire Hathaway 是巴菲特打造的投资与实业控股公司，核心由保险浮存金、公开股票和全资经营业务组成。",
+      "ja": "Berkshire HathawayはWarren Buffettが築いた投資・事業コングロマリットで、保険フロート、上場株、完全子会社を組み合わせています。",
+      "ko": "Berkshire Hathaway는 Warren Buffett이 구축한 투자 및 사업 지주회사로 보험 플로트, 상장주식, 완전 자회사로 구성됩니다."
+    },
+    "style": {
+      "en": "Classic value investing, long holding periods, concentrated stakes, durable moats, and a strong preference for understandable cash-generating businesses.",
+      "zh": "经典价值投资、长期持有、集中下注，强调护城河、安全边际和能产生现金流的可理解业务。",
+      "ja": "古典的なバリュー投資、長期保有、集中投資、堅固な競争優位、理解しやすいキャッシュ創出事業を重視します。",
+      "ko": "전통적 가치투자, 장기 보유, 집중 투자, 견고한 해자와 이해 가능한 현금창출 사업을 중시합니다."
+    },
+    "history": {
+      "en": "The textile company dates to the 19th century; Buffett took control in 1965 and turned it into a compounding holding company.",
+      "zh": "公司前身可追溯至 19 世纪纺织企业；巴菲特 1965 年接手后转型为复利型控股公司。",
+      "ja": "前身は19世紀の繊維会社で、Buffettが1965年に支配権を取得して複利型の持株会社へ転換しました。",
+      "ko": "전신은 19세기 섬유회사이며 Buffett이 1965년 경영권을 확보한 뒤 복리형 지주회사로 전환했습니다."
+    },
+    "scale": {
+      "en": "Its 13F equity portfolio is one of the largest in the market; full Berkshire value also includes operating subsidiaries and cash.",
+      "zh": "其 13F 美股组合属于市场最大规模之一；Berkshire 的完整价值还包括实业子公司和现金。",
+      "ja": "13F上場株ポートフォリオは市場最大級で、Berkshire全体の価値には事業子会社と現金も含まれます。",
+      "ko": "13F 상장주식 포트폴리오는 시장 최대 규모 중 하나이며 Berkshire 전체 가치는 사업 자회사와 현금도 포함합니다."
+    },
+    "leader": {
+      "en": "Buffett is known for patience, simplicity, capital allocation discipline, and a transition toward Greg Abel.",
+      "zh": "巴菲特以耐心、简单原则、资本配置纪律和诚信著称，管理层正逐步向 Greg Abel 交接。",
+      "ja": "Buffettは忍耐、単純明快な原則、資本配分規律で知られ、Greg Abelへの移行が進んでいます。",
+      "ko": "Buffett은 인내, 단순한 원칙, 자본배분 규율로 알려져 있으며 Greg Abel로의 승계가 진행 중입니다."
+    },
+    "record": {
+      "en": "Berkshire's long-term record since 1965 is a benchmark for compounding, though 13F data covers only public U.S. equity holdings.",
+      "zh": "Berkshire 自 1965 年以来的长期复利成绩是投资标杆；但 13F 只覆盖其公开美股仓位。",
+      "ja": "1965年以来の長期複利実績は投資の代表例ですが、13Fは米国上場株部分だけを示します。",
+      "ko": "1965년 이후 장기 복리 성과는 투자 기준점으로 평가되지만 13F는 미국 상장주식만 보여줍니다."
+    }
+  },
+  "himalaya": {
+    "overview": {
+      "en": "Himalaya Capital is Li Lu's investment firm, followed for a highly concentrated long-term U.S. equity portfolio.",
+      "zh": "Himalaya Capital 是李录管理的投资机构，以高度集中、长期持有的美股组合受到关注。",
+      "ja": "Himalaya CapitalはLi Luの投資会社で、非常に集中した長期米国株ポートフォリオで注目されます。",
+      "ko": "Himalaya Capital은 Li Lu가 운용하는 투자회사로, 매우 집중된 장기 미국 주식 포트폴리오로 주목받습니다."
+    },
+    "style": {
+      "en": "Deep value, business-quality focus, extreme concentration, and long holding periods similar to Buffett-style value investing.",
+      "zh": "深度价值、重视企业质量、极度集中、长期持有，风格接近巴菲特式价值投资。",
+      "ja": "ディープバリュー、事業品質重視、極度の集中、長期保有というBuffett型に近いスタイルです。",
+      "ko": "심층 가치, 기업 품질 중시, 극도의 집중, 장기 보유라는 Buffett식 가치투자에 가까운 스타일입니다."
+    },
+    "history": {
+      "en": "Li Lu founded Himalaya after building a reputation among value investors and later expanded from China-related ideas into U.S. equities.",
+      "zh": "李录创立 Himalaya 后在价值投资圈建立声誉，早期关注中国相关机会，后来扩展至美股核心资产。",
+      "ja": "Li LuはHimalayaを設立後、バリュー投資家として評価を高め、中国関連から米国株へ対象を広げました。",
+      "ko": "Li Lu는 Himalaya를 설립한 뒤 가치투자자로 명성을 쌓았고 중국 관련 투자에서 미국 핵심 주식으로 범위를 넓혔습니다."
+    },
+    "scale": {
+      "en": "The disclosed 13F portfolio is relatively small versus mega funds, but its top holdings often dominate the reported portfolio.",
+      "zh": "披露的 13F 组合相对巨型基金较小，但前几大持仓通常占比极高。",
+      "ja": "開示13Fポートフォリオは大型ファンドより小さい一方、上位銘柄の比率が非常に高い傾向があります。",
+      "ko": "공시된 13F 포트폴리오는 대형 펀드보다 작지만 상위 보유 종목 비중이 매우 높은 편입니다."
+    },
+    "leader": {
+      "en": "Li Lu is known for low-profile research depth, discipline, and a strong value-investing framework.",
+      "zh": "李录低调、研究深入、纪律性强，投资框架强调价值和长期复利。",
+      "ja": "Li Luは控えめで深いリサーチ、規律、強いバリュー投資フレームワークで知られます。",
+      "ko": "Li Lu는 조용하지만 깊은 리서치, 규율, 강한 가치투자 프레임워크로 알려져 있습니다."
+    },
+    "record": {
+      "en": "Public performance detail is limited, but the firm is watched because concentrated holdings can reveal high-conviction ideas.",
+      "zh": "公开业绩细节有限，但其集中持仓常被视为高置信度投资线索。",
+      "ja": "公開成績の詳細は限られますが、集中保有は高い確信度の手掛かりとして注目されます。",
+      "ko": "공개 성과 세부 정보는 제한적이지만 집중 보유는 높은 확신의 투자 단서로 여겨집니다."
+    }
+  },
+  "bridgewater": {
+    "overview": {
+      "en": "Bridgewater Associates is a large macro investment manager best known for systematic research and all-weather portfolio concepts.",
+      "zh": "Bridgewater Associates 是大型宏观投资机构，以系统化研究和全天候组合理念闻名。",
+      "ja": "Bridgewater Associatesは大型マクロ運用会社で、体系的リサーチと全天候型ポートフォリオの考え方で知られます。",
+      "ko": "Bridgewater Associates는 대형 매크로 투자회사로 체계적 리서치와 올웨더 포트폴리오 개념으로 유명합니다."
+    },
+    "style": {
+      "en": "Global macro, risk parity, diversified exposures, and rules-based decision systems rather than single-stock concentration.",
+      "zh": "全球宏观、风险平价、多资产分散和规则化决策，不以单一股票集中押注为核心。",
+      "ja": "グローバルマクロ、リスクパリティ、分散エクスポージャー、ルールベースの意思決定が中心です。",
+      "ko": "글로벌 매크로, 위험균형, 분산 노출, 규칙 기반 의사결정이 중심이며 단일 종목 집중과는 다릅니다."
+    },
+    "history": {
+      "en": "Ray Dalio founded Bridgewater in 1975; it became one of the world's best-known hedge fund organizations.",
+      "zh": "Ray Dalio 于 1975 年创立 Bridgewater，后来发展为全球最知名的对冲基金机构之一。",
+      "ja": "Ray Dalioが1975年に創業し、世界で最も知られるヘッジファンド組織の一つになりました。",
+      "ko": "Ray Dalio가 1975년에 설립했으며 세계에서 가장 잘 알려진 헤지펀드 조직 중 하나로 성장했습니다."
+    },
+    "scale": {
+      "en": "The firm's total AUM is much larger than its 13F equity slice; 13F mainly captures disclosed U.S.-listed equities and ETFs.",
+      "zh": "公司整体 AUM 远大于 13F 美股切片；13F 主要体现披露的美国上市股票和 ETF。",
+      "ja": "同社全体のAUMは13Fの株式部分より大きく、13Fは主に米国上場株とETFを示します。",
+      "ko": "전체 AUM은 13F 주식 부분보다 훨씬 크며 13F는 주로 미국 상장주식과 ETF를 보여줍니다."
+    },
+    "leader": {
+      "en": "Dalio is associated with principles-based management, macro frameworks, and systematic economic-machine thinking.",
+      "zh": "Dalio 以原则化管理、宏观框架和“经济机器”式系统思考著称。",
+      "ja": "Dalioは原則に基づく経営、マクロの枠組み、経済機械としての体系的思考で知られます。",
+      "ko": "Dalio는 원칙 기반 경영, 매크로 프레임워크, 경제 기계식 체계적 사고로 알려져 있습니다."
+    },
+    "record": {
+      "en": "Bridgewater is historically important in macro investing, but single-quarter 13F changes are only a partial view of its strategy.",
+      "zh": "Bridgewater 在宏观投资史上地位重要，但单季度 13F 变化只反映其策略的一小部分。",
+      "ja": "マクロ投資で歴史的に重要ですが、単一四半期の13F変化は戦略の一部にすぎません。",
+      "ko": "매크로 투자에서 역사적으로 중요하지만 한 분기 13F 변화는 전략의 일부만 보여줍니다."
+    }
+  },
+  "pershing": {
+    "overview": {
+      "en": "Pershing Square is Bill Ackman's concentrated investment firm, known for activist campaigns and high-conviction public-company stakes.",
+      "zh": "Pershing Square 是 Bill Ackman 管理的集中型投资机构，以激进主义行动和高置信度公开公司持仓闻名。",
+      "ja": "Pershing SquareはBill Ackmanの集中投資会社で、アクティビスト活動と高確信度の上場株投資で知られます。",
+      "ko": "Pershing Square는 Bill Ackman의 집중 투자회사로 행동주의 캠페인과 높은 확신의 상장사 투자가 특징입니다."
+    },
+    "style": {
+      "en": "Activist value, event-driven catalysts, concentrated positions, and willingness to push for governance or strategic change.",
+      "zh": "激进主义价值投资、事件催化、集中持仓，并愿意推动治理或战略变化。",
+      "ja": "アクティビスト・バリュー、イベント触媒、集中保有、ガバナンスや戦略変更の働きかけが特徴です。",
+      "ko": "행동주의 가치투자, 이벤트 촉매, 집중 보유, 지배구조나 전략 변화 요구가 특징입니다."
+    },
+    "history": {
+      "en": "Ackman founded Pershing Square in 2004 and became known for public campaigns, both successful and controversial.",
+      "zh": "Ackman 于 2004 年创立 Pershing Square，多个公开战役既有成功案例，也有争议案例。",
+      "ja": "Ackmanは2004年に創業し、成功例と論争例の両方を含む公開キャンペーンで知られるようになりました。",
+      "ko": "Ackman은 2004년에 회사를 설립했고 성공과 논란이 함께한 공개 캠페인으로 알려졌습니다."
+    },
+    "scale": {
+      "en": "The 13F portfolio is usually concentrated in a small set of large public companies.",
+      "zh": "其 13F 组合通常集中在少数大型公开公司。",
+      "ja": "13Fポートフォリオは少数の大型上場企業に集中する傾向があります。",
+      "ko": "13F 포트폴리오는 보통 소수의 대형 상장사에 집중됩니다."
+    },
+    "leader": {
+      "en": "Ackman is outspoken, analytical, and known for high-conviction public theses.",
+      "zh": "Ackman 善于公开表达、分析细致，常以高置信度投资论点著称。",
+      "ja": "Ackmanは発信力が高く、分析的で、高い確信度の公開投資論で知られます。",
+      "ko": "Ackman은 공개 발언이 많고 분석적이며 높은 확신의 투자 논리로 알려져 있습니다."
+    },
+    "record": {
+      "en": "The record includes major wins and large drawdowns, so the position context matters more than a headline action alone.",
+      "zh": "其历史既有重大成功，也有较大回撤，因此单一变仓动作必须结合组合背景理解。",
+      "ja": "大きな成功と大きな下落の両方があり、見出しの売買だけでなく文脈が重要です。",
+      "ko": "큰 성공과 큰 손실이 모두 있어 단순 매매보다 포트폴리오 맥락이 중요합니다."
+    }
+  },
+  "scion": {
+    "overview": {
+      "en": "Scion Asset Management is Michael Burry's investment firm, followed for contrarian and concentrated 13F signals.",
+      "zh": "Scion Asset Management 是 Michael Burry 的投资机构，以逆向、集中型 13F 信号受到关注。",
+      "ja": "Scion Asset ManagementはMichael Burryの投資会社で、逆張りかつ集中した13Fシグナルで注目されます。",
+      "ko": "Scion Asset Management는 Michael Burry의 투자회사로 역발상과 집중형 13F 신호로 주목받습니다."
+    },
+    "style": {
+      "en": "Contrarian value, concentrated bets, rapid position changes, and occasional bearish or hedging expressions outside 13F.",
+      "zh": "逆向价值、集中下注、调仓节奏较快，且可能通过 13F 之外的方式表达看空或对冲观点。",
+      "ja": "逆張りバリュー、集中投資、素早いポジション変更、13F外の弱気・ヘッジ表現が特徴です。",
+      "ko": "역발상 가치, 집중 투자, 빠른 포지션 변화, 13F 밖의 약세 또는 헤지 표현이 특징입니다."
+    },
+    "history": {
+      "en": "Burry became widely known for the mortgage-crisis short depicted in The Big Short and later restarted Scion Asset Management.",
+      "zh": "Burry 因金融危机前做空次贷而广为人知，后来重启 Scion Asset Management。",
+      "ja": "Burryは住宅ローン危機前のショートで広く知られ、その後Scion Asset Managementを再開しました。",
+      "ko": "Burry는 금융위기 전 모기지 쇼트로 널리 알려졌고 이후 Scion Asset Management를 재개했습니다."
+    },
+    "scale": {
+      "en": "The disclosed 13F portfolio is smaller and can shift sharply quarter to quarter.",
+      "zh": "披露的 13F 组合规模较小，季度之间变化可能很剧烈。",
+      "ja": "開示13Fポートフォリオは小さめで、四半期ごとの変化が大きくなり得ます。",
+      "ko": "공시된 13F 포트폴리오는 규모가 작고 분기별 변화가 클 수 있습니다."
+    },
+    "leader": {
+      "en": "Burry is known for independent research, data-driven skepticism, and willingness to hold unpopular views.",
+      "zh": "Burry 以独立研究、数据驱动的怀疑精神和坚持非共识观点著称。",
+      "ja": "Burryは独立した調査、データに基づく懐疑、非主流見解を持つ姿勢で知られます。",
+      "ko": "Burry는 독립적 리서치, 데이터 기반 회의론, 비주류 견해를 고수하는 태도로 알려져 있습니다."
+    },
+    "record": {
+      "en": "The mortgage-crisis trade is the signature achievement; later public 13F signals are more volatile and should be read carefully.",
+      "zh": "次贷危机交易是其标志性成绩；后续公开 13F 信号波动更大，需要谨慎解读。",
+      "ja": "住宅ローン危機の取引が代表的成果で、その後の13Fシグナルは変動が大きく慎重な解釈が必要です。",
+      "ko": "모기지 위기 거래가 대표 성과이며 이후 공개 13F 신호는 변동성이 커 신중히 해석해야 합니다."
+    }
+  },
+  "tiger": {
+    "overview": {
+      "en": "Tiger Global is a growth-oriented investment manager associated with technology, internet, and crossover public-private investing.",
+      "zh": "Tiger Global 是成长型投资机构，常与科技、互联网和公私市场结合投资相关。",
+      "ja": "Tiger Globalはテクノロジー、インターネット、公私市場横断投資で知られる成長株志向の運用会社です。",
+      "ko": "Tiger Global은 기술, 인터넷, 공·사모 시장을 넘나드는 성장 투자로 알려진 운용사입니다."
+    },
+    "style": {
+      "en": "Growth investing, technology platforms, quality compounders, and willingness to own public and private companies across cycles.",
+      "zh": "成长投资、科技平台、高质量复利公司，并在公私市场跨周期持有相关资产。",
+      "ja": "成長投資、テック平台、質の高い複利企業、公私市場をまたぐ保有が特徴です。",
+      "ko": "성장 투자, 기술 플랫폼, 고품질 복리 기업, 공·사모 시장을 넘나드는 보유가 특징입니다."
+    },
+    "history": {
+      "en": "Chase Coleman founded Tiger Global in 2001 with roots in the Tiger Management network.",
+      "zh": "Chase Coleman 于 2001 年创立 Tiger Global，背景与 Tiger Management 网络相关。",
+      "ja": "Chase Colemanが2001年に創業し、Tiger Managementの系譜を持ちます。",
+      "ko": "Chase Coleman이 2001년에 설립했으며 Tiger Management 네트워크에 뿌리를 둡니다."
+    },
+    "scale": {
+      "en": "The overall platform is much larger than any one 13F view because it also invests outside disclosed U.S. public equities.",
+      "zh": "整体平台规模大于单一 13F 视图，因为还投资 13F 未覆盖的资产。",
+      "ja": "13Fで見える米国上場株以外にも投資するため、平台全体は13F表示より大きいです。",
+      "ko": "13F에 보이는 미국 상장주식 외에도 투자하므로 전체 플랫폼은 13F보다 큽니다."
+    },
+    "leader": {
+      "en": "Coleman and the team are known for technology research and high-growth company selection.",
+      "zh": "Coleman 及团队以科技研究和高成长公司筛选能力著称。",
+      "ja": "Colemanとチームはテクノロジー調査と高成長企業の選別で知られます。",
+      "ko": "Coleman과 팀은 기술 리서치와 고성장 기업 선별로 알려져 있습니다."
+    },
+    "record": {
+      "en": "The firm had strong technology-cycle gains and painful drawdowns, making current position changes important but context-dependent.",
+      "zh": "机构曾在科技周期中获得强劲收益，也经历明显回撤，因此当前变仓需要结合周期背景理解。",
+      "ja": "テックサイクルで大きな利益と痛みを伴う下落の両方を経験しており、文脈が重要です。",
+      "ko": "기술 사이클에서 큰 수익과 큰 하락을 모두 경험했기 때문에 현재 변동은 맥락과 함께 봐야 합니다."
+    }
+  },
+  "palliser": {
+    "overview": {
+      "en": "Palliser Capital is a UK-based event-driven and value-oriented investment firm focused on complex situations.",
+      "zh": "Palliser Capital 是英国事件驱动和价值导向投资机构，关注复杂和催化剂机会。",
+      "ja": "Palliser Capitalは英国拠点のイベントドリブン・バリュー志向投資会社で、複雑な状況に注目します。",
+      "ko": "Palliser Capital은 영국 기반의 이벤트 중심·가치 지향 투자회사로 복잡한 상황에 주목합니다."
+    },
+    "style": {
+      "en": "Value, catalysts, special situations, and a multi-strategy toolkit spanning equities and credit.",
+      "zh": "价值、催化剂、特殊机会，并结合股票和信用等多策略工具。",
+      "ja": "バリュー、触媒、特殊状況、株式と信用を含むマルチ戦略が特徴です。",
+      "ko": "가치, 촉매, 특수상황, 주식과 신용을 아우르는 다전략 도구가 특징입니다."
+    },
+    "history": {
+      "en": "Palliser is a younger manager relative to older hedge-fund franchises, so its public track record is still developing.",
+      "zh": "相对老牌对冲基金，Palliser 成立时间较短，公开历史记录仍在积累。",
+      "ja": "老舗ヘッジファンドに比べて若い運用会社で、公開トラックレコードはまだ蓄積段階です。",
+      "ko": "오래된 헤지펀드에 비해 젊은 운용사라 공개 운용 기록은 아직 축적 중입니다."
+    },
+    "scale": {
+      "en": "Its disclosed 13F portfolio is small, so individual position changes can be large as a percentage of reported holdings.",
+      "zh": "披露的 13F 组合规模较小，因此单个仓位变化占比可能较大。",
+      "ja": "開示13Fポートフォリオは小さく、個別ポジションの変化率が大きく見える場合があります。",
+      "ko": "공시된 13F 포트폴리오는 작아 개별 포지션 변화율이 크게 보일 수 있습니다."
+    },
+    "leader": {
+      "en": "The team is associated with cross-border value and catalyst analysis rather than broad index exposure.",
+      "zh": "团队更偏跨境价值和催化剂分析，而不是宽基指数敞口。",
+      "ja": "幅広い指数エクスポージャーより、国境をまたぐバリューと触媒分析に重点があります。",
+      "ko": "광범위한 지수 노출보다는 국경 간 가치와 촉매 분석에 중점을 둡니다."
+    },
+    "record": {
+      "en": "Because the firm is young and smaller, 13F changes should be read as disclosed U.S.-equity clues, not a complete performance record.",
+      "zh": "由于机构较年轻且规模较小，13F 变化应视为美股披露线索，而非完整业绩记录。",
+      "ja": "若く小規模なため、13F変化は完全な成績ではなく米国株開示の手掛かりとして読むべきです。",
+      "ko": "젊고 규모가 작기 때문에 13F 변화는 전체 성과가 아니라 미국 주식 공시 단서로 봐야 합니다."
+    }
+  },
+  "ark": {
+    "overview": {
+      "en": "ARK Invest is Cathie Wood's active ETF platform focused on disruptive innovation themes.",
+      "zh": "ARK Invest 是 Cathie Wood 管理的主动 ETF 平台，专注颠覆性创新主题。",
+      "ja": "ARK InvestはCathie WoodのアクティブETF平台で、破壊的イノベーションのテーマに注力します。",
+      "ko": "ARK Invest는 Cathie Wood가 이끄는 액티브 ETF 플랫폼으로 파괴적 혁신 테마에 집중합니다."
+    },
+    "style": {
+      "en": "High-conviction thematic growth across AI, robotics, genomics, electric vehicles, fintech, and platform businesses.",
+      "zh": "高置信度主题成长，覆盖 AI、机器人、基因组学、电动车、金融科技和平台型企业。",
+      "ja": "AI、ロボティクス、ゲノム、EV、フィンテック、平台企業などへの高確信度テーマ成長投資です。",
+      "ko": "AI, 로봇, 유전체, 전기차, 핀테크, 플랫폼 기업에 대한 높은 확신의 테마 성장 투자입니다."
+    },
+    "history": {
+      "en": "Founded in 2014, ARK became widely followed after very strong innovation-theme performance during the 2020 cycle.",
+      "zh": "ARK 成立于 2014 年，在 2020 年创新主题强势周期后受到广泛关注。",
+      "ja": "2014年創業で、2020年のイノベーションテーマ好調期を経て広く注目されました。",
+      "ko": "2014년 설립되었고 2020년 혁신 테마 강세 이후 널리 주목받았습니다."
+    },
+    "scale": {
+      "en": "ARK's assets are mainly in ETFs; 13F captures disclosed U.S. equity positions but not the full investor flow picture.",
+      "zh": "ARK 资产主要在 ETF 中；13F 展示披露的美股仓位，但不等于完整资金流变化。",
+      "ja": "資産は主にETFにあり、13Fは米国株保有を示しますが資金流入出の全体像ではありません。",
+      "ko": "자산은 주로 ETF에 있으며 13F는 미국 주식 보유를 보여주지만 전체 자금 흐름은 아닙니다."
+    },
+    "leader": {
+      "en": "Wood is known for optimistic technology forecasts, public research, and willingness to tolerate volatility.",
+      "zh": "Cathie Wood 以乐观科技预测、公开研究和承受高波动的风格著称。",
+      "ja": "Woodは楽観的な技術予測、公開リサーチ、高い変動性を受け入れる姿勢で知られます。",
+      "ko": "Wood는 낙관적 기술 전망, 공개 리서치, 높은 변동성을 감수하는 스타일로 알려져 있습니다."
+    },
+    "record": {
+      "en": "ARK's returns have been extremely cycle-sensitive, with both explosive gains and large drawdowns.",
+      "zh": "ARK 的回报高度依赖周期，既有爆发式上涨，也有大幅回撤。",
+      "ja": "ARKのリターンはサイクル感応度が高く、急騰と大幅下落の両方があります。",
+      "ko": "ARK의 수익률은 사이클 민감도가 높아 폭발적 상승과 큰 하락이 모두 있었습니다."
+    }
+  },
+  "coatue": {
+    "overview": {
+      "en": "Coatue Management is Philippe Laffont's technology-focused investment platform spanning public and private markets.",
+      "zh": "Coatue Management 是 Philippe Laffont 管理的科技投资平台，覆盖公私市场。",
+      "ja": "Coatue ManagementはPhilippe Laffontのテクノロジー重視投資平台で、公私市場にまたがります。",
+      "ko": "Coatue Management는 Philippe Laffont의 기술 중심 투자 플랫폼으로 공·사모 시장을 아우릅니다."
+    },
+    "style": {
+      "en": "Technology growth, consumer internet, AI infrastructure, and research-driven crossover investing.",
+      "zh": "科技成长、消费互联网、AI 基础设施，以及研究驱动的跨市场投资。",
+      "ja": "テック成長、消費者インターネット、AIインフラ、リサーチ主導のクロスオーバー投資です。",
+      "ko": "기술 성장, 소비자 인터넷, AI 인프라, 리서치 기반 크로스오버 투자가 특징입니다."
+    },
+    "history": {
+      "en": "Founded in 1999, Coatue developed into a major technology investor through multiple internet and software cycles.",
+      "zh": "Coatue 成立于 1999 年，经历多轮互联网和软件周期后成为重要科技投资机构。",
+      "ja": "1999年創業で、複数のインターネット・ソフトウェアサイクルを経て主要テック投資家となりました。",
+      "ko": "1999년에 설립되어 여러 인터넷 및 소프트웨어 사이클을 거치며 주요 기술 투자자로 성장했습니다."
+    },
+    "scale": {
+      "en": "The platform's total assets include private holdings, so 13F is only the public U.S. equity portion.",
+      "zh": "平台总资产包含私募持仓，因此 13F 只是公开美股部分。",
+      "ja": "平台全体には未上場投資も含まれるため、13Fは米国上場株部分にすぎません。",
+      "ko": "전체 플랫폼에는 비상장 투자도 포함되므로 13F는 미국 상장주식 부분일 뿐입니다."
+    },
+    "leader": {
+      "en": "Laffont is associated with deep technology sector research and long-duration growth thinking.",
+      "zh": "Laffont 以深度科技行业研究和长期成长视角著称。",
+      "ja": "Laffontはテクノロジー分野の深い調査と長期成長思考で知られます。",
+      "ko": "Laffont는 깊은 기술 섹터 리서치와 장기 성장 관점으로 알려져 있습니다."
+    },
+    "record": {
+      "en": "Coatue has benefited from major technology cycles, but public 13F changes should be read alongside its private-market exposure.",
+      "zh": "Coatue 受益于多轮科技周期，但公开 13F 变化需要结合其私募市场敞口理解。",
+      "ja": "大きなテックサイクルの恩恵を受けてきましたが、13F変化は未上場投資と併せて読む必要があります。",
+      "ko": "주요 기술 사이클의 수혜를 받았지만 공개 13F 변화는 비상장 노출과 함께 해석해야 합니다."
+    }
+  },
+  "icahn": {
+    "overview": {
+      "en": "Icahn Capital reflects Carl Icahn's activist and value-oriented investment activity, often tied to Icahn Enterprises.",
+      "zh": "Icahn Capital 体现 Carl Icahn 的激进主义和价值投资活动，常与 Icahn Enterprises 相关。",
+      "ja": "Icahn CapitalはCarl Icahnのアクティビスト・バリュー投資活動を示し、Icahn Enterprisesと関係します。",
+      "ko": "Icahn Capital은 Carl Icahn의 행동주의 및 가치 투자 활동을 반영하며 Icahn Enterprises와 관련됩니다."
+    },
+    "style": {
+      "en": "Activist value investing, control-oriented situations, governance pressure, restructurings, and capital-return campaigns.",
+      "zh": "激进主义价值投资、控制权机会、治理施压、重组和资本回报诉求。",
+      "ja": "アクティビスト・バリュー、支配権志向、ガバナンス圧力、再編、資本還元要求が特徴です。",
+      "ko": "행동주의 가치투자, 지배권 지향 상황, 지배구조 압박, 구조조정, 자본환원 요구가 특징입니다."
+    },
+    "history": {
+      "en": "Icahn has been active since the 1980s and is one of the best-known figures in shareholder activism.",
+      "zh": "Icahn 自 1980 年代起活跃，是股东激进主义领域最知名人物之一。",
+      "ja": "Icahnは1980年代から活動し、株主アクティビズムで最も知られる人物の一人です。",
+      "ko": "Icahn은 1980년대부터 활동했으며 주주 행동주의에서 가장 유명한 인물 중 하나입니다."
+    },
+    "scale": {
+      "en": "The 13F portfolio is only one view; Icahn-related exposure can also sit through controlled companies and non-13F instruments.",
+      "zh": "13F 组合只是一个视角；Icahn 相关敞口还可能存在于控股公司和非 13F 工具中。",
+      "ja": "13Fは一つの視点にすぎず、Icahn関連エクスポージャーは支配企業や13F外の手段にも存在します。",
+      "ko": "13F 포트폴리오는 한 가지 시각일 뿐이며 Icahn 관련 노출은 지배 회사와 13F 외 수단에도 있을 수 있습니다."
+    },
+    "leader": {
+      "en": "Icahn is known for forceful negotiation, public pressure, and a control-oriented value approach.",
+      "zh": "Icahn 以强硬谈判、公开施压和控制权导向的价值方法著称。",
+      "ja": "Icahnは強い交渉、公開圧力、支配権志向のバリュー手法で知られます。",
+      "ko": "Icahn은 강한 협상, 공개 압박, 지배권 지향 가치 접근으로 알려져 있습니다."
+    },
+    "record": {
+      "en": "His career includes many high-profile activist wins, but recent exposures and entity-level results can be volatile.",
+      "zh": "其职业生涯有许多高知名度激进主义成功案例，但近年敞口和实体层面结果波动较大。",
+      "ja": "多くの著名な成功例がありますが、近年のエクスポージャーと事業体レベルの結果は変動が大きいです。",
+      "ko": "여러 유명한 행동주의 성공 사례가 있지만 최근 노출과 기업 차원의 결과는 변동성이 큽니다."
+    }
+  },
+  "third-point": {
+    "overview": {
+      "en": "Third Point is Daniel Loeb's event-driven hedge fund, known for activist letters and special-situation investing.",
+      "zh": "Third Point 是 Daniel Loeb 管理的事件驱动对冲基金，以股东信、激进主义和特殊机会投资闻名。",
+      "ja": "Third PointはDaniel Loebのイベントドリブン型ヘッジファンドで、株主書簡と特殊状況投資で知られます。",
+      "ko": "Third Point는 Daniel Loeb의 이벤트 중심 헤지펀드로 주주 서한과 특수상황 투자로 알려져 있습니다."
+    },
+    "style": {
+      "en": "Event-driven value, activist catalysts, restructurings, and opportunistic equity positions.",
+      "zh": "事件驱动价值、激进主义催化、重组机会和机会型股票仓位。",
+      "ja": "イベントドリブン・バリュー、アクティビスト触媒、再編、機会主義的な株式投資が特徴です。",
+      "ko": "이벤트 중심 가치, 행동주의 촉매, 구조조정, 기회주의적 주식 포지션이 특징입니다."
+    },
+    "history": {
+      "en": "Loeb founded Third Point in 1995 and became known for detailed public letters and catalyst-focused campaigns.",
+      "zh": "Loeb 于 1995 年创立 Third Point，以详细公开信和催化剂型投资战役闻名。",
+      "ja": "Loebは1995年に創業し、詳細な公開書簡と触媒重視のキャンペーンで知られるようになりました。",
+      "ko": "Loeb은 1995년에 Third Point를 설립했고 상세한 공개 서한과 촉매 중심 캠페인으로 알려졌습니다."
+    },
+    "scale": {
+      "en": "The disclosed 13F portfolio can change materially because the broader strategy may include non-13F positions and hedges.",
+      "zh": "披露的 13F 组合可能大幅变化，因为更完整策略还可能包含非 13F 仓位和对冲。",
+      "ja": "広い戦略には13F外ポジションやヘッジも含まれ得るため、開示13Fは大きく変わることがあります。",
+      "ko": "더 넓은 전략에는 13F 외 포지션과 헤지도 포함될 수 있어 공시 13F는 크게 변할 수 있습니다."
+    },
+    "leader": {
+      "en": "Loeb is known for sharp writing, detailed analysis, and willingness to push management teams.",
+      "zh": "Loeb 以文笔犀利、分析详细、愿意推动管理层改变著称。",
+      "ja": "Loebは鋭い文章、詳細な分析、経営陣への働きかけで知られます。",
+      "ko": "Loeb은 날카로운 글, 상세한 분석, 경영진 변화를 압박하는 태도로 알려져 있습니다."
+    },
+    "record": {
+      "en": "Third Point has a long event-driven history, but a single 13F quarter can mix real trading with portfolio-size effects.",
+      "zh": "Third Point 事件驱动历史较长，但单季度 13F 变化可能同时受到真实交易和组合规模变化影响。",
+      "ja": "長いイベントドリブンの歴史がありますが、単四半期の13Fは実取引とポートフォリオ規模効果が混在します。",
+      "ko": "긴 이벤트 중심 투자 역사가 있지만 한 분기 13F는 실제 거래와 포트폴리오 규모 효과가 섞일 수 있습니다."
+    }
+  },
+  "baupost": {
+    "overview": {
+      "en": "Baupost Group is Seth Klarman's value-oriented investment firm, known for patience, risk control, and distressed opportunities.",
+      "zh": "Baupost Group 是 Seth Klarman 管理的价值投资机构，以耐心、风险控制和困境机会闻名。",
+      "ja": "Baupost GroupはSeth Klarmanのバリュー投資会社で、忍耐、リスク管理、ディストレスト機会で知られます。",
+      "ko": "Baupost Group은 Seth Klarman의 가치투자 회사로 인내, 위험관리, 부실자산 기회로 알려져 있습니다."
+    },
+    "style": {
+      "en": "Deep value, distressed assets, capital preservation, low turnover, and willingness to hold cash.",
+      "zh": "深度价值、困境资产、资本保护、低换手，并愿意持有现金等待机会。",
+      "ja": "ディープバリュー、ディストレスト資産、資本保全、低回転率、現金保有をいとわない姿勢です。",
+      "ko": "심층 가치, 부실자산, 자본 보전, 낮은 회전율, 현금 보유를 감수하는 태도가 특징입니다."
+    },
+    "history": {
+      "en": "Baupost was created with support from Harvard-related capital and has long been associated with Klarman's Margin of Safety philosophy.",
+      "zh": "Baupost 早期有哈佛相关资金支持，长期与 Klarman 的《安全边际》理念相关。",
+      "ja": "Baupostはハーバード関連資金の支援で始まり、Klarmanの『Margin of Safety』哲学と結びついています。",
+      "ko": "Baupost는 하버드 관련 자금의 지원으로 시작되었고 Klarman의 안전마진 철학과 연결됩니다."
+    },
+    "scale": {
+      "en": "13F shows only public U.S. equities; Baupost's broader opportunity set can include distressed debt and private situations.",
+      "zh": "13F 只显示公开美股；Baupost 更广泛的机会集可能包括困境债和私有化机会。",
+      "ja": "13Fは米国上場株だけを示し、より広い機会にはディストレスト債や非公開案件も含まれ得ます。",
+      "ko": "13F는 미국 상장주식만 보여주며 더 넓은 기회에는 부실채권과 비공개 상황도 포함될 수 있습니다."
+    },
+    "leader": {
+      "en": "Klarman is known for caution, valuation discipline, and a strong focus on downside protection.",
+      "zh": "Klarman 以谨慎、估值纪律和强烈的下行风险保护意识著称。",
+      "ja": "Klarmanは慎重さ、評価規律、下方リスク保護への強い意識で知られます。",
+      "ko": "Klarman은 신중함, 가치평가 규율, 하방 보호 중시로 알려져 있습니다."
+    },
+    "record": {
+      "en": "Baupost is widely respected for long-term risk-adjusted results, though detailed current performance is not fully public.",
+      "zh": "Baupost 因长期风险调整后表现受到尊重，但当前详细业绩并不完全公开。",
+      "ja": "長期のリスク調整後成績で高く評価されますが、現在の詳細成績は完全には公開されていません。",
+      "ko": "장기 위험조정 성과로 높이 평가되지만 현재 상세 성과는 완전히 공개되어 있지 않습니다."
+    }
+  },
+  "greenlight": {
+    "overview": {
+      "en": "Greenlight Capital is David Einhorn's value-oriented investment platform, known for combining long ideas with short research.",
+      "zh": "Greenlight Capital 是 David Einhorn 的价值投资平台，以多头价值投资和做空研究结合闻名。",
+      "ja": "Greenlight CapitalはDavid Einhornのバリュー投資平台で、ロング投資とショート調査の組み合わせで知られます。",
+      "ko": "Greenlight Capital은 David Einhorn의 가치투자 플랫폼으로 롱 아이디어와 숏 리서치의 결합으로 알려져 있습니다."
+    },
+    "style": {
+      "en": "Value investing, forensic short research, detailed letters, and a focus on mispriced businesses.",
+      "zh": "价值投资、审慎做空研究、详细投资信件，并关注被错误定价的企业。",
+      "ja": "バリュー投資、精査型ショートリサーチ、詳細なレター、誤った価格付けの企業に注目します。",
+      "ko": "가치투자, 정밀한 숏 리서치, 상세한 서한, 잘못 가격 책정된 기업에 집중합니다."
+    },
+    "history": {
+      "en": "Einhorn founded Greenlight in 1996 and became known for public short theses and value-oriented letters.",
+      "zh": "Einhorn 于 1996 年创立 Greenlight，以公开做空论点和价值导向信件闻名。",
+      "ja": "Einhornは1996年に創業し、公開ショート論とバリュー志向のレターで知られます。",
+      "ko": "Einhorn은 1996년에 Greenlight를 설립했고 공개 숏 논리와 가치 지향 서한으로 알려졌습니다."
+    },
+    "scale": {
+      "en": "The tracked SEC filer shows disclosed U.S. equity holdings; hedges and short books are not visible in 13F.",
+      "zh": "本站跟踪的 SEC 披露人展示公开美股持仓；对冲和空头账簿不在 13F 中可见。",
+      "ja": "追跡SEC提出者は米国株保有を示しますが、ヘッジやショートブックは13Fでは見えません。",
+      "ko": "추적 SEC 제출자는 미국 주식 보유를 보여주지만 헤지와 숏 장부는 13F에 보이지 않습니다."
+    },
+    "leader": {
+      "en": "Einhorn is known for clear logic, public debate, and willingness to challenge consensus narratives.",
+      "zh": "Einhorn 以逻辑清晰、公开辩论和挑战共识叙事著称。",
+      "ja": "Einhornは明確な論理、公開討論、コンセンサスへの挑戦で知られます。",
+      "ko": "Einhorn은 명확한 논리, 공개 토론, 합의된 서사에 도전하는 태도로 알려져 있습니다."
+    },
+    "record": {
+      "en": "Greenlight has notable wins and difficult periods, so 13F changes should be read with the missing short book in mind.",
+      "zh": "Greenlight 既有著名成功，也经历困难阶段；解读 13F 时要记住空头账簿缺失。",
+      "ja": "著名な成功と困難な時期の両方があり、13Fはショートブックが見えない点を踏まえて読む必要があります。",
+      "ko": "주목할 성공과 어려운 시기가 모두 있었으므로 13F는 숏 장부가 보이지 않는다는 점을 고려해야 합니다."
+    }
+  },
+  "oaktree": {
+    "overview": {
+      "en": "Oaktree Capital is a credit and distressed-investing specialist associated with Howard Marks and market-cycle discipline.",
+      "zh": "Oaktree Capital 是信用和困境资产投资专家，与 Howard Marks 的周期纪律密切相关。",
+      "ja": "Oaktree CapitalはHoward Marksと市場サイクル規律で知られる信用・ディストレスト投資の専門家です。",
+      "ko": "Oaktree Capital은 Howard Marks와 시장 사이클 규율로 알려진 신용 및 부실투자 전문 운용사입니다."
+    },
+    "style": {
+      "en": "Distressed debt, credit cycles, contrarian risk control, and opportunistic equity exposure.",
+      "zh": "困境债、信用周期、逆向风险控制，以及机会型股票敞口。",
+      "ja": "ディストレスト債、信用サイクル、逆張りのリスク管理、機会主義的な株式エクスポージャーが特徴です。",
+      "ko": "부실채권, 신용 사이클, 역발상 위험관리, 기회주의적 주식 노출이 특징입니다."
+    },
+    "history": {
+      "en": "Founded in 1995, Oaktree became a major alternative-credit manager and later became part of the Brookfield ecosystem.",
+      "zh": "Oaktree 成立于 1995 年，成为重要另类信用管理人，后来进入 Brookfield 体系。",
+      "ja": "1995年創業で、主要なオルタナティブ信用運用会社となり、後にBrookfieldの体系に入りました。",
+      "ko": "1995년에 설립되어 주요 대체신용 운용사가 되었고 이후 Brookfield 생태계에 편입되었습니다."
+    },
+    "scale": {
+      "en": "The firm's main scale is in credit and alternatives, so 13F public equities are only a narrow slice.",
+      "zh": "公司主要规模在信用和另类资产，13F 公开股票只是很窄的切片。",
+      "ja": "主な規模は信用とオルタナティブにあり、13Fの上場株は狭い一部分です。",
+      "ko": "주요 규모는 신용과 대체자산에 있으며 13F 상장주식은 좁은 일부입니다."
+    },
+    "leader": {
+      "en": "Marks is known for memos on risk, cycles, psychology, and second-level thinking.",
+      "zh": "Marks 以关于风险、周期、心理和第二层思维的备忘录著称。",
+      "ja": "Marksはリスク、サイクル、心理、二段階思考に関するメモで知られます。",
+      "ko": "Marks는 위험, 사이클, 심리, 2차적 사고에 관한 메모로 유명합니다."
+    },
+    "record": {
+      "en": "Oaktree's reputation is strongest in credit-cycle investing; 13F equity signals should not be treated as the full strategy.",
+      "zh": "Oaktree 的声誉主要来自信用周期投资；13F 股票信号不能视为完整策略。",
+      "ja": "信用サイクル投資での評価が最も強く、13F株式シグナルは全戦略ではありません。",
+      "ko": "Oaktree의 명성은 신용 사이클 투자에서 가장 강하며 13F 주식 신호가 전체 전략은 아닙니다."
+    }
+  },
+  "hhlr": {
+    "overview": {
+      "en": "Hillhouse / HHLR Advisors is an Asia-linked investment manager followed for U.S.-listed positions in technology, consumer, healthcare, and China-related assets.",
+      "zh": "Hillhouse / HHLR Advisors 是亚洲相关投资机构，13F 常用于观察科技、消费、医疗和中国相关美股持仓。",
+      "ja": "Hillhouse / HHLR Advisorsはアジア関連の運用会社で、テック、消費、ヘルスケア、中国関連米国株の保有で注目されます。",
+      "ko": "Hillhouse / HHLR Advisors는 아시아 관련 운용사로 기술, 소비, 헬스케어, 중국 관련 미국 상장주 보유로 주목받습니다."
+    },
+    "style": {
+      "en": "Growth and value blended with long-term business research, especially in China and Asia-linked companies.",
+      "zh": "价值与成长结合，强调长期企业研究，尤其关注中国和亚洲相关公司。",
+      "ja": "バリューと成長を組み合わせ、特に中国・アジア関連企業の長期事業リサーチを重視します。",
+      "ko": "가치와 성장을 결합하며 중국 및 아시아 관련 기업의 장기 비즈니스 리서치를 중시합니다."
+    },
+    "history": {
+      "en": "Hillhouse was founded by Zhang Lei and became one of the best-known China-focused investment platforms.",
+      "zh": "高瓴由张磊创立，发展为最知名的中国相关投资平台之一。",
+      "ja": "HillhouseはZhang Leiが創業し、中国関連投資平台として広く知られる存在になりました。",
+      "ko": "Hillhouse는 Zhang Lei가 설립했으며 중국 관련 투자 플랫폼 중 가장 잘 알려진 곳 중 하나가 되었습니다."
+    },
+    "scale": {
+      "en": "The broader platform is larger than the 13F slice because it includes private, non-U.S., and non-13F assets.",
+      "zh": "整体平台规模大于 13F 切片，因为还包含私募、非美国和非 13F 资产。",
+      "ja": "非上場、米国外、13F外資産を含むため、平台全体は13F部分より大きいです。",
+      "ko": "비상장, 미국 외, 13F 외 자산을 포함하므로 전체 플랫폼은 13F보다 큽니다."
+    },
+    "leader": {
+      "en": "The platform is associated with Zhang Lei's long-termism and deep China market research.",
+      "zh": "平台与张磊的长期主义和对中国市场的深度研究相关。",
+      "ja": "Zhang Leiの長期主義と中国市場への深い理解と結びついています。",
+      "ko": "Zhang Lei의 장기주의와 중국 시장에 대한 깊은 연구와 연결됩니다."
+    },
+    "record": {
+      "en": "Historical reputation is strong in China growth investing, but 13F only reveals selected U.S.-listed exposures.",
+      "zh": "其历史声誉主要来自中国成长投资，但 13F 只披露部分美国上市敞口。",
+      "ja": "中国成長投資での評価が高い一方、13Fは米国上場エクスポージャーの一部だけを示します。",
+      "ko": "중국 성장 투자에서의 평판이 강하지만 13F는 일부 미국 상장 노출만 보여줍니다."
+    }
+  },
+  "greenwoods": {
+    "overview": {
+      "en": "Greenwoods / Jinglin is a China-linked investment manager whose 13F filings reveal selected U.S.-listed equity positions.",
+      "zh": "Greenwoods / Jinglin 是中国相关投资机构，13F 披露其部分美国上市股票仓位。",
+      "ja": "Greenwoods / Jinglinは中国関連の運用会社で、13Fは一部の米国上場株保有を示します。",
+      "ko": "Greenwoods / Jinglin은 중국 관련 운용사로 13F는 일부 미국 상장주 보유를 보여줍니다."
+    },
+    "style": {
+      "en": "Value and growth blended with deep China-company research and attention to U.S.-listed China assets.",
+      "zh": "价值与成长结合，强调中国公司研究，并关注美国上市中国资产。",
+      "ja": "バリューと成長を組み合わせ、中国企業の深い調査と米国上場中国資産に注目します。",
+      "ko": "가치와 성장을 결합하고 중국 기업 심층 연구와 미국 상장 중국 자산에 주목합니다."
+    },
+    "history": {
+      "en": "Jinglin is a well-known Chinese private investment manager; its Hong Kong and U.S. reporting entities disclose selected positions.",
+      "zh": "景林是国内知名私募投资机构，其香港及美国相关披露实体展示部分持仓。",
+      "ja": "Jinglinは中国で知られる私募運用会社で、香港・米国関連の提出主体が一部保有を開示します。",
+      "ko": "Jinglin은 중국의 유명 사모 운용사이며 홍콩 및 미국 관련 제출 주체가 일부 보유를 공시합니다."
+    },
+    "scale": {
+      "en": "Total China-market assets can be much broader than the U.S. 13F portfolio shown here.",
+      "zh": "其中国市场资产范围可能远大于本站展示的美国 13F 组合。",
+      "ja": "中国市場での資産範囲は、ここで示す米国13Fポートフォリオよりはるかに広い可能性があります。",
+      "ko": "중국 시장 자산 범위는 여기 표시된 미국 13F 포트폴리오보다 훨씬 넓을 수 있습니다."
+    },
+    "leader": {
+      "en": "The team is associated with fundamental China-company research and patient public-equity selection.",
+      "zh": "团队以中国公司基本面研究和耐心选股风格受到关注。",
+      "ja": "中国企業のファンダメンタル調査と忍耐強い上場株選択で注目されます。",
+      "ko": "팀은 중국 기업 펀더멘털 리서치와 인내심 있는 상장주 선별로 주목받습니다."
+    },
+    "record": {
+      "en": "The 13F signal is useful for U.S.-listed China exposure, but it does not represent the full domestic portfolio.",
+      "zh": "13F 对观察美国上市中国资产有价值，但不代表完整境内组合。",
+      "ja": "13Fは米国上場中国資産を見る手掛かりになりますが、国内ポートフォリオ全体ではありません。",
+      "ko": "13F는 미국 상장 중국 자산을 보는 단서가 되지만 전체 국내 포트폴리오를 대표하지 않습니다."
+    }
+  }
+}

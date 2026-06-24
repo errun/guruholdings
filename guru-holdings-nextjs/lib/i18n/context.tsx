@@ -42,7 +42,7 @@ const formatQuarter = (quarter: string, language: Language): string => {
   const match = /^(\d{4})Q([1-4])$/.exec(quarter);
   if (!match) return quarter;
   const [, year, quarterNumber] = match;
-  return language === 'zh' ? `${year}年Q${quarterNumber}` : `Q${quarterNumber} ${year}`;
+  return `Q${quarterNumber} ${year}`;
 };
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
@@ -127,4 +127,3 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 }
 
 export const useLanguage = () => useContext(LanguageContext);
-

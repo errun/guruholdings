@@ -20,6 +20,7 @@ import { ManagerOperationsTable } from '@/components/explorer/ManagerOperationsT
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getManagerProfile } from '@/lib/manager-profiles';
 import {
   changeBadgeVariant,
   directionTextClass,
@@ -193,7 +194,8 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
   const nextManager = snapshot.managers[(snapshot.managers.findIndex((item) => item.id === manager.id) + 1) % snapshot.managers.length];
   const largestIncrease = manager.metrics.largestIncrease;
   const largestDecrease = manager.metrics.largestDecrease;
-  const description = managerMetadata.descriptions?.[locale] || translate(locale, 'manager.description.fallback');
+  const managerProfile = getManagerProfile(manager.id, locale);
+  const description = managerProfile?.overview || managerMetadata.descriptions?.[locale] || translate(locale, 'manager.description.fallback');
 
   return (
     <div className="min-h-screen bg-background">
@@ -252,6 +254,23 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
               })}
             </AlertDescription>
           </Alert>
+        )}
+
+        {managerProfile && (
+          <section className="mb-8">
+            <div className="mb-4 flex items-center gap-3">
+              <FileText className="h-5 w-5 text-slate-700" />
+              <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'manager.profile.title')}</h2>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+              <ProfileItem label={translate(locale, 'manager.profile.style')} value={managerProfile.style} />
+              <ProfileItem label={translate(locale, 'manager.profile.history')} value={managerProfile.history} />
+              <ProfileItem label={translate(locale, 'manager.profile.scale')} value={managerProfile.scale} />
+              <ProfileItem label={translate(locale, 'manager.profile.leader')} value={managerProfile.leader} />
+              <ProfileItem label={translate(locale, 'manager.profile.record')} value={managerProfile.record} />
+              <ProfileItem label={translate(locale, 'manager.profile.scope')} value={translate(locale, 'manager.profile.scopeText')} />
+            </div>
+          </section>
         )}
 
         <section className="mb-8 grid gap-4 lg:grid-cols-4">
@@ -399,6 +418,15 @@ function Metric({ label, value, tone }: { label: string; value: string; tone?: s
     <div>
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className={`mt-1 font-mono text-sm font-semibold ${tone || 'text-slate-950'}`}>{value}</div>
+    </div>
+  );
+}
+
+function ProfileItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-stone-200 bg-white p-4">
+      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</div>
+      <p className="mt-2 text-sm leading-6 text-slate-800">{value}</p>
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { StockTrendChart } from '@/components/explorer/StockTrendChart';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { buildHoldingChangeModel } from '@/lib/holding-change.mjs';
+import { getCompanyMarketCap } from '@/lib/market-data';
 import { getManagerColor } from '@/lib/manager-colors';
 import {
   changeBadgeVariant,
@@ -23,6 +24,7 @@ import {
 import { getStockChartData } from '@/lib/sec13f-lite';
 import { localizedPath, translate, type Locale, type MessageKey } from '@/lib/i18n/site';
 import { getStockByCompanyId, getStockSlug, stockPath } from '@/lib/stock-routes';
+import { getStockDescription } from '@/lib/stock-profiles';
 
 type Stock = typeof snapshot.stocks[number];
 
@@ -86,11 +88,12 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
   const stock = getStockByCompanyId(companyId);
   if (!stock) notFound();
 
-  const { formatNumber, formatQuarter, themeName } = getViewFormatters(locale);
+  const { formatCurrency, formatDateTime, formatNumber, formatQuarter, themeName } = getViewFormatters(locale);
   const actions = getStockActions(stock.companyId);
   const currentHolderCount = actions.filter((action) => action.currentShares > 0).length;
   const descriptions = (stock as Stock & { descriptions?: Partial<Record<Locale, string>> | null }).descriptions;
-  const description = descriptions?.[locale] || translate(locale, 'stock.description.fallback', { name: stock.canonicalName });
+  const description = getStockDescription(stock.companyId, locale) || descriptions?.[locale] || null;
+  const marketCap = await getCompanyMarketCap(stock.companyId);
   const relatedOptions = getRelatedOptionStocks(stock);
 
   return (
@@ -110,9 +113,11 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
               <h1 className="break-words text-3xl font-semibold text-slate-950 sm:text-4xl">
                 {stock.canonicalName}
               </h1>
-              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-800">
-                {description}
-              </p>
+              {description && (
+                <p className="mt-3 max-w-3xl text-base leading-7 text-slate-800">
+                  {description}
+                </p>
+              )}
               <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
                 {translate(locale, 'stock.intro', {
                   ticker: stock.canonicalTicker ? `${stock.canonicalTicker}, ` : '',
@@ -120,9 +125,16 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
                 })}
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:min-w-[300px]">
+            <div className="grid grid-cols-2 gap-3 sm:min-w-[420px] sm:grid-cols-3">
               <HeaderStat label={translate(locale, 'stock.currentManagers')} value={formatNumber(currentHolderCount)} />
               <HeaderStat label={translate(locale, 'live.latestQuarter')} value={formatQuarter(stock.latestQuarter)} />
+              <HeaderStat
+                label={translate(locale, 'stock.companyMarketCap')}
+                value={marketCap.status === 'available' ? formatCurrency(marketCap.value) : translate(locale, 'stock.marketCap.unavailable')}
+                detail={marketCap.status === 'available'
+                  ? translate(locale, 'stock.marketCap.source', { source: marketCap.sourceName, date: formatDateTime(marketCap.retrievedAt) })
+                  : translate(locale, 'stock.marketCap.missing')}
+              />
             </div>
           </div>
         </div>
@@ -181,11 +193,12 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
   );
 }
 
-function HeaderStat({ label, value }: { label: string; value: string }) {
+function HeaderStat({ label, value, detail }: { label: string; value: string; detail?: string }) {
   return (
     <div className="rounded-md border border-stone-200 bg-stone-50 p-3 sm:p-4">
       <div className="text-xs font-medium uppercase text-muted-foreground">{label}</div>
       <div className="mt-2 break-words text-base font-semibold leading-tight text-slate-950 sm:text-lg">{value}</div>
+      {detail && <div className="mt-2 text-[11px] leading-4 text-muted-foreground">{detail}</div>}
     </div>
   );
 }
@@ -208,12 +221,18 @@ function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) 
     formatDate,
     formatNumber,
     formatPercent,
+    formatPercentagePoints,
     formatQuarter,
     formatSignedNumber,
     formatWeight,
   } = getViewFormatters(locale);
   const model = buildHoldingChangeModel(action);
-  const summaryKey = `stock.actionSummary.${model.action}` as MessageKey;
+  const weightDelta = model.weightDelta ?? 0;
+  const summaryKey = (
+    model.action === 'decrease' && weightDelta > 0 ? 'stock.actionSummary.decreaseWeightUp'
+      : model.action === 'increase' && weightDelta < 0 ? 'stock.actionSummary.increaseWeightDown'
+        : `stock.actionSummary.${model.action}`
+  ) as MessageKey;
   const isStale = action.managerQuarter !== snapshot.latestQuarter;
 
   return (
@@ -241,6 +260,11 @@ function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) 
           ) : (
             <div className="font-mono text-sm font-semibold text-slate-950">
               {model.isNew ? translate(locale, 'change.new') : translate(locale, 'change.exit')}: {formatWeight(model.specialWeight)}
+            </div>
+          )}
+          {model.weightDelta !== null && (
+            <div className={`mt-1 font-mono text-xs font-semibold ${directionTextClass(model.weightDelta)}`}>
+              {translate(locale, 'common.weightChange')}: {formatPercentagePoints(model.weightDelta)}
             </div>
           )}
           <p className="mt-2 text-sm leading-6 text-muted-foreground">

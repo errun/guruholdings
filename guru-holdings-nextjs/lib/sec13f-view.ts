@@ -109,9 +109,6 @@ export const formatQuarter = (value: string, locale: Locale = 'en') => {
   const match = /^(\d{4})Q([1-4])$/.exec(value);
   if (!match) return value;
   const [, year, quarter] = match;
-  if (locale === 'zh') return `${year} 年第 ${quarter} 季度`;
-  if (locale === 'ja') return `${year}年第${quarter}四半期`;
-  if (locale === 'ko') return `${year}년 ${quarter}분기`;
   return `Q${quarter} ${year}`;
 };
 

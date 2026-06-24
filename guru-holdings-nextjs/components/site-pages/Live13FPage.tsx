@@ -20,7 +20,6 @@ import {
   directionTextClass,
   getViewFormatters,
 } from '@/lib/sec13f-view';
-import { FilingExpectation } from '@/components/explorer/FilingExpectation';
 import { getExplorerData, getManagerCompareData } from '@/lib/sec13f-lite';
 import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
 import { stockPath } from '@/lib/stock-routes';
@@ -168,7 +167,6 @@ export function Live13FPage({ locale }: { locale: Locale }) {
               </div>
             </div>
           </div>
-          <FilingExpectation locale={locale} className="mt-5" />
         </div>
       </section>
 

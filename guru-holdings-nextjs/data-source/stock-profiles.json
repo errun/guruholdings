@@ -1,0 +1,218 @@
+{
+  "alphabet": {
+    "marketDataSymbol": "GOOGL",
+    "descriptions": {
+      "en": "Alphabet is Google's parent company, with revenue led by search advertising, YouTube, Android, Google Cloud, and a portfolio of AI and infrastructure bets.",
+      "zh": "Alphabet 是 Google 的母公司，收入主要来自搜索广告、YouTube、Android、Google Cloud，同时持续投入 AI 和基础设施业务。",
+      "ja": "AlphabetはGoogleの親会社で、検索広告、YouTube、Android、Google Cloudを主軸に、AIとインフラ事業にも投資しています。",
+      "ko": "Alphabet은 Google의 모회사로 검색 광고, YouTube, Android, Google Cloud가 핵심이며 AI와 인프라 사업에도 투자합니다."
+    }
+  },
+  "023135106": {
+    "marketDataSymbol": "AMZN",
+    "descriptions": {
+      "en": "Amazon combines global e-commerce, third-party marketplace services, advertising, subscriptions, and AWS cloud infrastructure.",
+      "zh": "Amazon 业务覆盖全球电商、第三方商家平台、广告、会员订阅和 AWS 云基础设施。",
+      "ja": "AmazonはグローバルEC、第三者出品サービス、広告、サブスクリプション、AWSクラウド基盤を展開しています。",
+      "ko": "Amazon은 글로벌 전자상거래, 제3자 판매자 플랫폼, 광고, 구독 서비스와 AWS 클라우드 인프라를 운영합니다."
+    }
+  },
+  "191216100": {
+    "marketDataSymbol": "KO",
+    "descriptions": {
+      "en": "Coca-Cola is a global beverage company built around concentrate sales, bottling partnerships, brands, and worldwide distribution.",
+      "zh": "Coca-Cola 是全球饮料公司，核心是浓缩液销售、装瓶伙伴体系、品牌组合和全球分销网络。",
+      "ja": "Coca-Colaは濃縮原液販売、ボトリング提携、ブランド群、世界的な流通網を中核とする飲料会社です。",
+      "ko": "Coca-Cola는 원액 판매, 병입 파트너십, 브랜드 포트폴리오와 글로벌 유통망을 중심으로 한 음료 기업입니다."
+    }
+  },
+  "microsoft": {
+    "marketDataSymbol": "MSFT",
+    "descriptions": {
+      "en": "Microsoft provides enterprise software, Azure cloud infrastructure, productivity tools, gaming platforms, and AI-enabled services.",
+      "zh": "Microsoft 提供企业软件、Azure 云基础设施、生产力工具、游戏平台和 AI 服务。",
+      "ja": "Microsoftは企業向けソフトウェア、Azureクラウド基盤、生産性ツール、ゲーム基盤、AIサービスを提供しています。",
+      "ko": "Microsoft는 기업용 소프트웨어, Azure 클라우드 인프라, 생산성 도구, 게임 플랫폼과 AI 서비스를 제공합니다."
+    }
+  },
+  "nvidia": {
+    "marketDataSymbol": "NVDA",
+    "descriptions": {
+      "en": "NVIDIA designs GPUs, accelerated computing platforms, networking products, and software used in AI, data centers, gaming, and visualization.",
+      "zh": "NVIDIA 设计 GPU、加速计算平台、网络产品和软件，主要用于 AI、数据中心、游戏和可视化。",
+      "ja": "NVIDIAはGPU、アクセラレーテッドコンピューティング基盤、ネットワーク製品、AI・データセンター・ゲーム向けソフトウェアを設計しています。",
+      "ko": "NVIDIA는 GPU, 가속 컴퓨팅 플랫폼, 네트워킹 제품과 AI, 데이터센터, 게임, 시각화용 소프트웨어를 설계합니다."
+    }
+  },
+  "874039100": {
+    "marketDataSymbol": "TSM",
+    "descriptions": {
+      "en": "Taiwan Semiconductor Manufacturing is the leading pure-play semiconductor foundry, manufacturing advanced chips for global fabless customers.",
+      "zh": "台积电是全球领先的专业半导体代工厂，为无晶圆厂客户制造先进芯片。",
+      "ja": "Taiwan Semiconductor Manufacturingは世界有数の専業半導体ファウンドリで、ファブレス企業向けに先端チップを製造しています。",
+      "ko": "Taiwan Semiconductor Manufacturing은 세계적인 전업 반도체 파운드리로 글로벌 팹리스 고객의 첨단 칩을 제조합니다."
+    }
+  },
+  "11135F101": {
+    "marketDataSymbol": "AVGO",
+    "descriptions": {
+      "en": "Broadcom supplies semiconductor and infrastructure software products used in networking, broadband, wireless, storage, and enterprise systems.",
+      "zh": "Broadcom 提供半导体和基础设施软件，应用于网络、宽带、无线、存储和企业系统。",
+      "ja": "Broadcomはネットワーク、ブロードバンド、無線、ストレージ、企業システム向けの半導体とインフラソフトウェアを提供します。",
+      "ko": "Broadcom은 네트워킹, 광대역, 무선, 스토리지와 기업 시스템에 쓰이는 반도체와 인프라 소프트웨어를 공급합니다."
+    }
+  },
+  "N07059210": {
+    "marketDataSymbol": "ASML",
+    "descriptions": {
+      "en": "ASML makes lithography systems that semiconductor manufacturers use to produce advanced chips, including EUV equipment.",
+      "zh": "ASML 制造半导体光刻系统，包括先进制程所需的 EUV 设备。",
+      "ja": "ASMLは先端半導体製造に使われるリソグラフィ装置、特にEUV装置を製造しています。",
+      "ko": "ASML은 첨단 반도체 생산에 필요한 리소그래피 장비, 특히 EUV 장비를 제조합니다."
+    }
+  },
+  "458140100": {
+    "marketDataSymbol": "INTC",
+    "descriptions": {
+      "en": "Intel designs processors and related platforms while investing in foundry manufacturing and advanced packaging.",
+      "zh": "Intel 设计处理器和相关平台，并投资晶圆代工制造与先进封装能力。",
+      "ja": "Intelはプロセッサと関連プラットフォームを設計し、ファウンドリ製造と先端パッケージにも投資しています。",
+      "ko": "Intel은 프로세서와 관련 플랫폼을 설계하며 파운드리 제조와 첨단 패키징에도 투자합니다."
+    }
+  },
+  "55024U109": {
+    "marketDataSymbol": "LITE",
+    "descriptions": {
+      "en": "Lumentum supplies optical and photonic products used in communications networks, cloud data centers, and laser applications.",
+      "zh": "Lumentum 提供光学和光子产品，应用于通信网络、云数据中心和激光场景。",
+      "ja": "Lumentumは通信ネットワーク、クラウドデータセンター、レーザー用途向けの光学・フォトニクス製品を供給します。",
+      "ko": "Lumentum은 통신 네트워크, 클라우드 데이터센터와 레이저 응용 분야에 쓰이는 광학·포토닉스 제품을 공급합니다."
+    }
+  },
+  "70614W100": {
+    "marketDataSymbol": "PTON",
+    "descriptions": {
+      "en": "Peloton sells connected fitness hardware, subscriptions, and digital workout content.",
+      "zh": "Peloton 销售联网健身硬件、会员订阅和数字健身内容。",
+      "ja": "Pelotonは接続型フィットネス機器、サブスクリプション、デジタル運動コンテンツを提供しています。",
+      "ko": "Peloton은 연결형 피트니스 기기, 구독 서비스와 디지털 운동 콘텐츠를 판매합니다."
+    }
+  },
+  "46120E602": {
+    "marketDataSymbol": "ISRG",
+    "descriptions": {
+      "en": "Intuitive Surgical develops robotic-assisted surgery systems, instruments, accessories, and related services.",
+      "zh": "Intuitive Surgical 开发机器人辅助手术系统、器械、耗材和相关服务。",
+      "ja": "Intuitive Surgicalはロボット支援手術システム、器具、アクセサリ、関連サービスを開発しています。",
+      "ko": "Intuitive Surgical은 로봇 보조 수술 시스템, 기구, 액세서리와 관련 서비스를 개발합니다."
+    }
+  },
+  "30303M102": {
+    "marketDataSymbol": "META",
+    "descriptions": {
+      "en": "Meta Platforms operates Facebook, Instagram, WhatsApp, Messenger, advertising systems, and Reality Labs.",
+      "zh": "Meta Platforms 运营 Facebook、Instagram、WhatsApp、Messenger、广告系统和 Reality Labs。",
+      "ja": "Meta PlatformsはFacebook、Instagram、WhatsApp、Messenger、広告システム、Reality Labsを運営しています。",
+      "ko": "Meta Platforms는 Facebook, Instagram, WhatsApp, Messenger, 광고 시스템과 Reality Labs를 운영합니다."
+    }
+  },
+  "91324P102": {
+    "marketDataSymbol": "UNH",
+    "descriptions": {
+      "en": "UnitedHealth Group provides health insurance, care delivery, pharmacy benefit management, and healthcare data services through UnitedHealthcare and Optum.",
+      "zh": "UnitedHealth Group 通过 UnitedHealthcare 和 Optum 提供健康保险、医疗服务、药品福利管理和医疗数据服务。",
+      "ja": "UnitedHealth GroupはUnitedHealthcareとOptumを通じて、医療保険、ケア提供、薬剤給付管理、医療データサービスを提供しています。",
+      "ko": "UnitedHealth Group은 UnitedHealthcare와 Optum을 통해 건강보험, 진료 서비스, 약제급여 관리와 의료 데이터 서비스를 제공합니다."
+    }
+  },
+  "75734B100": {
+    "marketDataSymbol": "RDDT",
+    "descriptions": {
+      "en": "Reddit operates online communities and monetizes through advertising, data licensing, and user services.",
+      "zh": "Reddit 运营在线社区，收入来自广告、数据授权和用户服务。",
+      "ja": "Redditはオンラインコミュニティを運営し、広告、データライセンス、ユーザーサービスで収益化しています。",
+      "ko": "Reddit은 온라인 커뮤니티를 운영하며 광고, 데이터 라이선스와 사용자 서비스로 수익을 창출합니다."
+    }
+  },
+  "03831W108": {
+    "marketDataSymbol": "APP",
+    "descriptions": {
+      "en": "AppLovin provides software and advertising technology used by mobile app developers to acquire users and monetize inventory.",
+      "zh": "AppLovin 提供移动应用开发者用于获客和广告变现的软件与广告技术。",
+      "ja": "AppLovinはモバイルアプリ開発者向けに、ユーザー獲得と広告収益化のためのソフトウェアと広告技術を提供します。",
+      "ko": "AppLovin은 모바일 앱 개발자가 이용자를 확보하고 광고 재고를 수익화하는 데 쓰는 소프트웨어와 광고 기술을 제공합니다."
+    }
+  },
+  "L8681T102": {
+    "marketDataSymbol": "SPOT",
+    "descriptions": {
+      "en": "Spotify operates a global audio streaming platform for music, podcasts, advertising, and paid subscriptions.",
+      "zh": "Spotify 运营全球音频流媒体平台，覆盖音乐、播客、广告和付费订阅。",
+      "ja": "Spotifyは音楽、ポッドキャスト、広告、有料サブスクリプションを扱う世界的な音声ストリーミング平台です。",
+      "ko": "Spotify는 음악, 팟캐스트, 광고와 유료 구독을 제공하는 글로벌 오디오 스트리밍 플랫폼입니다."
+    }
+  },
+  "11271J107": {
+    "marketDataSymbol": "BN",
+    "descriptions": {
+      "en": "Brookfield Corporation is an alternative-asset and investment company with exposure to infrastructure, real estate, renewable power, credit, and private equity.",
+      "zh": "Brookfield Corporation 是另类资产和投资公司，业务涉及基础设施、地产、可再生能源、信用和私募股权。",
+      "ja": "Brookfield Corporationはインフラ、不動産、再生可能電力、信用、プライベートエクイティに関わるオルタナティブ資産会社です。",
+      "ko": "Brookfield Corporation은 인프라, 부동산, 재생에너지, 신용과 사모투자에 노출된 대체자산 투자 회사입니다."
+    }
+  },
+  "01609W102": {
+    "marketDataSymbol": "BABA",
+    "descriptions": {
+      "en": "Alibaba Group operates Chinese and international commerce platforms, cloud services, logistics, local services, and digital media businesses.",
+      "zh": "Alibaba Group 运营中国及国际商业平台、云服务、物流、本地生活和数字媒体业务。",
+      "ja": "Alibaba Groupは中国および海外のコマース平台、クラウド、物流、ローカルサービス、デジタルメディア事業を展開しています。",
+      "ko": "Alibaba Group은 중국과 해외 커머스 플랫폼, 클라우드, 물류, 현지 생활 서비스와 디지털 미디어 사업을 운영합니다."
+    }
+  },
+  "038222105": {
+    "marketDataSymbol": "AMAT",
+    "descriptions": {
+      "en": "Applied Materials supplies equipment, services, and software used to manufacture semiconductors and advanced displays.",
+      "zh": "Applied Materials 提供制造半导体和先进显示器所需的设备、服务和软件。",
+      "ja": "Applied Materialsは半導体と先端ディスプレイ製造向けの装置、サービス、ソフトウェアを供給します。",
+      "ko": "Applied Materials는 반도체와 첨단 디스플레이 제조에 쓰이는 장비, 서비스와 소프트웨어를 공급합니다."
+    }
+  },
+  "512807306": {
+    "marketDataSymbol": "LRCX",
+    "descriptions": {
+      "en": "Lam Research supplies wafer-fabrication equipment and services used in semiconductor manufacturing.",
+      "zh": "Lam Research 提供半导体制造所需的晶圆制造设备和服务。",
+      "ja": "Lam Researchは半導体製造に使われるウェハ製造装置とサービスを提供します。",
+      "ko": "Lam Research는 반도체 제조에 쓰이는 웨이퍼 제조 장비와 서비스를 공급합니다."
+    }
+  },
+  "595112103": {
+    "marketDataSymbol": "MU",
+    "descriptions": {
+      "en": "Micron Technology makes memory and storage products, including DRAM, NAND, and SSD solutions.",
+      "zh": "Micron Technology 生产内存和存储产品，包括 DRAM、NAND 和 SSD 方案。",
+      "ja": "Micron TechnologyはDRAM、NAND、SSDなどのメモリおよびストレージ製品を製造しています。",
+      "ko": "Micron Technology는 DRAM, NAND, SSD를 포함한 메모리와 스토리지 제품을 제조합니다."
+    }
+  },
+  "747525103": {
+    "marketDataSymbol": "QCOM",
+    "descriptions": {
+      "en": "Qualcomm designs mobile and connectivity chips, modem technology, licensing platforms, and edge-AI semiconductor solutions.",
+      "zh": "Qualcomm 设计移动和连接芯片、调制解调器技术、授权平台和边缘 AI 半导体方案。",
+      "ja": "Qualcommはモバイル・接続チップ、モデム技術、ライセンス平台、エッジAI半導体ソリューションを設計しています。",
+      "ko": "Qualcomm은 모바일 및 연결 칩, 모뎀 기술, 라이선스 플랫폼과 엣지 AI 반도체 솔루션을 설계합니다."
+    }
+  },
+  "21873S108": {
+    "marketDataSymbol": "CRWV",
+    "descriptions": {
+      "en": "CoreWeave provides cloud infrastructure optimized for GPU computing and AI workloads.",
+      "zh": "CoreWeave 提供面向 GPU 计算和 AI 工作负载优化的云基础设施。",
+      "ja": "CoreWeaveはGPUコンピューティングとAIワークロード向けに最適化したクラウド基盤を提供しています。",
+      "ko": "CoreWeave는 GPU 컴퓨팅과 AI 워크로드에 최적화된 클라우드 인프라를 제공합니다."
+    }
+  }
+}
