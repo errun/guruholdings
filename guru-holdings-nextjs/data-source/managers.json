@@ -4,48 +4,331 @@
     "displayName": "Berkshire Hathaway",
     "managerName": "BERKSHIRE HATHAWAY INC",
     "leadInvestor": "Warren Buffett",
-    "cik": "0001067983"
+    "cik": "0001067983",
+    "aliases": ["Berkshire", "Berkshire Hathaway Inc", "Warren Buffett", "Buffett"],
+    "styleTags": ["concentrated", "quality", "value"],
+    "descriptions": {
+      "en": "Berkshire Hathaway is Warren Buffett’s holding company, known for a concentrated public-equity portfolio and long-term value investing.",
+      "zh": "Berkshire Hathaway 是 Warren Buffett 领导的控股公司，以集中型公开股票组合和长期价值投资著称。",
+      "ja": "Berkshire HathawayはWarren Buffettが率いる持株会社で、集中した上場株ポートフォリオと長期バリュー投資で知られます。",
+      "ko": "Berkshire Hathaway는 Warren Buffett이 이끄는 지주회사로, 집중된 상장주식 포트폴리오와 장기 가치투자로 알려져 있습니다."
+    },
+    "logoUrl": null,
+    "logoFallbackReason": "No reliable official logo asset URL was confirmed from the official Berkshire Hathaway website.",
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001067983.json"
+    }
   },
   {
     "id": "himalaya",
     "displayName": "Himalaya Capital",
     "managerName": "Himalaya Capital Management LLC",
     "leadInvestor": "Li Lu",
-    "cik": "0001709323"
+    "cik": "0001709323",
+    "aliases": ["Himalaya", "Himalaya Capital Management", "Li Lu"],
+    "styleTags": ["concentrated", "value", "china-assets"],
+    "descriptions": {
+      "en": "Himalaya Capital is Li Lu’s investment firm, followed for concentrated long-term public-equity holdings.",
+      "zh": "Himalaya Capital 是 Li Lu 管理的投资机构，因长期、集中型公开股票持仓受到关注。",
+      "ja": "Himalaya CapitalはLi Luの投資会社で、長期かつ集中した上場株保有で注目されています。",
+      "ko": "Himalaya Capital은 Li Lu가 운용하는 투자회사로, 장기 집중형 상장주식 보유로 주목받습니다."
+    },
+    "logoUrl": null,
+    "logoFallbackReason": "No reliable official logo asset URL was confirmed from the official Himalaya Capital website.",
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001709323.json"
+    }
   },
   {
     "id": "bridgewater",
     "displayName": "Bridgewater Associates",
     "managerName": "Bridgewater Associates, LP",
     "leadInvestor": "Ray Dalio / Bridgewater",
-    "cik": "0001350694"
+    "cik": "0001350694",
+    "aliases": ["Bridgewater", "Bridgewater Associates LP", "Ray Dalio"],
+    "styleTags": ["macro", "diversified", "systematic"],
+    "descriptions": {
+      "en": "Bridgewater Associates is a large macro-oriented investment manager whose 13F filings show its disclosed U.S. equity positions.",
+      "zh": "Bridgewater Associates 是大型宏观导向投资管理机构，其 13F 披露展示了美国公开股票持仓。",
+      "ja": "Bridgewater Associatesは大手マクロ系運用会社で、13Fでは開示対象の米国株保有を確認できます。",
+      "ko": "Bridgewater Associates는 대형 매크로 투자운용사로, 13F 공시에서 공개 대상 미국 주식 보유를 확인할 수 있습니다."
+    },
+    "logoUrl": null,
+    "logoFallbackReason": "No reliable official logo asset URL was confirmed from the official Bridgewater website.",
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001350694.json"
+    }
   },
   {
     "id": "pershing",
     "displayName": "Pershing Square",
     "managerName": "Pershing Square Capital Management, L.P.",
     "leadInvestor": "Bill Ackman",
-    "cik": "0001336528"
+    "cik": "0001336528",
+    "aliases": ["Pershing", "Pershing Square Capital", "Bill Ackman"],
+    "styleTags": ["activist", "concentrated", "quality"],
+    "descriptions": {
+      "en": "Pershing Square is Bill Ackman’s concentrated investment manager, often associated with activist and high-conviction public-equity positions.",
+      "zh": "Pershing Square 是 Bill Ackman 管理的集中型投资机构，常与主动参与和高 conviction 公开股票持仓相关。",
+      "ja": "Pershing SquareはBill Ackmanの集中型運用会社で、アクティビスト投資や高確信度の上場株保有で知られます。",
+      "ko": "Pershing Square는 Bill Ackman의 집중형 투자운용사로, 행동주의 투자와 고확신 상장주식 보유로 알려져 있습니다."
+    },
+    "logoUrl": null,
+    "logoFallbackReason": "No reliable official logo asset URL was confirmed from the official Pershing Square website.",
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001336528.json"
+    }
   },
   {
     "id": "scion",
     "displayName": "Scion Asset Management",
     "managerName": "Scion Asset Management, LLC",
     "leadInvestor": "Michael Burry",
-    "cik": "0001649339"
+    "cik": "0001649339",
+    "aliases": ["Scion", "Scion Asset Management LLC", "Michael Burry"],
+    "styleTags": ["contrarian", "concentrated", "event-driven"],
+    "descriptions": {
+      "en": "Scion Asset Management is Michael Burry’s investment manager, followed for concentrated and often contrarian 13F signals.",
+      "zh": "Scion Asset Management 是 Michael Burry 的投资管理机构，因集中且常带有逆向特征的 13F 信号受到关注。",
+      "ja": "Scion Asset ManagementはMichael Burryの運用会社で、集中型かつ逆張り色のある13Fシグナルで注目されます。",
+      "ko": "Scion Asset Management는 Michael Burry의 투자운용사로, 집중적이고 때로는 역발상적인 13F 신호로 주목받습니다."
+    },
+    "logoUrl": null,
+    "logoFallbackReason": "No reliable official logo asset URL was confirmed for Scion Asset Management.",
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001649339.json"
+    }
   },
   {
     "id": "tiger",
     "displayName": "Tiger Global",
     "managerName": "TIGER GLOBAL MANAGEMENT LLC",
     "leadInvestor": "Tiger Global",
-    "cik": "0001167483"
+    "cik": "0001167483",
+    "aliases": ["Tiger", "Tiger Global Management"],
+    "styleTags": ["growth", "technology", "global"],
+    "descriptions": {
+      "en": "Tiger Global is a global investment manager often associated with growth and technology-oriented public-equity holdings.",
+      "zh": "Tiger Global 是全球投资管理机构，常与成长型和科技导向的公开股票持仓相关。",
+      "ja": "Tiger Globalはグローバル運用会社で、成長株やテクノロジー関連の上場株保有で知られます。",
+      "ko": "Tiger Global은 글로벌 투자운용사로, 성장주와 기술주 중심의 상장주식 보유로 알려져 있습니다."
+    },
+    "logoUrl": null,
+    "logoFallbackReason": "No reliable official logo asset URL was confirmed from the official Tiger Global website.",
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001167483.json"
+    }
   },
   {
     "id": "palliser",
     "displayName": "Palliser Capital",
     "managerName": "Palliser Capital (UK) Ltd",
     "leadInvestor": "Palliser Capital",
-    "cik": "0001881490"
+    "cik": "0001881490",
+    "aliases": ["Palliser", "Palliser Capital UK"],
+    "styleTags": ["event-driven", "activist", "global"],
+    "descriptions": {
+      "en": "Palliser Capital is an event-driven investment manager whose 13F filings disclose selected U.S. public-equity positions.",
+      "zh": "Palliser Capital 是事件驱动型投资管理机构，其 13F 披露展示部分美国公开股票持仓。",
+      "ja": "Palliser Capitalはイベントドリブン型の運用会社で、13Fでは一部の米国上場株保有を開示しています。",
+      "ko": "Palliser Capital은 이벤트 드리븐 투자운용사로, 13F 공시에서 일부 미국 상장주식 보유를 공개합니다."
+    },
+    "logoUrl": null,
+    "logoFallbackReason": "No reliable official logo asset URL was confirmed from the official Palliser Capital website.",
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001881490.json"
+    }
+  },
+  {
+    "id": "ark",
+    "displayName": "ARK Invest",
+    "managerName": "ARK Investment Management LLC",
+    "leadInvestor": "Cathie Wood",
+    "cik": "0001697748",
+    "aliases": ["ARK", "ARK Invest", "ARK Investment Management", "Cathie Wood"],
+    "styleTags": ["innovation", "growth", "technology"],
+    "descriptions": {
+      "en": "ARK Invest is Cathie Wood's innovation-focused investment manager, followed for high-conviction growth and technology 13F signals.",
+      "zh": "ARK Invest 是 Cathie Wood 领导的创新主题投资机构，因高集中度成长与科技持仓信号受到关注。",
+      "ja": "ARK InvestはCathie Woodが率いるイノベーション重視の運用会社で、高確信度の成長株・テクノロジー関連13Fシグナルで注目されます。",
+      "ko": "ARK Invest는 Cathie Wood가 이끄는 혁신 중심 운용사로, 확신도 높은 성장주와 기술주 13F 신호로 주목받습니다."
+    },
+    "logoUrl": "https://assets.ark-funds.com/media-12243148-2a3e-4996-9763-260f93905eb9/90a5283e-7d28-4d42-90cc-2a486d39fdd6/ark-logo-1-1.svg",
+    "logoFallbackReason": null,
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001697748.json",
+      "officialWebsite": "https://www.ark-invest.com",
+      "officialLogoSource": "https://www.ark-funds.com"
+    }
+  },
+  {
+    "id": "coatue",
+    "displayName": "Coatue Management",
+    "managerName": "COATUE MANAGEMENT LLC",
+    "leadInvestor": "Philippe Laffont",
+    "cik": "0001135730",
+    "aliases": ["Coatue", "Coatue Management LLC", "Philippe Laffont"],
+    "styleTags": ["technology", "growth", "crossover"],
+    "descriptions": {
+      "en": "Coatue Management is Philippe Laffont's technology-oriented investment manager, followed for growth and crossover public-equity signals.",
+      "zh": "Coatue Management 是 Philippe Laffont 领导的科技导向投资机构，常被用于观察成长股与跨市场公开持仓信号。",
+      "ja": "Coatue ManagementはPhilippe Laffontが率いるテクノロジー志向の運用会社で、成長株とクロスオーバー投資の公開株シグナルで注目されます。",
+      "ko": "Coatue Management는 Philippe Laffont가 이끄는 기술주 중심 운용사로, 성장주와 크로스오버 공개주식 신호로 주목받습니다."
+    },
+    "logoUrl": "https://www.coatue.com/favicon.jpg",
+    "logoFallbackReason": null,
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001135730.json",
+      "officialWebsite": "https://www.coatue.com",
+      "officialLogoSource": "https://www.coatue.com/favicon.jpg"
+    }
+  },
+  {
+    "id": "icahn",
+    "displayName": "Icahn Capital",
+    "managerName": "ICAHN CARL C",
+    "leadInvestor": "Carl Icahn",
+    "cik": "0000921669",
+    "aliases": ["Icahn", "Icahn Capital", "Carl Icahn", "ICAHN CARL C"],
+    "styleTags": ["activist", "concentrated", "value"],
+    "descriptions": {
+      "en": "Icahn Capital tracks Carl Icahn's disclosed 13F positions, often associated with activist and concentrated value investing.",
+      "zh": "Icahn Capital 跟踪 Carl Icahn 披露的 13F 持仓，常与主动参与型、集中型价值投资相关。",
+      "ja": "Icahn CapitalはCarl Icahnの開示13Fポジションを追跡する対象で、アクティビスト型かつ集中したバリュー投資で知られます。",
+      "ko": "Icahn Capital은 Carl Icahn의 공개 13F 포지션을 추적하는 대상으로, 행동주의와 집중 가치투자로 잘 알려져 있습니다."
+    },
+    "logoUrl": null,
+    "logoFallbackReason": "No reliable official logo asset URL was confirmed from Icahn Capital or Icahn Enterprises official sources.",
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0000921669.json"
+    }
+  },
+  {
+    "id": "third-point",
+    "displayName": "Third Point",
+    "managerName": "Third Point LLC",
+    "leadInvestor": "Daniel Loeb",
+    "cik": "0001040273",
+    "aliases": ["Third Point", "Third Point LLC", "Daniel Loeb"],
+    "styleTags": ["activist", "event-driven", "value"],
+    "descriptions": {
+      "en": "Third Point is Daniel Loeb's event-driven investment firm, followed for activist, special-situation, and value-oriented 13F signals.",
+      "zh": "Third Point 是 Daniel Loeb 领导的事件驱动投资机构，常被用于观察主动参与、特殊机会与价值导向 13F 信号。",
+      "ja": "Third PointはDaniel Loebが率いるイベントドリブン投資会社で、アクティビスト、特殊状況、バリュー志向の13Fシグナルで注目されます。",
+      "ko": "Third Point는 Daniel Loeb가 이끄는 이벤트 중심 투자회사로, 행동주의·특수상황·가치지향 13F 신호로 주목받습니다."
+    },
+    "logoUrl": "https://www.thirdpoint.com/img/apple-touch-icon.png",
+    "logoFallbackReason": null,
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001040273.json",
+      "officialWebsite": "https://www.thirdpoint.com",
+      "officialLogoSource": "https://www.thirdpoint.com/img/apple-touch-icon.png"
+    }
+  },
+  {
+    "id": "baupost",
+    "displayName": "Baupost Group",
+    "managerName": "BAUPOST GROUP LLC/MA",
+    "leadInvestor": "Seth Klarman",
+    "cik": "0001061768",
+    "aliases": ["Baupost", "Baupost Group", "Baupost Group LLC", "Seth Klarman"],
+    "styleTags": ["value", "contrarian", "concentrated"],
+    "descriptions": {
+      "en": "Baupost Group is Seth Klarman's value-oriented investment firm, followed for patient and often contrarian 13F portfolio signals.",
+      "zh": "Baupost Group 是 Seth Klarman 领导的价值投资机构，因耐心且常带逆向特征的 13F 持仓信号受到关注。",
+      "ja": "Baupost GroupはSeth Klarmanが率いるバリュー志向の投資会社で、忍耐強く逆張り色のある13Fポートフォリオシグナルで注目されます。",
+      "ko": "Baupost Group은 Seth Klarman이 이끄는 가치투자 회사로, 인내심 있고 때로는 역발상적인 13F 포트폴리오 신호로 주목받습니다."
+    },
+    "logoUrl": null,
+    "logoFallbackReason": "No reliable official public logo asset URL was confirmed for Baupost Group.",
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001061768.json"
+    }
+  },
+  {
+    "id": "greenlight",
+    "displayName": "Greenlight Capital",
+    "managerName": "DME Capital Management, LP",
+    "leadInvestor": "David Einhorn",
+    "cik": "0001489933",
+    "aliases": ["Greenlight", "Greenlight Capital", "DME Capital Management", "David Einhorn"],
+    "styleTags": ["value", "long-short", "event-driven"],
+    "descriptions": {
+      "en": "Greenlight Capital is David Einhorn's investment platform; its current 13F signals are tracked through the SEC filer DME Capital Management, LP.",
+      "zh": "Greenlight Capital 是 David Einhorn 的投资平台；当前 13F 信号以 SEC 申报主体 DME Capital Management, LP 进行跟踪。",
+      "ja": "Greenlight CapitalはDavid Einhornの投資プラットフォームで、現在の13FシグナルはSEC提出主体DME Capital Management, LPを通じて追跡します。",
+      "ko": "Greenlight Capital은 David Einhorn의 투자 플랫폼이며, 현재 13F 신호는 SEC 제출 주체인 DME Capital Management, LP를 통해 추적합니다."
+    },
+    "logoUrl": null,
+    "logoFallbackReason": "No reliable official public logo asset URL was confirmed for Greenlight Capital or DME Capital Management.",
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001489933.json"
+    }
+  },
+  {
+    "id": "oaktree",
+    "displayName": "Oaktree Capital",
+    "managerName": "OAKTREE CAPITAL MANAGEMENT LP",
+    "leadInvestor": "Howard Marks",
+    "cik": "0000949509",
+    "aliases": ["Oaktree", "Oaktree Capital", "Oaktree Capital Management", "Howard Marks"],
+    "styleTags": ["credit", "value", "distressed"],
+    "descriptions": {
+      "en": "Oaktree Capital is Howard Marks' credit and value-oriented investment manager, with 13F filings showing its disclosed U.S. equity positions.",
+      "zh": "Oaktree Capital 是 Howard Marks 相关的信用与价值导向投资机构，其 13F 披露展示了公开美国股票持仓。",
+      "ja": "Oaktree CapitalはHoward Marksで知られるクレジットおよびバリュー志向の運用会社で、13Fでは開示対象の米国株ポジションを確認できます。",
+      "ko": "Oaktree Capital은 Howard Marks로 알려진 신용 및 가치 중심 운용사로, 13F를 통해 공개 대상 미국 주식 포지션을 확인할 수 있습니다."
+    },
+    "logoUrl": "https://www.oaktreecapital.com/Assets/OaktreeCap/Images/favicon_1024x1024_1.png",
+    "logoFallbackReason": null,
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0000949509.json",
+      "officialWebsite": "https://www.oaktreecapital.com",
+      "officialLogoSource": "https://www.oaktreecapital.com/Assets/OaktreeCap/Images/favicon_1024x1024_1.png"
+    }
+  },
+  {
+    "id": "hhlr",
+    "displayName": "Hillhouse / HHLR Advisors",
+    "managerName": "HHLR ADVISORS, LTD.",
+    "leadInvestor": "Hillhouse / HHLR",
+    "cik": "0001762304",
+    "aliases": ["Hillhouse", "HHLR", "HHLR Advisors", "Hillhouse Capital", "Gaoling"],
+    "styleTags": ["asia", "growth", "china-assets"],
+    "descriptions": {
+      "en": "Hillhouse / HHLR Advisors is an Asia-linked investment manager whose 13F filings disclose selected U.S.-listed equity positions.",
+      "zh": "Hillhouse / HHLR Advisors 是与亚洲市场相关的投资机构，其 13F 披露展示部分美国上市股票持仓。",
+      "ja": "Hillhouse / HHLR Advisorsはアジア関連の運用会社で、13Fでは一部の米国上場株ポジションを開示しています。",
+      "ko": "Hillhouse / HHLR Advisors는 아시아 시장과 관련된 운용사로, 13F를 통해 일부 미국 상장주식 포지션을 공개합니다."
+    },
+    "logoUrl": "https://www.hillhouseinvestment.cn/wp-content/uploads/2024/01/Hillhouse_Primary_On_BG_Symbol_RGB_AW.jpg",
+    "logoFallbackReason": null,
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001762304.json",
+      "officialWebsite": "https://www.hillhouseinvestment.cn",
+      "officialLogoSource": "https://www.hillhouseinvestment.cn/wp-content/uploads/2024/01/Hillhouse_Primary_On_BG_Symbol_RGB_AW.jpg"
+    }
+  },
+  {
+    "id": "greenwoods",
+    "displayName": "Greenwoods / Jinglin",
+    "managerName": "Greenwoods Asset Management Hong Kong Ltd.",
+    "leadInvestor": "Jinglin Asset Management",
+    "cik": "0001848138",
+    "aliases": ["Greenwoods", "Jinglin", "Jinglin Asset Management", "Greenwoods Asset Management Hong Kong"],
+    "styleTags": ["asia", "china-assets", "value"],
+    "descriptions": {
+      "en": "Greenwoods / Jinglin is a China-linked investment manager whose SEC 13F filings show selected U.S.-listed equity positions.",
+      "zh": "Greenwoods / Jinglin 是与中国市场相关的投资机构，其 SEC 13F 披露展示部分美国上市股票持仓。",
+      "ja": "Greenwoods / Jinglinは中国市場に関連する運用会社で、SEC 13Fでは一部の米国上場株ポジションを確認できます。",
+      "ko": "Greenwoods / Jinglin은 중국 시장과 관련된 운용사로, SEC 13F를 통해 일부 미국 상장주식 포지션을 확인할 수 있습니다."
+    },
+    "logoUrl": "https://www.greenwoodsasset.com/favicon.ico",
+    "logoFallbackReason": null,
+    "sourceIdentifiers": {
+      "secSubmissionsUrl": "https://data.sec.gov/submissions/CIK0001848138.json",
+      "officialWebsite": "https://www.greenwoodsasset.com",
+      "officialLogoSource": "https://www.greenwoodsasset.com/favicon.ico"
+    }
   }
 ]

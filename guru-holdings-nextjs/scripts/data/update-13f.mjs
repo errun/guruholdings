@@ -122,6 +122,24 @@ const parseNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const median = (values) => {
+  if (!values.length) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+};
+
+const detectValueScale = (rows) => {
+  const shareRatios = rows
+    .filter((row) => row.amountType === 'SH' && !row.putCall && row.rawValue > 0 && row.shares > 0)
+    .map((row) => row.rawValue / row.shares);
+  const medianRatio = median(shareRatios);
+  if (medianRatio !== null && medianRatio < 1 && medianRatio * 1000 >= 1 && medianRatio * 1000 <= 200000) {
+    return 1000;
+  }
+  return 1;
+};
+
 const normalizeIssuer = (name) => name.replace(/\s+/g, ' ').trim().toUpperCase();
 
 const classifyThemes = (issuerName, themes) => {
@@ -149,6 +167,7 @@ const createSecurityResolver = (securities = []) => {
     ]).map((item) => String(item).trim()).filter(Boolean),
     themes: security.themes || [],
     note: security.note || null,
+    descriptions: security.descriptions || null,
   }));
 
   const byCusip = new Map();
@@ -268,15 +287,29 @@ const fetchFilingFiles = async (manager, filing) => {
 
 const parseInfoTable = (xml, manager, filing, themes, securityResolver) => {
   const blocks = xml.match(/<(?:[A-Za-z0-9_]+:)?infoTable\b[^>]*>[\s\S]*?<\/(?:[A-Za-z0-9_]+:)?infoTable>/gi) || [];
+  const rows = blocks.map((block) => ({
+    issuerName: textFromTag(block, 'nameOfIssuer'),
+    titleOfClass: textFromTag(block, 'titleOfClass'),
+    cusip: textFromTag(block, 'cusip').replace(/\s+/g, '').toUpperCase(),
+    putCall: textFromTag(block, 'putCall').toUpperCase(),
+    rawValue: parseNumber(textFromTag(block, 'value')),
+    shares: parseNumber(textFromTag(block, 'sshPrnamt')),
+    amountType: textFromTag(block, 'sshPrnamtType').toUpperCase() || 'SH',
+  }));
+  const valueScale = detectValueScale(rows);
   const aggregated = new Map();
 
-  for (const block of blocks) {
-    const issuerName = textFromTag(block, 'nameOfIssuer');
-    const titleOfClass = textFromTag(block, 'titleOfClass');
-    const cusip = textFromTag(block, 'cusip').replace(/\s+/g, '').toUpperCase();
-    const putCall = textFromTag(block, 'putCall').toUpperCase();
-    const value = parseNumber(textFromTag(block, 'value'));
-    const shares = parseNumber(textFromTag(block, 'sshPrnamt'));
+  for (const row of rows) {
+    const {
+      issuerName,
+      titleOfClass,
+      cusip,
+      putCall,
+      rawValue,
+      shares,
+      amountType,
+    } = row;
+    const value = rawValue * valueScale;
 
     if (!issuerName || !cusip || value <= 0 || shares <= 0) {
       continue;
@@ -286,13 +319,14 @@ const parseInfoTable = (xml, manager, filing, themes, securityResolver) => {
     const canonicalSecurity = securityResolver.resolve(issuerName, cusip);
     const canonicalCompanyId = canonicalSecurity?.canonicalCompanyId || cusip;
     const companyId = putCall ? `${canonicalCompanyId}:${putCall}` : canonicalCompanyId;
-    const positionType = putCall || 'SHARE';
+    const positionType = putCall || (amountType === 'PRN' ? 'PRN' : 'SHARE');
     const detectedThemes = classifyThemes(issuerName, themes);
     const mergedThemes = unique([...detectedThemes, ...(canonicalSecurity?.themes || [])]);
     const existing = aggregated.get(securityId);
     if (existing) {
       existing.value += value;
       existing.shares += shares;
+      existing.rawValue += rawValue;
       existing.sourceRows += 1;
     } else {
       aggregated.set(securityId, {
@@ -308,10 +342,14 @@ const parseInfoTable = (xml, manager, filing, themes, securityResolver) => {
         normalizedIssuerName: normalizeIssuer(issuerName),
         titleOfClass,
         putCall: putCall || null,
+        amountType,
         positionType,
         value,
+        rawValue,
+        valueScale,
         shares,
         themes: mergedThemes,
+        descriptions: canonicalSecurity?.descriptions || null,
         sourceRows: 1,
         managerId: manager.id,
         quarter: filing.quarter,
@@ -369,6 +407,7 @@ const aggregateCompanyHoldings = (holdings) => {
         value: holding.value,
         shares: holding.shares,
         themes: holding.themes || ['unclassified'],
+        descriptions: holding.descriptions || null,
         sourceRows: holding.sourceRows || 1,
         securityIds: [holding.securityId],
         managerId: holding.managerId,
@@ -719,6 +758,7 @@ const buildStockIndex = (managers, latestQuarter, consensus) => {
         issuerNames: [],
         themes: [],
         searchAliases: [],
+        descriptions: seed.descriptions || null,
         holders: [],
         rawHoldings: [],
       });
@@ -731,6 +771,7 @@ const buildStockIndex = (managers, latestQuarter, consensus) => {
     record.rawCusips = unique([...record.rawCusips, ...(seed.rawCusips || [seed.cusip]).filter(Boolean)]);
     record.issuerNames = unique([...record.issuerNames, ...(seed.issuerNames || [seed.issuerName]).filter(Boolean)]);
     record.themes = unique([...record.themes, ...(seed.themes || [])]);
+    record.descriptions = record.descriptions || seed.descriptions || null;
     record.searchAliases = unique([
       ...record.searchAliases,
       seed.canonicalTicker,
@@ -820,26 +861,41 @@ const buildStockIndex = (managers, latestQuarter, consensus) => {
       const quarters = recentQuarters.map((quarter) => {
         const holders = [];
         for (const manager of managers) {
+          const quarterFiling = (manager.filings || []).find((filing) => filing.quarter === quarter) || null;
           const holding = (manager.companyHoldingsByQuarter?.[quarter] || []).find((item) => item.companyId === stock.companyId);
-          if (!holding) continue;
           const change = (manager.companyChangesByQuarter?.[quarter] || []).find((item) => item.companyId === stock.companyId) || null;
+          if (!holding && change?.changeType !== 'exit') continue;
+
           holders.push({
             managerId: manager.id,
             managerName: manager.displayName,
-            value: holding.value,
-            shares: holding.shares,
-            weight: holding.weight,
+            value: holding?.value || 0,
+            shares: holding?.shares || 0,
+            weight: holding?.weight || 0,
             changeType: change?.changeType || 'unchanged',
             shareChange: change?.shareChange || 0,
             valueChange: change?.valueChange || 0,
             weightChange: change?.weightChange || 0,
+            currentShares: change?.currentShares ?? holding?.shares ?? 0,
+            previousShares: change?.previousShares ?? null,
+            currentValue: change?.currentValue ?? holding?.value ?? 0,
+            previousValue: change?.previousValue ?? null,
+            currentWeight: change?.currentWeight ?? holding?.weight ?? 0,
+            previousWeight: change?.previousWeight ?? null,
+            positionType: change?.positionType || holding?.positionType || 'SHARE',
+            putCall: change?.putCall || holding?.putCall || null,
+            sourceUrl: change?.sourceUrl || holding?.sourceUrl || quarterFiling?.sourceUrl || null,
+            accessionNumber: change?.accessionNumber || holding?.accessionNumber || quarterFiling?.accessionNumber || null,
+            filingDate: holding?.filingDate || quarterFiling?.filingDate || null,
           });
         }
+        const currentHolders = holders.filter((holder) => holder.shares > 0);
         return {
           quarter,
-          holderCount: holders.length,
-          totalValue: holders.reduce((sum, holder) => sum + holder.value, 0),
-          totalShares: holders.reduce((sum, holder) => sum + holder.shares, 0),
+          holderCount: currentHolders.length,
+          eventCount: holders.length,
+          totalValue: currentHolders.reduce((sum, holder) => sum + holder.value, 0),
+          totalShares: currentHolders.reduce((sum, holder) => sum + holder.shares, 0),
           holders,
         };
       });
@@ -864,6 +920,7 @@ const buildStockIndex = (managers, latestQuarter, consensus) => {
         rawCusips: unique(stock.rawCusips),
         issuerNames: unique(stock.issuerNames),
         themes: stock.themes.length ? stock.themes : ['unclassified'],
+        descriptions: stock.descriptions || null,
         latestQuarter,
         latestHolderCount: sortedHolders.length,
         latestTotalValue,
@@ -918,6 +975,8 @@ const buildSearchIndex = (stocks, managers, consensus) => ({
       manager.managerName,
       manager.leadInvestor,
       manager.cik,
+      ...(manager.aliases || []),
+      ...(manager.styleTags || []),
     ]).join(' ').toUpperCase(),
   })),
   consensus: [
@@ -966,11 +1025,15 @@ const toPublicHolding = (holding) => ({
   issuerName: holding.issuerName,
   titleOfClass: holding.titleOfClass,
   putCall: holding.putCall,
+  amountType: holding.amountType,
   positionType: holding.positionType,
   value: holding.value,
+  rawValue: holding.rawValue,
+  valueScale: holding.valueScale,
   shares: holding.shares,
   weight: holding.weight,
   themes: holding.themes,
+  descriptions: holding.descriptions || null,
   sourceRows: holding.sourceRows,
   quarter: holding.quarter,
   accessionNumber: holding.accessionNumber,
@@ -1017,6 +1080,12 @@ const toPublicManager = (manager) => ({
   displayName: manager.displayName,
   managerName: manager.managerName,
   leadInvestor: manager.leadInvestor,
+  aliases: manager.aliases || [],
+  styleTags: manager.styleTags || [],
+  descriptions: manager.descriptions || null,
+  logoUrl: manager.logoUrl || null,
+  logoFallbackReason: manager.logoFallbackReason || null,
+  sourceIdentifiers: manager.sourceIdentifiers || null,
   cik: manager.cik,
   latestQuarter: manager.latestQuarter,
   latestFiling: manager.latestFiling,
@@ -1268,6 +1337,12 @@ const main = async () => {
       displayName: manager.displayName,
       managerName: manager.managerName,
       leadInvestor: manager.leadInvestor,
+      aliases: manager.aliases || [],
+      styleTags: manager.styleTags || [],
+      descriptions: manager.descriptions || null,
+      logoUrl: manager.logoUrl || null,
+      logoFallbackReason: manager.logoFallbackReason || null,
+      sourceIdentifiers: manager.sourceIdentifiers || null,
       cik: normalizeCik(manager.cik),
       latestQuarter,
       latestFiling: filingsOutput.find((filing) => filing.quarter === latestQuarter) || null,

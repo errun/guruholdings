@@ -32,6 +32,6 @@ export const financeGlossary = {
   new: { en: 'New position', zh: '新增', ja: '新規取得', ko: '신규 매수' },
   increase: { en: 'Increased', zh: '增持', ja: '買い増し', ko: '비중 확대' },
   decrease: { en: 'Reduced', zh: '减持', ja: '保有縮小', ko: '비중 축소' },
-  exit: { en: 'Exited', zh: '清仓', ja: '全売却', ko: '전량 매도' },
+  exit: { en: 'Exited', zh: '退出', ja: '全売却', ko: '전량 매도' },
   weight: { en: 'Portfolio weight', zh: '仓位占比', ja: 'ポートフォリオ比率', ko: '포트폴리오 비중' },
 } as const;

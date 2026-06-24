@@ -166,7 +166,7 @@ export const translations = {
         dataSource: '数据来源：SEC EDGAR 13F 报告 | 数据延迟：约45天 | 非实时持仓',
         disclaimer: '© 2024 大师持仓追踪。仅供参考，不构成投资建议。'
       },
-      changeTypes: { increase: '增持', decrease: '减持', new: '新增', exit: '清仓', unchanged: '不变', none: '无持仓' },
+      changeTypes: { increase: '增持', decrease: '减持', new: '新增', exit: '退出', unchanged: '不变', none: '无持仓' },
       riskLevels: { low: '低', moderate: '中等', elevated: '较高', high: '高' },
       others: '其他',
       languageSelectorLabel: '语言',
@@ -213,7 +213,7 @@ export const translations = {
       resources: { title: '原始资料', shareholderLetters: { title: '股东信', subtitle: '伯克希尔·哈撒韦官方每年致股东公开信。' }, meetingTranscripts: { title: '股东大会问答实录', subtitle: '查看伯克希尔·哈撒韦股东大会的完整问答内容。' } },
       dataNotice: { title: '数据说明', items: ['数据来源：SEC EDGAR 13F 季度报告', '13F 数据通常滞后约45天，非实时持仓', '仅统计价值超过20万美元且持股超过1万股的美股仓位', '以上信息仅供参考，不构成投资建议'] }
     },
-    holdingsTable: { title: '持仓详情对比', subtitle: '最近四个季度持仓变化', stockInfo: '股票信息', noHoldings: '无持仓', sharesLabel: '{{count}} 股', weightLabel: '仓位占比 {{weight}}%', legend: { increase: '增持', decrease: '减持', new: '新增', exit: '清仓', unchanged: '不变' } },
+    holdingsTable: { title: '持仓详情对比', subtitle: '最近四个季度持仓变化', stockInfo: '股票信息', noHoldings: '无持仓', sharesLabel: '{{count}} 股', weightLabel: '仓位占比 {{weight}}%', legend: { increase: '增持', decrease: '减持', new: '新增', exit: '退出', unchanged: '不变' } },
     aiInsights: { title: 'AI 智能分析', summaryTitle: '本季度亮点', keyChangesTitle: '关键变化', riskLevel: '风险水平', diversification: '分散化程度', disclaimer: '* AI 分析基于公开的 13F 数据，仅供参考，不构成投资建议。' },
     charts: { pie: { tooltipValue: '市值', tooltipWeight: '仓位占比' }, line: { tooltipValue: '总市值' } }
   }

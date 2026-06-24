@@ -52,7 +52,7 @@ for (const locale of locales) {
 }
 
 const requiredTerms = {
-  zh: { 'change.new': '新增', 'change.increase': '增持', 'change.decrease': '减持', 'change.exit': '清仓' },
+  zh: { 'change.new': '新增', 'change.increase': '增持', 'change.decrease': '减持', 'change.exit': '退出' },
   ja: { 'change.new': '新規取得', 'change.increase': '買い増し', 'change.decrease': '保有縮小', 'change.exit': '全売却' },
   ko: { 'change.new': '신규 매수', 'change.increase': '비중 확대', 'change.decrease': '비중 축소', 'change.exit': '전량 매도' },
 };

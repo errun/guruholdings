@@ -112,7 +112,9 @@ const validateHoldingSchema = (holding, context, failures) => {
 };
 
 const validateManagerValueUnits = (manager, failures) => {
-  const ratios = manager.holdings
+  const priceHoldings = manager.holdings.filter((holding) => holding.positionType === 'SHARE');
+  const holdingsForUnitCheck = priceHoldings.length >= 3 ? priceHoldings : manager.holdings;
+  const ratios = holdingsForUnitCheck
     .filter((holding) => positiveNumber(holding.value) && positiveNumber(holding.shares))
     .map((holding) => holding.value / holding.shares);
   const medianPrice = median(ratios);

@@ -172,6 +172,12 @@ function HoldingsTable({ manager, locale }: { manager: Manager; locale: Locale }
 export async function ManagerPage({ managerId, locale }: { managerId: string; locale: Locale }) {
   const manager = snapshot.managers.find((item) => item.id === managerId);
   if (!manager) notFound();
+  const managerMetadata = manager as Manager & {
+    descriptions?: Partial<Record<Locale, string>> | null;
+    logoUrl?: string | null;
+    logoFallbackReason?: string | null;
+    styleTags?: string[];
+  };
 
   const {
     concentrationName,
@@ -187,6 +193,7 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
   const nextManager = snapshot.managers[(snapshot.managers.findIndex((item) => item.id === manager.id) + 1) % snapshot.managers.length];
   const largestIncrease = manager.metrics.largestIncrease;
   const largestDecrease = manager.metrics.largestDecrease;
+  const description = managerMetadata.descriptions?.[locale] || translate(locale, 'manager.description.fallback');
 
   return (
     <div className="min-h-screen bg-background">
@@ -197,16 +204,27 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
             {translate(locale, 'common.back13f')}
           </Link>
           <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
-            <div>
-              <Badge variant={managerStatusVariant(manager)} className="mb-4 rounded-md">
-                {formatQuarter(manager.latestQuarter)}
-              </Badge>
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-                {manager.displayName}
-              </h1>
-              <p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground">
-                {translate(locale, 'manager.intro', { managerName: manager.managerName, cik: manager.cik })}
-              </p>
+            <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start">
+              <ManagerLogo manager={managerMetadata} locale={locale} />
+              <div className="min-w-0">
+                <Badge variant={managerStatusVariant(manager)} className="mb-4 rounded-md">
+                  {formatQuarter(manager.latestQuarter)}
+                </Badge>
+                <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                  {manager.displayName}
+                </h1>
+                <p className="mt-3 max-w-3xl text-base leading-7 text-slate-800">
+                  {description}
+                </p>
+                <p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground">
+                  {translate(locale, 'manager.intro', { managerName: manager.managerName, cik: manager.cik })}
+                </p>
+                {!managerMetadata.logoUrl && (
+                  <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                    {managerMetadata.logoFallbackReason || translate(locale, 'manager.logoFallback')}
+                  </p>
+                )}
+              </div>
             </div>
             <a
               href={manager.latestFiling.sourceUrl}
@@ -341,6 +359,37 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
           </Link>
         </section>
       </div>
+    </div>
+  );
+}
+
+function ManagerLogo({
+  manager,
+  locale,
+}: {
+  manager: Manager & { logoUrl?: string | null };
+  locale: Locale;
+}) {
+  const initials = manager.displayName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
+
+  if (manager.logoUrl) {
+    return (
+      <img
+        src={manager.logoUrl}
+        alt={translate(locale, 'brand.name') + ' - ' + manager.displayName}
+        className="h-16 w-16 shrink-0 rounded-md border border-stone-200 bg-white object-contain p-2"
+      />
+    );
+  }
+
+  return (
+    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md border border-stone-200 bg-stone-100 text-lg font-semibold text-slate-700">
+      {initials}
     </div>
   );
 }

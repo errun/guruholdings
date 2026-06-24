@@ -9,10 +9,10 @@ const root = process.cwd();
 const siteUrl = 'https://guruholdings.net';
 const snapshot = JSON.parse(fs.readFileSync(path.join(root, 'data-generated', 'snapshots', 'latest.json'), 'utf8'));
 const locales = {
-  en: { prefix: '', lang: 'en', marker: 'See What Top Funds Are Buying and Selling' },
-  zh: { prefix: '/zh', lang: 'zh-CN', marker: '洞见机构仓位动向' },
-  ja: { prefix: '/ja', lang: 'ja', marker: 'トップファンドの売買動向を読み解く' },
-  ko: { prefix: '/ko', lang: 'ko', marker: '주요 펀드의 매수·매도 동향을 확인하세요' },
+  en: { prefix: '', lang: 'en', marker: "Track Top Institutions' Latest Portfolio Moves" },
+  zh: { prefix: '/zh', lang: 'zh-CN', marker: '看清顶级机构最新变仓' },
+  ja: { prefix: '/ja', lang: 'ja', marker: 'トップ機関投資家の最新ポートフォリオ変化を追跡' },
+  ko: { prefix: '/ko', lang: 'ko', marker: '주요 기관의 최신 포트폴리오 변화를 추적하세요' },
 };
 const hreflang = { en: 'en', zh: 'zh-Hans', ja: 'ja', ko: 'ko' };
 const representativePaths = [

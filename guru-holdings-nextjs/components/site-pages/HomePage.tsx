@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import snapshot from '@/data-generated/snapshots/latest.json';
 import { ExplorerSearchDisclosure } from '@/components/explorer/ExplorerSearchDisclosure';
+import { FilingExpectation } from '@/components/explorer/FilingExpectation';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { buildHoldingChangeModel } from '@/lib/holding-change.mjs';
@@ -21,7 +22,9 @@ import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
 import { stockPath } from '@/lib/stock-routes';
 
 type Manager = typeof snapshot.managers[number];
-type ConsensusItem = typeof snapshot.consensus.sharedIncrease[number];
+type ConsensusItem =
+  | typeof snapshot.consensus.sharedIncrease[number]
+  | typeof snapshot.consensus.sharedDecrease[number];
 
 const managerStatusVariant = (manager: Manager) =>
   manager.latestQuarter === snapshot.latestQuarter ? 'success' as const : 'warning' as const;
@@ -39,10 +42,8 @@ function ConsensusCard({ item, direction, locale }: { item: ConsensusItem; direc
   const title = item.canonicalName || item.issuerName;
   const {
     changeName,
+    formatSignedCurrency,
     formatNumber,
-    formatPercent,
-    formatPercentagePoints,
-    formatSignedNumber,
     formatWeight,
   } = getViewFormatters(locale);
 
@@ -62,9 +63,9 @@ function ConsensusCard({ item, direction, locale }: { item: ConsensusItem; direc
           </p>
         </div>
         <div className="shrink-0 text-right">
-          <div className="text-xs text-muted-foreground">{translate(locale, 'common.shareChange')}</div>
-          <div className={'font-mono text-sm font-semibold ' + directionTextClass(item.netShareChange)}>
-            {formatSignedNumber(item.netShareChange)}
+          <div className="text-xs text-muted-foreground">{translate(locale, 'common.valueChange')}</div>
+          <div className={'font-mono text-sm font-semibold ' + directionTextClass(item.netValueChange)}>
+            {formatSignedCurrency(item.netValueChange)}
           </div>
         </div>
       </div>
@@ -84,7 +85,6 @@ function ConsensusCard({ item, direction, locale }: { item: ConsensusItem; direc
                 {change.showWeightTransition ? (
                   <span>
                     {formatWeight(change.previousWeight)} <ArrowRight className="mx-1 inline h-3 w-3" /> {formatWeight(change.currentWeight)}
-                    <strong className={'ml-2 ' + directionTextClass(change.weightDelta || 0)}>{formatPercentagePoints(change.weightDelta)}</strong>
                   </span>
                 ) : (
                   <span className="font-semibold text-slate-900">
@@ -92,11 +92,8 @@ function ConsensusCard({ item, direction, locale }: { item: ConsensusItem; direc
                   </span>
                 )}
               </div>
-              <div className={'font-mono text-xs font-semibold sm:text-right ' + directionTextClass(change.shareDelta || 0)}>
-                {formatSignedNumber(change.shareDelta || 0)}
-                {!change.isSpecial && change.shareDeltaPercent !== null && (
-                  <span className="ml-1 font-normal text-muted-foreground">({formatPercent(change.shareDeltaPercent)})</span>
-                )}
+              <div className={'font-mono text-xs font-semibold sm:text-right ' + directionTextClass(manager.valueChange || 0)}>
+                {formatSignedCurrency(manager.valueChange || 0)}
               </div>
             </div>
           );
@@ -165,6 +162,7 @@ export function HomePage({ locale }: { locale: Locale }) {
               <Stat label={translate(locale, 'common.managers')} value={formatNumber(snapshot.managers.length)} />
             </div>
           </div>
+          <FilingExpectation locale={locale} className="mt-5" />
         </div>
       </section>
 

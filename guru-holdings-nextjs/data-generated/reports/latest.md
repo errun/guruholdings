@@ -1,11 +1,11 @@
 # 13F Data Update Report
 
-Generated at: 2026-06-18T08:31:11.895Z
+Generated at: 2026-06-24T14:27:49.361Z
 Latest quarter: 2026Q1
 Validation: passed
-Canonical companies: 3
-Stock index: 1479
-Search index: 1520
+Canonical companies: 5
+Stock index: 1940
+Search index: 2133
 
 ## Managers
 
@@ -18,12 +18,21 @@ Search index: 1520
 | Scion Asset Management | 2025Q3 | 2025-11-03 | 8 | 1,381,198,076 | 0001649339-25-000007 |
 | Tiger Global | 2026Q1 | 2026-05-15 | 54 | 22,845,413,829 | 0000919574-26-003362 |
 | Palliser Capital | 2026Q1 | 2026-05-14 | 5 | 128,845,217 | 0001881490-26-000004 |
+| ARK Invest | 2026Q1 | 2026-05-12 | 181 | 12,859,485,351 | 0001104659-26-059240 |
+| Coatue Management | 2026Q1 | 2026-05-15 | 62 | 29,056,031,305 | 0000919574-26-003501 |
+| Icahn Capital | 2026Q1 | 2026-05-15 | 12 | 8,553,640,766 | 0001539497-26-001469 |
+| Third Point | 2026Q1 | 2026-05-15 | 33 | 2,082,795,760 | 0001040273-26-000002 |
+| Baupost Group | 2026Q1 | 2026-05-14 | 22 | 5,115,380,000 | 0001061768-26-000007 |
+| Greenlight Capital | 2026Q1 | 2026-05-15 | 45 | 3,190,735,190 | 0001172661-26-002341 |
+| Oaktree Capital | 2026Q1 | 2026-05-20 | 147 | 6,557,119,230 | 0000949509-26-000004 |
+| Hillhouse / HHLR Advisors | 2026Q1 | 2026-05-15 | 38 | 1,672,822,114 | 0000919574-26-003551 |
+| Greenwoods / Jinglin | 2026Q1 | 2026-05-08 | 25 | 3,878,030,259 | 0001848138-26-000008 |
 
 ## Consensus
 
-Shared increases: 10
-Shared decreases: 24
-Divergent signals: 28
+Shared increases: 60
+Shared decreases: 117
+Divergent signals: 131
 
 ## Validation
 

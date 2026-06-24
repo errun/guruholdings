@@ -75,15 +75,22 @@ export function buildStockSlugRegistry(stocks, existing = {}, overrides = {}) {
     const base = companyNameSlug(stock.canonicalName || stock.issuerNames?.[0] || stock.companyId);
     const group = baseGroups.get(base) || [];
     const descriptor = group.length > 1 ? classDescriptor(stock) : '';
-    const candidate = overrides[stock.companyId] || [base, descriptor].filter(Boolean).join('-');
+    const candidates = overrides[stock.companyId]
+      ? [overrides[stock.companyId]]
+      : [
+          [base, descriptor].filter(Boolean).join('-'),
+          [base, descriptor, cleanSlug(stock.companyId)].filter(Boolean).join('-'),
+        ];
+    const readableCandidates = [...new Set(candidates)].filter(isReadableStockSlug);
+    const candidate = readableCandidates.find((slug) => !occupied.has(slug));
 
-    if (!isReadableStockSlug(candidate)) {
-      throw new Error(`Unreadable generated slug ${stock.companyId}: ${candidate}`);
+    if (!readableCandidates.length) {
+      throw new Error(`Unreadable generated slug ${stock.companyId}: ${candidates.join(', ')}`);
     }
 
-    const owner = occupied.get(candidate);
-    if (owner) {
-      throw new Error(`Unresolved slug collision ${candidate}: ${owner}, ${stock.companyId}. Add an explicit override.`);
+    if (!candidate) {
+      const owner = occupied.get(readableCandidates[0]);
+      throw new Error(`Unresolved slug collision ${readableCandidates[0]}: ${owner}, ${stock.companyId}. Add an explicit override.`);
     }
 
     registry[stock.companyId] = candidate;

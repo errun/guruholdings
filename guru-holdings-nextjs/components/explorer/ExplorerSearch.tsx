@@ -64,7 +64,6 @@ export function ExplorerSearch({
     formatNumber,
     formatQuarter,
     formatSignedCurrency,
-    formatSignedNumber,
     formatWeight,
     themeName,
   } = getViewFormatters(locale);
@@ -344,14 +343,10 @@ export function ExplorerSearch({
                         {translate(locale, isIncrease ? 'home.sharedIncrease' : 'home.sharedDecrease')}
                       </Badge>
                     </div>
-                    <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                       <div>
                         <span className="text-muted-foreground">{translate(locale, 'common.managers')}</span>
                         <div className="font-mono font-semibold">{managersCount}</div>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">{translate(locale, 'common.shares')}</span>
-                        <div className="font-mono font-semibold">{formatSignedNumber(item.netShareChange)}</div>
                       </div>
                       <div>
                         <span className="text-muted-foreground">{translate(locale, 'common.marketValue')}</span>

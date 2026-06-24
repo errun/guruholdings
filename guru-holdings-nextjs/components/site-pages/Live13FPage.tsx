@@ -20,13 +20,16 @@ import {
   directionTextClass,
   getViewFormatters,
 } from '@/lib/sec13f-view';
+import { FilingExpectation } from '@/components/explorer/FilingExpectation';
 import { getExplorerData, getManagerCompareData } from '@/lib/sec13f-lite';
 import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
 import { stockPath } from '@/lib/stock-routes';
 
 type Snapshot = typeof snapshot;
 type Manager = Snapshot['managers'][number];
-type ConsensusItem = Snapshot['consensus']['sharedIncrease'][number];
+type ConsensusItem =
+  | Snapshot['consensus']['sharedIncrease'][number]
+  | Snapshot['consensus']['sharedDecrease'][number];
 
 const managerStatusVariant = (manager: Manager) =>
   manager.latestQuarter === snapshot.latestQuarter ? 'success' as const : 'warning' as const;
@@ -53,7 +56,7 @@ function ConsensusTable({
 }) {
   const Icon = direction === 'increase' ? ArrowUpRight : ArrowDownRight;
   const iconClass = direction === 'increase' ? 'text-emerald-700' : 'text-red-700';
-  const { changeName, formatPercent, formatSignedCurrency, formatSignedNumber } = getViewFormatters(locale);
+  const { changeName, formatPercent, formatSignedCurrency } = getViewFormatters(locale);
 
   return (
     <Card className="border-stone-200 bg-white">
@@ -66,12 +69,11 @@ function ConsensusTable({
       </CardHeader>
       <CardContent>
         <div className="max-w-full overflow-x-auto">
-          <table className="w-full min-w-[980px] text-left text-sm">
+          <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="border-y border-stone-200 bg-stone-100 text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-4 py-3">{translate(locale, 'common.company')}</th>
                 <th className="px-4 py-3">{translate(locale, 'common.involvedManagers')}</th>
-                <th className="px-4 py-3 text-right">{translate(locale, 'common.shareChange')}</th>
                 <th className="px-4 py-3 text-right">{translate(locale, 'common.valueChange')}</th>
                 <th className="px-4 py-3 text-right">{translate(locale, 'common.weightChange')}</th>
                 <th className="px-4 py-3">{translate(locale, 'common.details')}</th>
@@ -97,10 +99,6 @@ function ConsensusTable({
                         ))}
                       </div>
                     </td>
-                    <td className={`px-4 py-4 text-right font-mono font-semibold ${directionTextClass(item.netShareChange)}`}>
-                      {formatSignedNumber(item.netShareChange)}
-                      <div className="text-xs font-normal text-muted-foreground">{formatPercent(item.netShareChangePercent)}</div>
-                    </td>
                     <td className={`px-4 py-4 text-right font-mono font-semibold ${directionTextClass(item.netValueChange)}`}>
                       {formatSignedCurrency(item.netValueChange)}
                     </td>
@@ -112,7 +110,7 @@ function ConsensusTable({
                         {rows.map((manager) => (
                           <div key={`${item.companyId}-${manager.managerId}-detail`} className="grid grid-cols-[1fr_auto_auto] gap-2 text-xs">
                             <span className="break-words text-slate-700">{changeName(manager.changeType)}</span>
-                            <span className="font-mono text-slate-700">{formatSignedNumber(manager.shareChange)}</span>
+                            <span className="font-mono text-slate-700">{formatSignedCurrency(manager.valueChange)}</span>
                             <span className="font-mono text-muted-foreground">{formatPercent(manager.weightChange)}</span>
                           </div>
                         ))}
@@ -163,13 +161,14 @@ export function Live13FPage({ locale }: { locale: Locale }) {
               </p>
             </div>
 
-            <div className="min-w-[180px]">
+            <div className="min-w-[260px]">
               <div className="rounded-lg border border-stone-200 bg-stone-50 p-4">
                 <div className="text-xs font-medium uppercase text-muted-foreground">{translate(locale, 'live.latestQuarter')}</div>
                 <div className="mt-2 text-lg font-semibold text-slate-950">{formatQuarter(snapshot.latestQuarter)}</div>
               </div>
             </div>
           </div>
+          <FilingExpectation locale={locale} className="mt-5" />
         </div>
       </section>
 

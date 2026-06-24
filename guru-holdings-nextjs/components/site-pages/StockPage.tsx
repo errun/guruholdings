@@ -22,9 +22,28 @@ import {
 } from '@/lib/sec13f-view';
 import { getStockChartData } from '@/lib/sec13f-lite';
 import { localizedPath, translate, type Locale, type MessageKey } from '@/lib/i18n/site';
-import { getStockByCompanyId, getStockSlug } from '@/lib/stock-routes';
+import { getStockByCompanyId, getStockSlug, stockPath } from '@/lib/stock-routes';
 
 type Stock = typeof snapshot.stocks[number];
+
+const optionPattern = /:(CALL|PUT)$/;
+
+function getOptionLabel(companyId: string) {
+  return optionPattern.exec(companyId)?.[1] || null;
+}
+
+function getRelatedOptionStocks(stock: Stock) {
+  if (getOptionLabel(stock.companyId)) return [];
+  const rawCusips = new Set(stock.rawCusips || []);
+  return snapshot.stocks.filter((candidate) =>
+    candidate.companyId !== stock.companyId
+    && Boolean(getOptionLabel(candidate.companyId))
+    && (
+      candidate.canonicalCompanyId === stock.canonicalCompanyId
+      || (candidate.rawCusips || []).some((cusip) => rawCusips.has(cusip))
+    )
+  );
+}
 
 function getStockActions(companyId: string) {
   return snapshot.managers.flatMap((manager) => {
@@ -70,6 +89,9 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
   const { formatNumber, formatQuarter, themeName } = getViewFormatters(locale);
   const actions = getStockActions(stock.companyId);
   const currentHolderCount = actions.filter((action) => action.currentShares > 0).length;
+  const descriptions = (stock as Stock & { descriptions?: Partial<Record<Locale, string>> | null }).descriptions;
+  const description = descriptions?.[locale] || translate(locale, 'stock.description.fallback', { name: stock.canonicalName });
+  const relatedOptions = getRelatedOptionStocks(stock);
 
   return (
     <div className="min-h-screen bg-background">
@@ -88,6 +110,9 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
               <h1 className="break-words text-3xl font-semibold text-slate-950 sm:text-4xl">
                 {stock.canonicalName}
               </h1>
+              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-800">
+                {description}
+              </p>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
                 {translate(locale, 'stock.intro', {
                   ticker: stock.canonicalTicker ? `${stock.canonicalTicker}, ` : '',
@@ -115,6 +140,26 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
           <SectionHeading icon={<Activity className="h-5 w-5 text-slate-700" />} title={translate(locale, 'stock.trends')} description={translate(locale, 'stock.trend.description')} />
           <StockTrendChart stock={getStockChartData(stock)} locale={locale} />
         </section>
+
+        {relatedOptions.length > 0 && (
+          <Alert className="mb-10 border-stone-200 bg-white text-slate-900 [&>svg]:text-primary">
+            <FileText className="h-4 w-4" />
+            <AlertTitle>{translate(locale, 'stock.relatedOptions.title')}</AlertTitle>
+            <AlertDescription>
+              {translate(locale, 'stock.relatedOptions.body', {
+                options: relatedOptions.map((option) => `${option.canonicalName} ${getOptionLabel(option.companyId)}`).join(', '),
+              })}
+              <div className="mt-2 flex flex-wrap gap-2">
+                {relatedOptions.map((option) => (
+                  <Link key={option.companyId} href={localizedPath(locale, stockPath(option.companyId))} className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+                    {option.canonicalName} {getOptionLabel(option.companyId)}
+                    <ExternalLink className="h-3 w-3" />
+                  </Link>
+                ))}
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <section className="mb-10 space-y-3">
           <SectionHeading icon={<Table2 className="h-5 w-5 text-slate-700" />} title={translate(locale, 'stock.details.title')} description={translate(locale, 'stock.details.description')} />
@@ -163,7 +208,6 @@ function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) 
     formatDate,
     formatNumber,
     formatPercent,
-    formatPercentagePoints,
     formatQuarter,
     formatSignedNumber,
     formatWeight,
@@ -171,7 +215,6 @@ function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) 
   const model = buildHoldingChangeModel(action);
   const summaryKey = `stock.actionSummary.${model.action}` as MessageKey;
   const isStale = action.managerQuarter !== snapshot.latestQuarter;
-  const weightDeltaDigits = model.weightDelta !== null && model.weightDelta !== 0 && Math.abs(model.weightDelta) < 0.01 ? 3 : 2;
 
   return (
     <article className="relative py-5 pl-4 pr-3 sm:px-5">
@@ -194,7 +237,6 @@ function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) 
           {model.showWeightTransition ? (
             <div className="font-mono text-sm font-semibold text-slate-950">
               {formatWeight(model.previousWeight)} <span className="px-1 text-muted-foreground">→</span> {formatWeight(model.currentWeight)}
-              <span className={`ml-2 whitespace-nowrap ${directionTextClass(model.weightDelta || 0)}`}>({formatPercentagePoints(model.weightDelta, weightDeltaDigits)})</span>
             </div>
           ) : (
             <div className="font-mono text-sm font-semibold text-slate-950">
@@ -301,7 +343,7 @@ function QuarterTable({ stock, locale }: { stock: Stock; locale: Locale }) {
                 <div className="flex max-w-[420px] flex-wrap gap-1">
                   {quarter.holders.map((holder) => (
                     <Badge key={`${quarter.quarter}-${holder.managerId}`} variant={changeBadgeVariant(holder.changeType)} className="rounded-md">
-                      {holder.managerName} {changeName(holder.changeType)}
+                      {holder.managerName} {changeName(holder.changeType)} · {formatNumber(holder.shares)} {translate(locale, 'common.shares')}
                     </Badge>
                   ))}
                 </div>

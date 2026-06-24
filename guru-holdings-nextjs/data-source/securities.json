@@ -7,6 +7,12 @@
     "issuerAliases": ["ALPHABET INC", "GOOGLE INC"],
     "searchAliases": ["GOOG", "GOOGL", "GOOGLE", "ALPHABET"],
     "themes": ["technology"],
+    "descriptions": {
+      "en": "Alphabet is Google’s parent company, spanning search, advertising, cloud software, YouTube, Android, and other technology businesses.",
+      "zh": "Alphabet 是 Google 的母公司，业务涵盖搜索、广告、云软件、YouTube、Android 及其他科技业务。",
+      "ja": "AlphabetはGoogleの親会社で、検索、広告、クラウド、YouTube、Androidなどのテクノロジー事業を展開しています。",
+      "ko": "Alphabet은 Google의 모회사로 검색, 광고, 클라우드, YouTube, Android 등 기술 사업을 운영합니다."
+    },
     "note": "SEC 13F may report Alphabet Class A and Class C under different CUSIPs. Consensus analytics treat them as one company while raw holdings keep their original CUSIP rows."
   },
   {
@@ -17,6 +23,12 @@
     "issuerAliases": ["NVIDIA CORP", "NVIDIA CORPORATION"],
     "searchAliases": ["NVDA", "NVIDIA"],
     "themes": ["technology"],
+    "descriptions": {
+      "en": "NVIDIA designs GPUs, accelerated computing platforms, networking products, and software used in AI, data centers, gaming, and visualization.",
+      "zh": "NVIDIA 设计 GPU、加速计算平台、网络产品和软件，应用于 AI、数据中心、游戏和可视化等领域。",
+      "ja": "NVIDIAはGPU、アクセラレーテッドコンピューティング基盤、ネットワーク製品、AI・データセンター・ゲーム向けソフトウェアを設計しています。",
+      "ko": "NVIDIA는 GPU, 가속 컴퓨팅 플랫폼, 네트워킹 제품과 AI, 데이터센터, 게임, 시각화용 소프트웨어를 설계합니다."
+    },
     "note": "Ticker and aliases are used for search only. Holdings still come from SEC 13F CUSIP rows."
   },
   {
@@ -27,6 +39,44 @@
     "issuerAliases": ["MICROSOFT CORP", "MICROSOFT CORPORATION"],
     "searchAliases": ["MSFT", "MICROSOFT"],
     "themes": ["technology"],
+    "descriptions": {
+      "en": "Microsoft provides enterprise software, cloud infrastructure, productivity tools, gaming platforms, and AI-enabled services.",
+      "zh": "Microsoft 提供企业软件、云基础设施、生产力工具、游戏平台和 AI 服务。",
+      "ja": "Microsoftは企業向けソフトウェア、クラウド基盤、生産性ツール、ゲーム基盤、AI関連サービスを提供しています。",
+      "ko": "Microsoft는 기업용 소프트웨어, 클라우드 인프라, 생산성 도구, 게임 플랫폼과 AI 서비스를 제공합니다."
+    },
     "note": "Ticker and aliases are used for search only. Holdings still come from SEC 13F CUSIP rows."
+  },
+  {
+    "canonicalCompanyId": "874039100",
+    "canonicalName": "Taiwan Semiconductor Manufacturing Co. Ltd.",
+    "ticker": "TSM",
+    "cusips": ["874039100"],
+    "issuerAliases": ["TAIWAN SEMICONDUCTOR MANUFAC", "TAIWAN SEMICONDUCTOR MFG", "TAIWAN SEMICONDUCTOR MANUFACTURING"],
+    "searchAliases": ["TSM", "TSMC", "TAIWAN SEMICONDUCTOR"],
+    "themes": ["technology"],
+    "descriptions": {
+      "en": "Taiwan Semiconductor Manufacturing is a dedicated semiconductor foundry that manufactures chips for global fabless and integrated device customers.",
+      "zh": "台积电是一家专业半导体代工企业，为全球无晶圆厂和综合器件客户制造芯片。",
+      "ja": "Taiwan Semiconductor Manufacturingは専業半導体ファウンドリで、世界のファブレス企業や統合デバイス企業向けにチップを製造しています。",
+      "ko": "Taiwan Semiconductor Manufacturing은 글로벌 팹리스 및 종합 반도체 고객을 위해 칩을 제조하는 전업 파운드리입니다."
+    },
+    "note": "Ticker and aliases are used for search only. Holdings still come from SEC 13F CUSIP rows."
+  },
+  {
+    "canonicalCompanyId": "91324P102",
+    "canonicalName": "UnitedHealth Group Inc.",
+    "ticker": "UNH",
+    "cusips": ["91324P102"],
+    "issuerAliases": ["UNITEDHEALTH GROUP INC", "UNITED HEALTH GROUP"],
+    "searchAliases": ["UNH", "UNITEDHEALTH", "UNITED HEALTH"],
+    "themes": ["healthcare"],
+    "descriptions": {
+      "en": "UnitedHealth Group provides health insurance, healthcare services, pharmacy benefit management, and care delivery through UnitedHealthcare and Optum.",
+      "zh": "UnitedHealth Group 通过 UnitedHealthcare 和 Optum 提供健康保险、医疗服务、药品福利管理和护理交付。",
+      "ja": "UnitedHealth GroupはUnitedHealthcareとOptumを通じて、医療保険、ヘルスケアサービス、薬剤給付管理、ケア提供を行っています。",
+      "ko": "UnitedHealth Group은 UnitedHealthcare와 Optum을 통해 건강보험, 헬스케어 서비스, 약제급여 관리와 진료 서비스를 제공합니다."
+    },
+    "note": "CALL/PUT rows are kept separate from common-share holdings for signal accuracy."
   }
 ]
