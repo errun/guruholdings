@@ -1,29 +1,53 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
-  ArrowDownRight,
+  Activity,
   ArrowLeft,
-  ArrowUpRight,
+  ChevronDown,
   CheckCircle2,
   ExternalLink,
   FileText,
-  Layers3,
   Table2,
 } from 'lucide-react';
 import snapshot from '@/data-generated/snapshots/latest.json';
 import { StockTrendChart } from '@/components/explorer/StockTrendChart';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { buildHoldingChangeModel } from '@/lib/holding-change.mjs';
+import { getManagerColor } from '@/lib/manager-colors';
 import {
   changeBadgeVariant,
   directionTextClass,
   getViewFormatters,
 } from '@/lib/sec13f-view';
 import { getStockChartData } from '@/lib/sec13f-lite';
-import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
+import { localizedPath, translate, type Locale, type MessageKey } from '@/lib/i18n/site';
+import { getStockByCompanyId, getStockSlug } from '@/lib/stock-routes';
 
 type Stock = typeof snapshot.stocks[number];
+
+function getStockActions(companyId: string) {
+  return snapshot.managers.flatMap((manager) => {
+    const change = manager.latestCompanyChanges.find((item) => item.companyId === companyId);
+    if (!change) return [];
+
+    return [{
+      ...change,
+      managerId: manager.id,
+      managerName: manager.displayName,
+      leadInvestor: manager.leadInvestor,
+      managerQuarter: manager.latestQuarter,
+      filingDate: manager.latestFiling.filingDate,
+      sourceUrl: change.sourceUrl || manager.latestFiling.sourceUrl,
+    }];
+  }).sort((a, b) => {
+    const priority: Record<string, number> = { new: 0, exit: 0, increase: 1, decrease: 1, unchanged: 2 };
+    return (priority[a.changeType] ?? 3) - (priority[b.changeType] ?? 3)
+      || Math.abs(b.weightChange) - Math.abs(a.weightChange);
+  });
+}
+
+type StockAction = ReturnType<typeof getStockActions>[number];
 
 export function getStockStaticParams() {
   const priorityIds = new Set([
@@ -36,107 +60,76 @@ export function getStockStaticParams() {
 
   return snapshot.stocks
     .filter((stock) => priorityIds.has(stock.companyId))
-    .map((stock) => ({ companyId: stock.companyId }));
+    .map((stock) => ({ companyId: getStockSlug(stock.companyId) }));
 }
 
 export async function StockPage({ companyId, locale }: { companyId: string; locale: Locale }) {
-  const decodedCompanyId = decodeURIComponent(companyId);
-  const stock = snapshot.stocks.find((item) => item.companyId === decodedCompanyId);
+  const stock = getStockByCompanyId(companyId);
   if (!stock) notFound();
 
-  const { formatCurrency, formatNumber, formatQuarter, themeName } = getViewFormatters(locale);
-
-  const increaseSignals = stock.consensusSignals.filter((item) => item.direction === 'increase');
-  const decreaseSignals = stock.consensusSignals.filter((item) => item.direction === 'decrease');
+  const { formatNumber, formatQuarter, themeName } = getViewFormatters(locale);
+  const actions = getStockActions(stock.companyId);
+  const currentHolderCount = actions.filter((action) => action.currentShares > 0).length;
 
   return (
     <div className="min-h-screen bg-background">
       <section className="border-b border-stone-200 bg-white">
-        <div className="container py-8 lg:py-10">
+        <div className="container py-7 lg:py-9">
           <Link href={localizedPath(locale, '/live-13f')} className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
             <ArrowLeft className="h-4 w-4" />
             {translate(locale, 'common.back13f')}
           </Link>
-          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
-            <div>
-              <Badge variant="info" className="mb-4 rounded-md">
-                {formatQuarter(stock.latestQuarter)}
-              </Badge>
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+          <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div className="min-w-0">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                {stock.canonicalTicker && <Badge variant="info" className="rounded-md">{stock.canonicalTicker}</Badge>}
+                {(stock.themes || []).map((theme) => <Badge key={theme} variant="outline" className="rounded-md border-stone-300">{themeName(theme)}</Badge>)}
+              </div>
+              <h1 className="break-words text-3xl font-semibold text-slate-950 sm:text-4xl">
                 {stock.canonicalName}
               </h1>
-              <p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground">
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
                 {translate(locale, 'stock.intro', {
                   ticker: stock.canonicalTicker ? `${stock.canonicalTicker}, ` : '',
                   cusips: stock.rawCusips.join(', '),
                 })}
               </p>
             </div>
-            <div className="grid min-w-[280px] grid-cols-2 gap-3">
-              <HeaderStat label={translate(locale, 'stock.currentManagers')} value={formatNumber(stock.latestHolderCount)} />
-              <HeaderStat label={translate(locale, 'home.combinedValue')} value={formatCurrency(stock.latestTotalValue)} />
+            <div className="grid grid-cols-2 gap-3 sm:min-w-[300px]">
+              <HeaderStat label={translate(locale, 'stock.currentManagers')} value={formatNumber(currentHolderCount)} />
+              <HeaderStat label={translate(locale, 'live.latestQuarter')} value={formatQuarter(stock.latestQuarter)} />
             </div>
           </div>
         </div>
       </section>
 
-      <div className="container py-8 lg:py-10">
-        <section className="mb-8 grid gap-4 lg:grid-cols-4">
-          <MetricCard title={translate(locale, 'stock.currentManagers')} value={formatNumber(stock.latestHolderCount)} description={translate(locale, 'stock.currentManagers.description')} />
-          <MetricCard title={translate(locale, 'stock.totalShares')} value={formatNumber(stock.latestTotalShares)} description={translate(locale, 'stock.totalShares.description')} />
-          <MetricCard title={translate(locale, 'home.combinedValue')} value={formatCurrency(stock.latestTotalValue)} description={translate(locale, 'stock.totalValue.description')} />
-          <MetricCard title={translate(locale, 'stock.themes')} value={(stock.themes || []).map(themeName).join(' / ')} description={translate(locale, 'stock.themes.description')} />
+      <div className="container py-7 lg:py-9">
+        <section className="mb-10">
+          <SectionHeading icon={<Activity className="h-5 w-5 text-primary" />} title={translate(locale, 'stock.actions.title')} description={translate(locale, 'stock.actions.description')} />
+          <div className="divide-y divide-stone-200 border-y border-stone-200 bg-white">
+            {actions.map((action) => <ActionRow key={action.managerId} action={action} locale={locale} />)}
+          </div>
         </section>
 
-        {(increaseSignals.length > 0 || decreaseSignals.length > 0) && (
-          <section className="mb-8 grid gap-4 lg:grid-cols-2">
-            {increaseSignals.map((signal) => (
-              <SignalCard key={`inc-${stock.companyId}`} signal={signal} direction="increase" locale={locale} />
-            ))}
-            {decreaseSignals.map((signal) => (
-              <SignalCard key={`dec-${stock.companyId}`} signal={signal} direction="decrease" locale={locale} />
-            ))}
-          </section>
-        )}
-
         <section className="mb-10">
-          <div className="mb-4 flex items-center gap-3">
-            <Layers3 className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'stock.trends')}</h2>
-          </div>
+          <SectionHeading icon={<Activity className="h-5 w-5 text-slate-700" />} title={translate(locale, 'stock.trends')} description={translate(locale, 'stock.trend.description')} />
           <StockTrendChart stock={getStockChartData(stock)} locale={locale} />
         </section>
 
-        <section className="mb-10">
-          <div className="mb-4 flex items-center gap-3">
-            <Table2 className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'stock.holders')}</h2>
-          </div>
-          <HoldersTable stock={stock} locale={locale} />
-        </section>
-
-        <section className="mb-10">
-          <div className="mb-4 flex items-center gap-3">
-            <FileText className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'stock.rawCusip')}</h2>
-          </div>
-          <RawHoldingsTable stock={stock} locale={locale} />
-        </section>
-
-        <section className="mb-10">
-          <div className="mb-4 flex items-center gap-3">
-            <Table2 className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'stock.quarterDetails')}</h2>
-          </div>
-          <QuarterTable stock={stock} locale={locale} />
+        <section className="mb-10 space-y-3">
+          <SectionHeading icon={<Table2 className="h-5 w-5 text-slate-700" />} title={translate(locale, 'stock.details.title')} description={translate(locale, 'stock.details.description')} />
+          <DetailDisclosure title={translate(locale, 'stock.quarterDetails')} icon={<Table2 className="h-4 w-4" />}>
+            <QuarterTable stock={stock} locale={locale} />
+          </DetailDisclosure>
+          <DetailDisclosure title={translate(locale, 'stock.rawCusip')} icon={<FileText className="h-4 w-4" />}>
+            <RawHoldingsTable stock={stock} locale={locale} />
+          </DetailDisclosure>
         </section>
 
         <Alert className="border-primary/20 bg-white text-slate-900 [&>svg]:text-primary">
           <CheckCircle2 className="h-4 w-4" />
           <AlertTitle>{translate(locale, 'stock.source.title')}</AlertTitle>
-          <AlertDescription>
-            {translate(locale, 'stock.source.body')}
-          </AlertDescription>
+          <AlertDescription>{translate(locale, 'stock.source.body')}</AlertDescription>
         </Alert>
       </div>
     </div>
@@ -145,116 +138,114 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
 
 function HeaderStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-stone-200 bg-stone-50 p-4">
-      <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="mt-2 break-words font-mono text-lg font-semibold leading-tight text-slate-950">{value}</div>
+    <div className="rounded-md border border-stone-200 bg-stone-50 p-3 sm:p-4">
+      <div className="text-xs font-medium uppercase text-muted-foreground">{label}</div>
+      <div className="mt-2 break-words text-base font-semibold leading-tight text-slate-950 sm:text-lg">{value}</div>
     </div>
   );
 }
 
-function MetricCard({ title, value, description }: { title: string; value: string; description: string }) {
+function SectionHeading({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <Card className="border-stone-200 bg-white">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="break-words font-mono text-xl font-semibold leading-tight text-slate-950 sm:text-2xl">{value}</div>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function SignalCard({ signal, direction, locale }: { signal: Record<string, any>; direction: 'increase' | 'decrease'; locale: Locale }) {
-  const Icon = direction === 'increase' ? ArrowUpRight : ArrowDownRight;
-  const title = translate(locale, direction === 'increase' ? 'home.sharedIncrease' : 'home.sharedDecrease');
-  const { formatPercent, formatSignedCurrency, formatSignedNumber } = getViewFormatters(locale);
-  return (
-    <Card className="border-stone-200 bg-white">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Icon className={`h-5 w-5 ${direction === 'increase' ? 'text-emerald-700' : 'text-red-700'}`} />
-          {title}
-        </CardTitle>
-        <CardDescription>{translate(locale, 'stock.sameDirection', { count: signal.managerCount })}</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-3 sm:grid-cols-3">
-        <Metric label={translate(locale, 'common.shareChange')} value={formatSignedNumber(signal.netShareChange)} tone={directionTextClass(signal.netShareChange)} />
-        <Metric label={translate(locale, 'common.valueChange')} value={formatSignedCurrency(signal.netValueChange)} tone={directionTextClass(signal.netValueChange)} />
-        <Metric label={translate(locale, 'common.weightChange')} value={formatPercent(signal.netWeightChange)} tone={directionTextClass(signal.netWeightChange)} />
-      </CardContent>
-    </Card>
-  );
-}
-
-function Metric({ label, value, tone }: { label: string; value: string; tone?: string }) {
-  return (
-    <div>
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className={`mt-1 font-mono text-sm font-semibold ${tone || 'text-slate-950'}`}>{value}</div>
+    <div className="mb-4">
+      <div className="flex items-center gap-2">
+        {icon}
+        <h2 className="text-xl font-semibold text-slate-950 sm:text-2xl">{title}</h2>
+      </div>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p>
     </div>
   );
 }
 
-function HoldersTable({ stock, locale }: { stock: Stock; locale: Locale }) {
-  const { changeName, formatCurrency, formatDate, formatNumber, formatPercent, formatQuarter, formatSignedCurrency, formatSignedNumber, formatWeight } = getViewFormatters(locale);
+function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) {
+  const {
+    changeName,
+    formatDate,
+    formatNumber,
+    formatPercent,
+    formatPercentagePoints,
+    formatQuarter,
+    formatSignedNumber,
+    formatWeight,
+  } = getViewFormatters(locale);
+  const model = buildHoldingChangeModel(action);
+  const summaryKey = `stock.actionSummary.${model.action}` as MessageKey;
+  const isStale = action.managerQuarter !== snapshot.latestQuarter;
+  const weightDeltaDigits = model.weightDelta !== null && model.weightDelta !== 0 && Math.abs(model.weightDelta) < 0.01 ? 3 : 2;
+
   return (
-    <div className="max-w-full overflow-x-auto rounded-lg border border-stone-200 bg-white">
-      <table className="w-full min-w-[1040px] text-left text-sm">
-        <thead className="bg-stone-100 text-xs uppercase tracking-wider text-muted-foreground">
-          <tr>
-            <th className="px-4 py-3">{translate(locale, 'common.manager')}</th>
-            <th className="px-4 py-3">{translate(locale, 'common.quarter')}</th>
-            <th className="px-4 py-3 text-right">{translate(locale, 'common.marketValue')}</th>
-            <th className="px-4 py-3 text-right">{translate(locale, 'common.shares')}</th>
-            <th className="px-4 py-3 text-right">{translate(locale, 'common.positionWeight')}</th>
-            <th className="px-4 py-3">{translate(locale, 'stock.currentChange')}</th>
-            <th className="px-4 py-3 text-right">{translate(locale, 'common.shareChange')}</th>
-            <th className="px-4 py-3 text-right">{translate(locale, 'common.valueChange')}</th>
-            <th className="px-4 py-3">{translate(locale, 'stock.secSource')}</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-stone-100">
-          {stock.holders.map((holder) => (
-            <tr key={`${stock.companyId}-${holder.managerId}`} className="align-top hover:bg-stone-50">
-              <td className="px-4 py-3">
-                <Link href={localizedPath(locale, `/live-13f/${holder.managerId}`)} className="font-semibold text-slate-950 hover:text-primary hover:underline">
-                  {holder.managerName}
-                </Link>
-                <div className="mt-1 text-xs text-muted-foreground">{holder.leadInvestor}</div>
-              </td>
-              <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{formatQuarter(holder.quarter)}</td>
-              <td className="px-4 py-3 text-right font-mono font-medium">{formatCurrency(holder.value, false)}</td>
-              <td className="px-4 py-3 text-right font-mono">{formatNumber(holder.shares)}</td>
-              <td className="px-4 py-3 text-right font-mono">{formatWeight(holder.weight)}</td>
-              <td className="px-4 py-3">
-                <Badge variant={changeBadgeVariant(holder.changeType)} className="rounded-md">{changeName(holder.changeType)}</Badge>
-                <div className="mt-1 font-mono text-xs text-muted-foreground">{formatPercent(holder.shareChangePercent)}</div>
-              </td>
-              <td className={`px-4 py-3 text-right font-mono font-semibold ${directionTextClass(holder.shareChange)}`}>{formatSignedNumber(holder.shareChange)}</td>
-              <td className={`px-4 py-3 text-right font-mono font-semibold ${directionTextClass(holder.valueChange)}`}>{formatSignedCurrency(holder.valueChange, false)}</td>
-              <td className="px-4 py-3">
-                <a href={holder.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
-                  XML
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-                <div className="mt-1 font-mono text-xs text-muted-foreground">{formatDate(holder.filingDate)}</div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <article className="relative py-5 pl-4 pr-3 sm:px-5">
+      <span className="absolute inset-y-5 left-0 w-1 rounded-full" style={{ backgroundColor: getManagerColor(action.managerId) }} />
+      <div className="grid gap-4 lg:grid-cols-[minmax(180px,1.15fr)_110px_minmax(240px,1.35fr)_minmax(180px,1fr)_80px] lg:items-center">
+        <div className="min-w-0">
+          <Link href={localizedPath(locale, `/live-13f/${action.managerId}`)} className="break-words font-semibold text-slate-950 hover:text-primary hover:underline">
+            {action.managerName}
+          </Link>
+          <div className="mt-1 text-xs text-muted-foreground">{action.leadInvestor}</div>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span>{formatQuarter(action.managerQuarter)}</span>
+            {isStale && <Badge variant="warning" className="rounded-md">{translate(locale, 'stock.latestAvailable')}</Badge>}
+          </div>
+        </div>
+
+        <Badge variant={changeBadgeVariant(model.action)} className="w-fit rounded-md">{changeName(model.action)}</Badge>
+
+        <div>
+          {model.showWeightTransition ? (
+            <div className="font-mono text-sm font-semibold text-slate-950">
+              {formatWeight(model.previousWeight)} <span className="px-1 text-muted-foreground">→</span> {formatWeight(model.currentWeight)}
+              <span className={`ml-2 whitespace-nowrap ${directionTextClass(model.weightDelta || 0)}`}>({formatPercentagePoints(model.weightDelta, weightDeltaDigits)})</span>
+            </div>
+          ) : (
+            <div className="font-mono text-sm font-semibold text-slate-950">
+              {model.isNew ? translate(locale, 'change.new') : translate(locale, 'change.exit')}: {formatWeight(model.specialWeight)}
+            </div>
+          )}
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {translate(locale, summaryKey, {
+              manager: action.managerName,
+              previous: formatWeight(model.previousWeight),
+              current: formatWeight(model.currentWeight),
+              shares: formatNumber(Math.abs(model.isExit ? model.previousShares || 0 : model.shareDelta || model.currentShares || 0)),
+            })}
+          </p>
+        </div>
+
+        <div>
+          <div className={`font-mono text-sm font-semibold ${directionTextClass(model.shareDelta || 0)}`}>
+            {formatSignedNumber(model.shareDelta || 0)} {translate(locale, 'common.shares')}
+          </div>
+          <div className="mt-1 font-mono text-xs text-muted-foreground">{formatPercent(model.shareDeltaPercent)}</div>
+        </div>
+
+        <a href={action.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+          SEC
+          <ExternalLink className="h-3 w-3" />
+          <span className="sr-only">{formatDate(action.filingDate)}</span>
+        </a>
+      </div>
+    </article>
+  );
+}
+
+function DetailDisclosure({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <details className="group rounded-md border border-stone-200 bg-white">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 font-medium text-slate-900 marker:content-none">
+        <span className="flex items-center gap-2">{icon}{title}</span>
+        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="border-t border-stone-200">{children}</div>
+    </details>
   );
 }
 
 function RawHoldingsTable({ stock, locale }: { stock: Stock; locale: Locale }) {
   const { formatCurrency, formatNumber, formatWeight } = getViewFormatters(locale);
   return (
-    <div className="max-w-full overflow-x-auto rounded-lg border border-stone-200 bg-white">
+    <div className="max-w-full overflow-x-auto">
       <table className="w-full min-w-[900px] text-left text-sm">
-        <thead className="bg-stone-100 text-xs uppercase tracking-wider text-muted-foreground">
+        <thead className="bg-stone-100 text-xs uppercase text-muted-foreground">
           <tr>
             <th className="px-4 py-3">{translate(locale, 'common.manager')}</th>
             <th className="px-4 py-3">{translate(locale, 'common.issuer')}</th>
@@ -276,12 +267,7 @@ function RawHoldingsTable({ stock, locale }: { stock: Stock; locale: Locale }) {
               <td className="px-4 py-3 text-right font-mono">{formatCurrency(holding.value, false)}</td>
               <td className="px-4 py-3 text-right font-mono">{formatNumber(holding.shares)}</td>
               <td className="px-4 py-3 text-right font-mono">{formatWeight(holding.weight)}</td>
-              <td className="px-4 py-3">
-                <a href={holding.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
-                  SEC XML
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </td>
+              <td className="px-4 py-3"><a href={holding.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">SEC XML<ExternalLink className="h-3 w-3" /></a></td>
             </tr>
           ))}
         </tbody>
@@ -293,9 +279,9 @@ function RawHoldingsTable({ stock, locale }: { stock: Stock; locale: Locale }) {
 function QuarterTable({ stock, locale }: { stock: Stock; locale: Locale }) {
   const { changeName, formatCurrency, formatNumber, formatQuarter } = getViewFormatters(locale);
   return (
-    <div className="max-w-full overflow-x-auto rounded-lg border border-stone-200 bg-white">
+    <div className="max-w-full overflow-x-auto">
       <table className="w-full min-w-[780px] text-left text-sm">
-        <thead className="bg-stone-100 text-xs uppercase tracking-wider text-muted-foreground">
+        <thead className="bg-stone-100 text-xs uppercase text-muted-foreground">
           <tr>
             <th className="px-4 py-3">{translate(locale, 'common.quarter')}</th>
             <th className="px-4 py-3 text-right">{translate(locale, 'stock.currentManagers')}</th>

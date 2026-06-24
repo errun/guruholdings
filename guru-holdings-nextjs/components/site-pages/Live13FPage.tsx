@@ -1,12 +1,10 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import {
-  AlertTriangle,
   ArrowDownRight,
   ArrowRight,
   ArrowUpRight,
   Building2,
-  CheckCircle2,
   Database,
   ExternalLink,
   FileCheck2,
@@ -15,7 +13,6 @@ import {
 import snapshot from '@/data-generated/snapshots/latest.json';
 import { ExplorerSearch } from '@/components/explorer/ExplorerSearch';
 import { ManagerCompare } from '@/components/explorer/ManagerCompare';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -25,6 +22,7 @@ import {
 } from '@/lib/sec13f-view';
 import { getExplorerData, getManagerCompareData } from '@/lib/sec13f-lite';
 import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
+import { stockPath } from '@/lib/stock-routes';
 
 type Snapshot = typeof snapshot;
 type Manager = Snapshot['managers'][number];
@@ -85,7 +83,7 @@ function ConsensusTable({
                 return (
                   <tr key={`${direction}-${item.companyId}`} className="align-top hover:bg-stone-50">
                     <td className="px-4 py-4">
-                      <Link href={localizedPath(locale, `/stocks/${encodeURIComponent(item.companyId)}`)} className="font-semibold text-slate-950 hover:text-primary hover:underline">
+                      <Link href={localizedPath(locale, stockPath(item.companyId))} className="font-semibold text-slate-950 hover:text-primary hover:underline">
                         {item.canonicalName || item.issuerName}
                       </Link>
                       <div className="mt-1 font-mono text-xs text-muted-foreground">{item.rawCusips?.join(', ') || item.cusip}</div>
@@ -136,7 +134,6 @@ export function Live13FPage({ locale }: { locale: Locale }) {
   const {
     concentrationName,
     formatDate,
-    formatDateTime,
     formatNumber,
     formatPercent,
     formatQuarter,
@@ -166,17 +163,10 @@ export function Live13FPage({ locale }: { locale: Locale }) {
               </p>
             </div>
 
-            <div className="grid min-w-[280px] grid-cols-2 gap-3">
+            <div className="min-w-[180px]">
               <div className="rounded-lg border border-stone-200 bg-stone-50 p-4">
                 <div className="text-xs font-medium uppercase text-muted-foreground">{translate(locale, 'live.latestQuarter')}</div>
                 <div className="mt-2 text-lg font-semibold text-slate-950">{formatQuarter(snapshot.latestQuarter)}</div>
-              </div>
-              <div className="rounded-lg border border-stone-200 bg-stone-50 p-4">
-                <div className="text-xs font-medium uppercase text-muted-foreground">{translate(locale, 'live.validation')}</div>
-                <div className="mt-2 flex items-center gap-2 text-lg font-semibold text-emerald-700">
-                  <CheckCircle2 className="h-5 w-5" />
-                  {snapshot.validation.status === 'passed' ? translate(locale, 'validation.passed') : snapshot.validation.status}
-                </div>
               </div>
             </div>
           </div>
@@ -202,16 +192,6 @@ export function Live13FPage({ locale }: { locale: Locale }) {
           <SummaryCard icon={<ArrowUpRight className="h-4 w-4 text-emerald-700" />} title={translate(locale, 'home.sharedIncrease')} value={formatNumber(sharedIncrease.length)} description={translate(locale, 'live.sharedIncrease.description')} />
           <SummaryCard icon={<ArrowDownRight className="h-4 w-4 text-red-700" />} title={translate(locale, 'home.sharedDecrease')} value={formatNumber(sharedDecrease.length)} description={translate(locale, 'live.sharedDecrease.description')} />
         </section>
-
-        {snapshot.validation.warnings.length > 0 && (
-          <Alert variant="warning" className="mb-8">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>{translate(locale, 'live.warning.title')}</AlertTitle>
-            <AlertDescription className="break-words">
-              {translate(locale, 'live.warning.body', { warnings: snapshot.validation.warnings.join('; ') })}
-            </AlertDescription>
-          </Alert>
-        )}
 
         <section className="mb-10">
           <ManagerCompare managers={managerCompareData} locale={locale} />
@@ -319,15 +299,6 @@ export function Live13FPage({ locale }: { locale: Locale }) {
           </div>
         </section>
 
-        <section>
-          <Alert className="rounded-lg border-primary/20 bg-white text-slate-900 [&>svg]:text-primary">
-            <CheckCircle2 className="h-4 w-4" />
-            <AlertTitle>{translate(locale, 'live.validity.title')}</AlertTitle>
-            <AlertDescription className="break-words">
-              {translate(locale, 'live.validity.body', { date: formatDateTime(snapshot.generatedAt) })}
-            </AlertDescription>
-          </Alert>
-        </section>
       </div>
     </div>
   );

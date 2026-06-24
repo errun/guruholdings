@@ -328,7 +328,7 @@ export function ExplorerSearch({
                 return (
                   <Link
                     key={`${item.direction}-${item.companyId}`}
-                    href={localizedPath(locale, `/stocks/${encodeURIComponent(item.companyId)}`)}
+                    href={localizedPath(locale, item.href)}
                     data-testid="consensus-result"
                     className="block rounded-md border border-stone-200 bg-white p-3 transition-colors hover:border-primary/40 hover:bg-stone-50"
                   >

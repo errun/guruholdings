@@ -9,10 +9,10 @@ const root = process.cwd();
 const siteUrl = 'https://guruholdings.net';
 const snapshot = JSON.parse(fs.readFileSync(path.join(root, 'data-generated', 'snapshots', 'latest.json'), 'utf8'));
 const locales = {
-  en: { prefix: '', lang: 'en', marker: 'Institutional holdings and consensus moves' },
-  zh: { prefix: '/zh', lang: 'zh-CN', marker: '投资机构持仓与共同变化' },
-  ja: { prefix: '/ja', lang: 'ja', marker: '機関投資家の保有銘柄と共同売買動向' },
-  ko: { prefix: '/ko', lang: 'ko', marker: '기관투자자 보유종목과 공동 매매 변화' },
+  en: { prefix: '', lang: 'en', marker: 'See What Top Funds Are Buying and Selling' },
+  zh: { prefix: '/zh', lang: 'zh-CN', marker: '洞见机构仓位动向' },
+  ja: { prefix: '/ja', lang: 'ja', marker: 'トップファンドの売買動向を読み解く' },
+  ko: { prefix: '/ko', lang: 'ko', marker: '주요 펀드의 매수·매도 동향을 확인하세요' },
 };
 const hreflang = { en: 'en', zh: 'zh-Hans', ja: 'ja', ko: 'ko' };
 const representativePaths = [
@@ -23,6 +23,7 @@ const representativePaths = [
   '/stocks/alphabet',
   '/stocks/microsoft',
   '/stocks/nvidia',
+  '/stocks/coca-cola',
 ];
 const errors = [];
 const titlesByLocale = new Map();
@@ -137,6 +138,8 @@ try {
     ['/en/live-13f/berkshire', '/live-13f/berkshire'],
     ['/holdings/buffett', '/live-13f/berkshire'],
     ['/ja/holdings/li-lu', '/ja/live-13f/himalaya'],
+    ['/stocks/191216100', '/stocks/coca-cola'],
+    ['/zh/stocks/191216100', '/zh/stocks/coca-cola'],
   ];
   for (const [source, destination] of redirectCases) {
     const response = await fetch(`${baseUrl}${source}`, { redirect: 'manual' });
@@ -160,6 +163,14 @@ try {
   if (new Set(locations).size !== locations.length) errors.push('sitemap.xml: duplicate URLs found');
   if (locations.some((url) => !url.startsWith(siteUrl))) errors.push('sitemap.xml: non-canonical domain found');
   if (locations.some((url) => url.includes('data-automation-check') || url.includes('/holdings/'))) errors.push('sitemap.xml: internal or legacy URL found');
+  const stockLocations = locations.filter((url) => new URL(url).pathname.includes('/stocks/'));
+  const opaqueStockUrl = stockLocations.find((url) => {
+    const slug = new URL(url).pathname.split('/').at(-1) || '';
+    return /^\d+$/.test(slug) || /^(?=.*\d)[A-Za-z0-9]{9}$/.test(slug);
+  });
+  if (opaqueStockUrl) errors.push(`sitemap.xml: opaque stock URL found ${opaqueStockUrl}`);
+  if (!locations.includes(`${siteUrl}/stocks/coca-cola`)) errors.push('sitemap.xml: readable Coca-Cola URL is missing');
+  if (locations.includes(`${siteUrl}/stocks/191216100`)) errors.push('sitemap.xml: legacy Coca-Cola CUSIP URL is present');
 
   if (errors.length > 0) {
     console.error(`SEO check failed with ${errors.length} issue(s):`);

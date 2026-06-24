@@ -63,6 +63,21 @@ export const formatWeight = (
   }).format(value)}%`;
 };
 
+export const formatPercentagePoints = (
+  value: number | null | undefined,
+  digits = 2,
+  locale: Locale = 'en',
+) => {
+  if (value === null || value === undefined || Number.isNaN(value)) return 'n/a';
+  const formatted = new Intl.NumberFormat(intlLocales[locale], {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+    signDisplay: 'always',
+  }).format(value);
+  const suffix = locale === 'zh' ? ' 个百分点' : locale === 'ja' ? 'ポイント' : locale === 'ko' ? '%p' : ' pp';
+  return `${formatted}${suffix}`;
+};
+
 export const formatDate = (value: string | null | undefined, locale: Locale = 'en') => {
   if (!value) return 'n/a';
   const date = new Date(`${value.slice(0, 10)}T00:00:00Z`);
@@ -146,6 +161,7 @@ export function getViewFormatters(locale: Locale) {
     formatDateTime: (value: string) => formatDateTime(value, locale),
     formatNumber: (value: number) => formatNumber(value, locale),
     formatPercent: (value: number | null | undefined, digits = 2) => formatPercent(value, digits, locale),
+    formatPercentagePoints: (value: number | null | undefined, digits = 2) => formatPercentagePoints(value, digits, locale),
     formatQuarter: (value: string) => formatQuarter(value, locale),
     formatSignedCurrency: (value: number, compact = true) => formatSignedCurrency(value, compact, locale),
     formatSignedNumber: (value: number) => formatSignedNumber(value, locale),

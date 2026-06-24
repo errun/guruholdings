@@ -42,6 +42,15 @@ jobs:
         env:
           SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
 
+      - name: Sync readable stock routes
+        run: npm run routes:sync
+
+      - name: Check readable stock routes
+        run: npm run routes:check
+
+      - name: Check holdings change model
+        run: npm run changes:check
+
       - name: Verify SEC sources and hashes
         run: npm run data:verify
         env:
@@ -69,6 +78,7 @@ jobs:
           git add guru-holdings-nextjs/data-source/managers.json
           git add guru-holdings-nextjs/data-source/themes.json
           git add guru-holdings-nextjs/data-source/securities.json
+          git add guru-holdings-nextjs/data-source/stock-slugs.json guru-holdings-nextjs/data-source/stock-route-aliases.json
           if git diff --cached --quiet; then
             echo "No generated data changes to commit."
             exit 0

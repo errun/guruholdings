@@ -27,6 +27,7 @@ import {
 } from '@/lib/sec13f-view';
 import { getManagerChartData, getManagerOperationData } from '@/lib/sec13f-lite';
 import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
+import { stockPath } from '@/lib/stock-routes';
 
 type Manager = typeof snapshot.managers[number];
 type CompanyChange = Manager['latestCompanyChanges'][number];
@@ -72,7 +73,7 @@ function ChangeList({
       </CardHeader>
       <CardContent className="space-y-3">
         {changes.slice(0, 8).map((change) => (
-          <Link key={`${title}-${change.companyId}`} href={localizedPath(locale, `/stocks/${encodeURIComponent(change.companyId)}`)} className="block rounded-lg border border-stone-200 bg-white p-4 hover:border-primary/40 hover:bg-stone-50">
+          <Link key={`${title}-${change.companyId}`} href={localizedPath(locale, stockPath(change.companyId))} className="block rounded-lg border border-stone-200 bg-white p-4 hover:border-primary/40 hover:bg-stone-50">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 <div className="break-words font-semibold text-slate-950">{change.canonicalName || change.issuerName}</div>
@@ -132,7 +133,7 @@ function HoldingsTable({ manager, locale }: { manager: Manager; locale: Locale }
                 </td>
                 <td className="px-4 py-3 font-mono text-xs text-slate-700">{holding.cusip}</td>
                 <td className="px-4 py-3">
-                  <Link href={localizedPath(locale, `/stocks/${encodeURIComponent(holding.companyId)}`)} className="text-sm font-medium text-slate-800 hover:text-primary hover:underline">
+                  <Link href={localizedPath(locale, stockPath(holding.companyId))} className="text-sm font-medium text-slate-800 hover:text-primary hover:underline">
                     {holding.canonicalName || holding.issuerName}
                   </Link>
                   <div className="font-mono text-xs text-muted-foreground">{holding.canonicalCompanyId}</div>
@@ -329,7 +330,6 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
             <AlertTitle>{translate(locale, 'manager.evidence.title')}</AlertTitle>
             <AlertDescription>
               {translate(locale, 'manager.evidence.body', {
-                status: snapshot.validation.status === 'passed' ? translate(locale, 'validation.passed') : snapshot.validation.status,
                 accession: manager.latestFiling.accessionNumber,
                 date: formatDate(manager.latestFiling.filingDate),
               })}
@@ -381,7 +381,7 @@ function InsightCard({ title, change, tone, locale }: { title: string; change: C
       </CardHeader>
       <CardContent>
         {change ? (
-          <Link href={localizedPath(locale, `/stocks/${encodeURIComponent(change.companyId)}`)} className="block rounded-lg border border-stone-200 bg-stone-50 p-4 hover:border-primary/40">
+          <Link href={localizedPath(locale, stockPath(change.companyId))} className="block rounded-lg border border-stone-200 bg-stone-50 p-4 hover:border-primary/40">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div className="font-semibold text-slate-950">{change.canonicalName || change.issuerName}</div>

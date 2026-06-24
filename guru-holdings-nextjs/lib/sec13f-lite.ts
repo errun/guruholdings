@@ -1,4 +1,5 @@
 import snapshot from '@/data-generated/snapshots/latest.json';
+import { stockPath } from '@/lib/stock-routes';
 
 type AnyRecord = Record<string, any>;
 
@@ -31,7 +32,7 @@ const pickManagerBasics = (manager: AnyRecord) => ({
 
 const pickStockSearchResult = (stock: AnyRecord) => ({
   companyId: stock.companyId,
-  href: stock.href,
+  href: stockPath(stock.companyId),
   canonicalName: stock.canonicalName,
   canonicalTicker: stock.canonicalTicker,
   rawCusips: stock.rawCusips,
@@ -48,6 +49,7 @@ const pickStockSearchResult = (stock: AnyRecord) => ({
 
 const pickConsensusSearchResult = (item: AnyRecord) => ({
   companyId: item.companyId,
+  href: stockPath(item.companyId),
   canonicalName: item.canonicalName,
   canonicalTicker: item.canonicalTicker,
   issuerName: item.issuerName,
@@ -92,6 +94,7 @@ export function getManagerCompareData() {
     ...pickManagerBasics(manager),
     companyHoldings: (manager.companyHoldings || []).map((holding: AnyRecord) => ({
       companyId: holding.companyId,
+      href: stockPath(holding.companyId),
       canonicalName: holding.canonicalName,
       issuerName: holding.issuerName,
       rawCusips: holding.rawCusips,
@@ -100,6 +103,7 @@ export function getManagerCompareData() {
     })),
     latestCompanyChanges: (manager.latestCompanyChanges || []).map((change: AnyRecord) => ({
       companyId: change.companyId,
+      href: stockPath(change.companyId),
       canonicalName: change.canonicalName,
       issuerName: change.issuerName,
       changeType: change.changeType,
@@ -117,9 +121,15 @@ export function getManagerChartData(manager: AnyRecord) {
 }
 
 export function getManagerOperationData(manager: AnyRecord) {
+  const quarterlyCompanyChanges = Object.fromEntries(
+    Object.entries(manager.quarterlyCompanyChanges || {}).map(([quarter, changes]) => [
+      quarter,
+      (changes as AnyRecord[]).map((change) => ({ ...change, href: stockPath(change.companyId) })),
+    ]),
+  );
   return {
     latestQuarter: manager.latestQuarter,
-    quarterlyCompanyChanges: manager.quarterlyCompanyChanges || {},
+    quarterlyCompanyChanges,
   };
 }
 

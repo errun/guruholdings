@@ -38,6 +38,7 @@ export function ManagerCompare({ managers, locale }: { managers: AnyRecord[]; lo
         const first = holdings[0].holding as AnyRecord;
         return {
           companyId,
+          href: first.href,
           canonicalName: first.canonicalName || first.issuerName,
           rawCusips: first.rawCusips || [first.cusip],
           totalValue: holdings.reduce((sum, item) => sum + item.holding.value, 0),
@@ -60,6 +61,7 @@ export function ManagerCompare({ managers, locale }: { managers: AnyRecord[]; lo
       const first = changes[0].change as AnyRecord;
       return {
         companyId,
+        href: first.href,
         canonicalName: first.canonicalName || first.issuerName,
         changes,
       };
@@ -185,7 +187,7 @@ function SignalList({ title, items, kind, locale }: { title: string; items: AnyR
       </div>
       <div className="space-y-2">
         {items.map((item) => (
-          <Link key={`${kind}-${item.companyId}`} href={localizedPath(locale, `/stocks/${encodeURIComponent(item.companyId)}`)} className="block rounded-md border border-stone-200 bg-white p-3 hover:border-primary/40">
+          <Link key={`${kind}-${item.companyId}`} href={localizedPath(locale, item.href)} className="block rounded-md border border-stone-200 bg-white p-3 hover:border-primary/40">
             <div className="break-words font-semibold text-slate-950">{item.canonicalName}</div>
             {kind === 'holding' ? (
               <div className="mt-1 font-mono text-xs text-muted-foreground">{formatCurrency(item.totalValue)}</div>

@@ -2,6 +2,7 @@ import snapshot from '@/data-generated/snapshots/latest.json';
 import { buildMetadata } from './metadata';
 import { seoKeywordMap } from './seo-keywords';
 import type { Locale } from './site';
+import { getStockByCompanyId, resolveStockRoute, stockPath } from '@/lib/stock-routes';
 
 export function getHomeMetadata(locale: Locale) {
   return buildMetadata(locale, {
@@ -35,17 +36,17 @@ export function getManagerMetadata(locale: Locale, managerId: string) {
   });
 }
 
-export function getStockMetadata(locale: Locale, companyId: string) {
-  const decodedCompanyId = decodeURIComponent(companyId);
-  const stock = snapshot.stocks.find((item) => item.companyId === decodedCompanyId);
-  const name = stock?.canonicalName || decodedCompanyId;
+export function getStockMetadata(locale: Locale, routeSegment: string) {
+  const route = resolveStockRoute(routeSegment);
+  const stock = route ? getStockByCompanyId(route.companyId) : null;
+  const name = stock?.canonicalName || routeSegment;
   return buildMetadata(locale, {
     titleKey: 'seo.stock.title',
     descriptionKey: 'seo.stock.description',
     titleValues: { name },
     descriptionValues: { name },
-    path: `/stocks/${encodeURIComponent(decodedCompanyId)}`,
+    path: route ? stockPath(route.companyId) : `/stocks/${encodeURIComponent(routeSegment)}`,
     keywords: [...seoKeywordMap[locale].stock, name, ...(stock?.canonicalTicker ? [stock.canonicalTicker] : [])],
-    index: Boolean(stock),
+    index: Boolean(stock && route?.isCanonical),
   });
 }

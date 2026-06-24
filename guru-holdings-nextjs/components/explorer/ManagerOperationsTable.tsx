@@ -97,7 +97,7 @@ export function ManagerOperationsTable({ manager, locale }: { manager: AnyRecord
             {rows.map((change: AnyRecord) => (
               <tr key={`${quarter}-${change.companyId}`} className="align-top hover:bg-stone-50">
                 <td className="px-4 py-3">
-                  <Link href={localizedPath(locale, `/stocks/${encodeURIComponent(change.companyId)}`)} className="font-semibold text-slate-950 hover:text-primary hover:underline">
+                  <Link href={localizedPath(locale, change.href)} className="font-semibold text-slate-950 hover:text-primary hover:underline">
                     {change.canonicalName || change.issuerName}
                   </Link>
                   <div className="mt-1 font-mono text-xs text-muted-foreground">{change.canonicalTicker || change.companyId}</div>
