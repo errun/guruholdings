@@ -115,6 +115,14 @@ assert.ok(homeSource.includes('home.consensus.viewAllIncrease'), 'home page must
 assert.ok(homeSource.includes('home.consensus.viewAllDecrease'), 'home page must link to all shared decreases');
 assert.ok(homeSource.includes('ManagerPortfolioMini'), 'home manager cards must show disclosed portfolio value change');
 
+const heroSource = fs.readFileSync('components/signals/SignalHero.tsx', 'utf8');
+assert.ok(heroSource.includes('snapshot.consensus.sharedIncrease.length'), 'hero must expose the shared increase total');
+assert.ok(heroSource.includes('snapshot.consensus.sharedDecrease.length'), 'hero must expose the shared decrease total');
+assert.ok(heroSource.includes('signal.hero.strongSignals'), 'hero must label the strong signal board');
+assert.ok(!heroSource.includes('SignalCard'), 'hero must not use ordinary signal cards');
+assert.ok(!heroSource.includes('SignalSearchBox'), 'hero must not bring search back into the first screen');
+assert.ok(!heroSource.includes('FilingFreshnessStrip'), 'hero status must be a compact one-line cadence');
+
 const stockSource = fs.readFileSync('components/site-pages/StockPage.tsx', 'utf8');
 assert.ok(stockSource.includes('stock.estimatedPriceRange'), 'stock actions must show estimated quarter price ranges');
 assert.ok(!stockSource.includes('average buy price'), 'stock page must not describe estimated prices as average buy price');

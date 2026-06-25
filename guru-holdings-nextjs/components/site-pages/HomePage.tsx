@@ -150,7 +150,7 @@ function PositionSignal({ item, kind, locale }: { item: ConsensusItem; kind: 'ne
   return (
     <Link
       href={localizedPath(locale, stockPath(item.companyId))}
-      className="flex items-center justify-between gap-3 rounded-md border border-stone-200 bg-white px-4 py-3 hover:border-primary/50"
+      className="flex min-w-0 max-w-full items-center justify-between gap-3 overflow-hidden rounded-md border border-stone-200 bg-white px-4 py-3 hover:border-primary/50"
     >
       <div className="min-w-0">
         <div className="truncate font-semibold text-slate-950">{item.canonicalName || item.issuerName}</div>
@@ -266,23 +266,23 @@ export async function HomePage({ locale }: { locale: Locale }) {
 
         <section className="mb-10 border-y border-stone-200 py-6">
           <h2 className="mb-4 text-xl font-semibold text-slate-950">{translate(locale, 'home.positionSignals')}</h2>
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div>
+          <div className="grid min-w-0 gap-6 lg:grid-cols-2">
+            <div className="min-w-0">
               <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
                 <LogIn className="h-4 w-4 text-cyan-700" />
                 {translate(locale, 'home.sharedNew')}
               </h3>
-              <div className="space-y-2">
+              <div className="min-w-0 space-y-2">
                 {sharedNew.map((item) => <PositionSignal key={'new-' + item.companyId} item={item} kind="new" locale={locale} />)}
                 {sharedNew.length === 0 && <EmptySignal text={translate(locale, 'home.noSharedNew')} />}
               </div>
             </div>
-            <div>
+            <div className="min-w-0">
               <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
                 <ArrowDownRight className="h-4 w-4 text-amber-700" />
                 {translate(locale, 'home.sharedExit')}
               </h3>
-              <div className="space-y-2">
+              <div className="min-w-0 space-y-2">
                 {sharedExit.map((item) => <PositionSignal key={'exit-' + item.companyId} item={item} kind="exit" locale={locale} />)}
                 {sharedExit.length === 0 && <EmptySignal text={translate(locale, 'home.noSharedExit')} />}
               </div>
