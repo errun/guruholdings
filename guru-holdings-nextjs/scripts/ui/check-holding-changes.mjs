@@ -115,10 +115,16 @@ assert.ok(homeSource.includes('home.consensus.viewAllIncrease'), 'home page must
 assert.ok(homeSource.includes('home.consensus.viewAllDecrease'), 'home page must link to all shared decreases');
 assert.ok(homeSource.includes('ManagerPortfolioMini'), 'home manager cards must show disclosed portfolio value change');
 
+const headerSource = fs.readFileSync('components/layout/Header.tsx', 'utf8');
+assert.ok(headerSource.includes('snapshot.consensus.sharedIncrease.length'), 'header must expose the shared increase total');
+assert.ok(headerSource.includes('snapshot.consensus.sharedDecrease.length'), 'header must expose the shared decrease total');
+assert.ok(headerSource.includes('header-signal-summary'), 'header must contain the compact signal summary bar');
+assert.ok(!headerSource.includes('signal.hero.badge'), 'header must not show the SEC EDGAR 13F signal badge');
+
 const heroSource = fs.readFileSync('components/signals/SignalHero.tsx', 'utf8');
-assert.ok(heroSource.includes('snapshot.consensus.sharedIncrease.length'), 'hero must expose the shared increase total');
-assert.ok(heroSource.includes('snapshot.consensus.sharedDecrease.length'), 'hero must expose the shared decrease total');
 assert.ok(heroSource.includes('signal.hero.strongSignals'), 'hero must label the strong signal board');
+assert.ok(!heroSource.includes('hero-count-'), 'hero must not duplicate header count cards');
+assert.ok(!heroSource.includes('hero-status-line'), 'hero must not duplicate the header status line');
 assert.ok(!heroSource.includes('SignalCard'), 'hero must not use ordinary signal cards');
 assert.ok(!heroSource.includes('SignalSearchBox'), 'hero must not bring search back into the first screen');
 assert.ok(!heroSource.includes('FilingFreshnessStrip'), 'hero status must be a compact one-line cadence');

@@ -6,7 +6,6 @@ import { buildHoldingChangeModel } from '@/lib/holding-change.mjs';
 import { getViewFormatters } from '@/lib/sec13f-view';
 import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
 import { stockPath } from '@/lib/stock-routes';
-import { getFreshnessDisplay } from '@/lib/update-cadence';
 
 type ConsensusItem =
   | typeof snapshot.consensus.sharedIncrease[number]
@@ -54,11 +53,8 @@ export function SignalHero({
 }: {
   locale: Locale;
 }) {
-  const { formatDateTime, formatNumber, formatQuarter } = getViewFormatters(locale);
-  const freshness = getFreshnessDisplay(snapshot.latestQuarter, locale);
+  const { formatNumber } = getViewFormatters(locale);
   const strongSignals = buildStrongSignals();
-  const sharedIncreaseCount = snapshot.consensus.sharedIncrease.length;
-  const sharedDecreaseCount = snapshot.consensus.sharedDecrease.length;
 
   return (
     <section className="border-b border-stone-200 bg-white" data-testid="signal-hero">
@@ -68,37 +64,6 @@ export function SignalHero({
             <h1 className="max-w-4xl break-words text-3xl font-semibold leading-[1.08] text-slate-950 sm:text-4xl lg:text-[2.65rem]">
               {translate(locale, 'home.hero.title')}
             </h1>
-
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              <SignalCountBlock
-                direction="increase"
-                label={translate(locale, 'home.sharedIncrease')}
-                value={formatNumber(sharedIncreaseCount)}
-                description={translate(locale, 'signal.hero.sharedMoveHint')}
-              />
-              <SignalCountBlock
-                direction="decrease"
-                label={translate(locale, 'home.sharedDecrease')}
-                value={formatNumber(sharedDecreaseCount)}
-                description={translate(locale, 'signal.hero.sharedMoveHint')}
-              />
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-stone-200 py-2 text-[11px] leading-5 text-muted-foreground sm:text-xs" data-testid="hero-status-line">
-              <span>
-                <span className="font-medium text-slate-800">{translate(locale, 'home.latestQuarter')}</span>{' '}
-                <span className="font-mono text-slate-950">{formatQuarter(snapshot.latestQuarter)}</span>
-              </span>
-              <span className="hidden text-stone-300 sm:inline">/</span>
-              <span>
-                <span className="font-medium text-slate-800">{translate(locale, 'common.managers')}</span>{' '}
-                <span className="font-mono text-slate-950">{formatNumber(snapshot.managers.length)}</span>
-              </span>
-              <span className="hidden text-stone-300 sm:inline">/</span>
-              <span>{translate(locale, 'signal.hero.generatedShort', { date: formatDateTime(snapshot.generatedAt) })}</span>
-              <span className="hidden text-stone-300 sm:inline">/</span>
-              <span>{translate(locale, 'signal.hero.nextCheckShort', { date: freshness.nextCheckDate })}</span>
-            </div>
           </div>
 
           <div className="min-w-0 rounded-md border border-slate-800 bg-slate-950 p-4 text-white shadow-sm sm:p-5" data-testid="hero-strong-signals">
@@ -126,37 +91,6 @@ export function SignalHero({
         </div>
       </div>
     </section>
-  );
-}
-
-function SignalCountBlock({
-  direction,
-  label,
-  value,
-  description,
-}: {
-  direction: 'increase' | 'decrease';
-  label: string;
-  value: string;
-  description: string;
-}) {
-  const isIncrease = direction === 'increase';
-
-  return (
-    <div className={`min-h-[92px] rounded-md border bg-stone-50 p-3 ${isIncrease ? 'border-emerald-200' : 'border-red-200'}`} data-testid={`hero-count-${direction}`}>
-      <div className="flex items-center gap-2 text-xs font-medium text-slate-700">
-        {isIncrease ? (
-          <ArrowUpRight className="h-4 w-4 text-emerald-700" />
-        ) : (
-          <ArrowDownRight className="h-4 w-4 text-red-700" />
-        )}
-        <span className="break-words">{label}</span>
-      </div>
-      <div className={`mt-2 font-mono text-3xl font-semibold leading-none ${isIncrease ? 'text-emerald-700' : 'text-red-700'}`}>
-        {value}
-      </div>
-      <div className="mt-2 text-[11px] leading-4 text-muted-foreground">{description}</div>
-    </div>
   );
 }
 
