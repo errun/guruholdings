@@ -326,9 +326,9 @@ function QuarterPriceRangeRow({
   if (estimate.status !== 'available') {
     return (
       <div className="grid gap-1">
-        <div className="flex items-center justify-between gap-3 text-xs">
+        <div className="grid gap-1 text-xs sm:flex sm:items-center sm:justify-between sm:gap-3">
           <span className="font-mono font-semibold text-slate-800">{formatQuarter(estimate.quarter)}</span>
-          <span className="text-muted-foreground">{translate(locale, 'stock.estimatedPriceUnavailable')}</span>
+          <span className="text-muted-foreground sm:text-right">{translate(locale, 'stock.estimatedPriceUnavailable')}</span>
         </div>
         <div className="h-1.5 rounded-full bg-stone-200" />
       </div>
@@ -340,9 +340,9 @@ function QuarterPriceRangeRow({
 
   return (
     <div className="grid gap-1.5">
-      <div className="flex items-center justify-between gap-3 text-xs">
+      <div className="grid gap-1 text-xs sm:flex sm:items-center sm:justify-between sm:gap-3">
         <span className="font-mono font-semibold text-slate-800">{formatQuarter(estimate.quarter)}</span>
-        <span className="font-mono text-slate-950">{formatPrice(estimate.low)} - {formatPrice(estimate.high)}</span>
+        <span className="break-words font-mono text-slate-950 sm:text-right">{formatPrice(estimate.low)} - {formatPrice(estimate.high)}</span>
       </div>
       <div className="relative h-1.5 overflow-hidden rounded-full bg-stone-200">
         <span
@@ -485,7 +485,7 @@ function PriceEstimateBlock({
   return (
     <div className="rounded-md border border-stone-200 bg-stone-50 p-3">
       <div className="text-xs font-medium text-muted-foreground">{translate(locale, 'stock.estimatedPriceRange')}</div>
-      <div className="mt-1 font-mono text-sm font-semibold text-slate-950">
+      <div className="mt-1 break-words font-mono text-sm font-semibold text-slate-950">
         {formatPrice(estimate.low)} - {formatPrice(estimate.high)}
       </div>
       <div className="mt-1 text-[11px] leading-4 text-muted-foreground">
