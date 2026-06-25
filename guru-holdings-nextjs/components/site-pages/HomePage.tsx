@@ -13,13 +13,15 @@ import { SignalHero } from '@/components/signals/SignalHero';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { buildHoldingChangeModel } from '@/lib/holding-change.mjs';
+import { getCompanyMarketCaps, type CompanyMarketCap } from '@/lib/market-data';
 import { getExplorerData } from '@/lib/sec13f-lite';
 import {
   directionTextClass,
   getViewFormatters,
 } from '@/lib/sec13f-view';
 import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
-import { getSignalCounts, getSignalItems } from '@/lib/signals';
+import { getManagerPortfolioChange, formatManagerPortfolioChange } from '@/lib/manager-portfolio';
+import { getSignalItems } from '@/lib/signals';
 import { stockPath } from '@/lib/stock-routes';
 
 type Manager = typeof snapshot.managers[number];
@@ -41,16 +43,20 @@ function ConsensusCard({
   item,
   direction,
   locale,
+  marketCap,
 }: {
   item: ConsensusItem;
   direction: 'increase' | 'decrease';
   locale: Locale;
+  marketCap?: CompanyMarketCap;
 }) {
   const rows = directionalManagers(item, direction);
   const Icon = direction === 'increase' ? ArrowUpRight : ArrowDownRight;
   const title = item.canonicalName || item.issuerName;
   const {
     changeName,
+    formatCurrency,
+    formatDateTime,
     formatSignedCurrency,
     formatNumber,
     formatWeight,
@@ -69,6 +75,20 @@ function ConsensusCard({
           </div>
           <p className="mt-1 font-mono text-xs text-muted-foreground">
             {item.canonicalTicker || item.rawCusips?.join(', ') || item.cusip}
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {translate(locale, 'stock.companyMarketCap')}: {' '}
+            <span className="font-mono font-semibold text-slate-900">
+              {marketCap?.status === 'available' ? formatCurrency(marketCap.value) : translate(locale, 'stock.marketCap.unavailable')}
+            </span>
+            {marketCap?.status === 'available' && (
+              <span className="ml-1">
+                {translate(locale, 'stock.marketCap.shortSource', {
+                  source: marketCap.sourceName,
+                  date: formatDateTime(marketCap.retrievedAt),
+                })}
+              </span>
+            )}
           </p>
         </div>
         <div className="shrink-0 text-right">
@@ -147,19 +167,46 @@ function EmptySignal({ text }: { text: string }) {
   return <div className="rounded-md border border-dashed border-stone-300 px-4 py-5 text-sm leading-6 text-muted-foreground">{text}</div>;
 }
 
+function ManagerPortfolioMini({ manager, locale }: { manager: Manager; locale: Locale }) {
+  const change = getManagerPortfolioChange(manager);
+  const formatted = formatManagerPortfolioChange(change, locale);
+  if (!formatted || change.status !== 'available') return null;
+
+  return (
+    <div className="mb-3 w-full rounded-md border border-stone-200 bg-stone-50 p-3">
+      <div className="text-xs font-medium text-muted-foreground">{translate(locale, 'home.managerPortfolioChange')}</div>
+      <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <span className="font-mono text-base font-semibold text-slate-950">{formatted.currentValue}</span>
+        <span className={`font-mono text-xs font-semibold ${change.toneClass}`}>
+          {formatted.valueDelta} / {formatted.percentDelta}
+        </span>
+      </div>
+      <div className="mt-1 text-[11px] leading-4 text-muted-foreground">
+        {translate(locale, 'home.managerPortfolioChangeNote', {
+          current: formatted.currentQuarter,
+          previous: formatted.previousQuarter,
+        })}
+      </div>
+    </div>
+  );
+}
+
 export async function HomePage({ locale }: { locale: Locale }) {
   const explorerData = getExplorerData();
   const { formatNumber, formatQuarter } = getViewFormatters(locale);
   const allSignals = getSignalItems('all');
-  const signalCounts = getSignalCounts(allSignals);
   const topSharedIncrease = snapshot.consensus.sharedIncrease.slice(0, 4);
   const topSharedDecrease = snapshot.consensus.sharedDecrease.slice(0, 4);
+  const marketCaps = await getCompanyMarketCaps([
+    ...topSharedIncrease.map((item) => item.companyId),
+    ...topSharedDecrease.map((item) => item.companyId),
+  ]);
   const sharedNew = snapshot.consensus.sharedIncrease.filter((item) => item.newManagers.length >= 2).slice(0, 4);
   const sharedExit = snapshot.consensus.sharedDecrease.filter((item) => item.exitManagers.length >= 2).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background">
-      <SignalHero locale={locale} signals={allSignals} counts={signalCounts} />
+      <SignalHero locale={locale} signals={allSignals} />
 
       <div className="container py-7 lg:py-9">
         <section className="mb-10">
@@ -187,8 +234,12 @@ export async function HomePage({ locale }: { locale: Locale }) {
               </div>
               <p className="mb-3 text-xs text-muted-foreground">{translate(locale, 'home.consensus.showingTop', { shown: formatNumber(topSharedIncrease.length), total: formatNumber(snapshot.consensus.sharedIncrease.length) })}</p>
               <div className="space-y-3">
-                {topSharedIncrease.map((item) => <ConsensusCard key={'inc-' + item.companyId} item={item} direction="increase" locale={locale} />)}
+                {topSharedIncrease.map((item) => <ConsensusCard key={'inc-' + item.companyId} item={item} direction="increase" locale={locale} marketCap={marketCaps.get(item.companyId)} />)}
               </div>
+              <Link href={localizedPath(locale, '/live-13f?mode=increase')} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+                {translate(locale, 'home.consensus.viewAllIncrease')}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
 
             <div className="min-w-0">
@@ -203,8 +254,12 @@ export async function HomePage({ locale }: { locale: Locale }) {
               </div>
               <p className="mb-3 text-xs text-muted-foreground">{translate(locale, 'home.consensus.showingTop', { shown: formatNumber(topSharedDecrease.length), total: formatNumber(snapshot.consensus.sharedDecrease.length) })}</p>
               <div className="space-y-3">
-                {topSharedDecrease.map((item) => <ConsensusCard key={'dec-' + item.companyId} item={item} direction="decrease" locale={locale} />)}
+                {topSharedDecrease.map((item) => <ConsensusCard key={'dec-' + item.companyId} item={item} direction="decrease" locale={locale} marketCap={marketCaps.get(item.companyId)} />)}
               </div>
+              <Link href={localizedPath(locale, '/live-13f?mode=decrease')} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+                {translate(locale, 'home.consensus.viewAllDecrease')}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </section>
@@ -254,6 +309,7 @@ export async function HomePage({ locale }: { locale: Locale }) {
                     </div>
                   </CardHeader>
                   <CardContent className="flex flex-wrap gap-2 p-5 pt-0 text-xs">
+                    <ManagerPortfolioMini manager={manager} locale={locale} />
                     <Badge variant="success" className="rounded-sm">{translate(locale, 'change.increase')} {manager.metrics.changeCounts.increase || 0}</Badge>
                     <Badge variant="destructive" className="rounded-sm">{translate(locale, 'change.decrease')} {manager.metrics.changeCounts.decrease || 0}</Badge>
                     <Badge variant="info" className="rounded-sm">{translate(locale, 'change.new')} {manager.metrics.changeCounts.new || 0}</Badge>

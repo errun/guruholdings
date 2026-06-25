@@ -26,6 +26,14 @@ export const formatSignedCurrency = (value: number, compact = true, locale: Loca
   return formatted;
 };
 
+export const formatPrice = (value: number, locale: Locale = 'en') =>
+  new Intl.NumberFormat(intlLocales[locale], {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value || 0);
+
 export const formatNumber = (value: number, locale: Locale = 'en') =>
   new Intl.NumberFormat(intlLocales[locale], {
     maximumFractionDigits: 0,
@@ -159,6 +167,7 @@ export function getViewFormatters(locale: Locale) {
     formatNumber: (value: number) => formatNumber(value, locale),
     formatPercent: (value: number | null | undefined, digits = 2) => formatPercent(value, digits, locale),
     formatPercentagePoints: (value: number | null | undefined, digits = 2) => formatPercentagePoints(value, digits, locale),
+    formatPrice: (value: number) => formatPrice(value, locale),
     formatQuarter: (value: string) => formatQuarter(value, locale),
     formatSignedCurrency: (value: number, compact = true) => formatSignedCurrency(value, compact, locale),
     formatSignedNumber: (value: number) => formatSignedNumber(value, locale),

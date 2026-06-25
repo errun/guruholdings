@@ -37,8 +37,8 @@ function buildSeries(quarters: AnyRecord[]) {
     labelOffset: 0,
   })).sort((a, b) => b.finalWeight - a.finalWeight);
 
-  const estimatedPlotHeight = 220;
-  const minimumLabelGap = 20;
+  const estimatedPlotHeight = 400;
+  const minimumLabelGap = 34;
   const rawLabelY = ordered.map((manager) => ((maxWeight - manager.finalWeight) / maxWeight) * estimatedPlotHeight);
 
   for (let groupStart = 0; groupStart < ordered.length;) {
@@ -90,9 +90,9 @@ export function StockTrendChart({ stock, locale }: { stock: AnyRecord; locale: L
 
   return (
     <div className="rounded-lg border border-stone-200 bg-white p-3 sm:p-5">
-      <div className="h-[320px] min-w-0">
+      <div className="h-[500px] min-w-0 sm:h-[560px]">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={trend} margin={{ top: 18, right: 132, bottom: 8, left: 0 }}>
+          <LineChart data={trend} margin={{ top: 28, right: 188, bottom: 14, left: 0 }}>
             <CartesianGrid stroke="#e7e0d6" vertical={false} />
             <XAxis dataKey="quarter" tickLine={false} axisLine={false} tickFormatter={formatQuarter} fontSize={12} />
             <YAxis

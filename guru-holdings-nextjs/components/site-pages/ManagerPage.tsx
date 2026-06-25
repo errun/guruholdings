@@ -23,6 +23,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getManagerProfile } from '@/lib/manager-profiles';
+import { getManagerPortfolioChange, formatManagerPortfolioChange } from '@/lib/manager-portfolio';
 import {
   changeBadgeVariant,
   directionTextClass,
@@ -205,6 +206,8 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
   const largestDecrease = manager.metrics.largestDecrease;
   const managerProfile = getManagerProfile(manager.id, locale);
   const description = managerProfile?.overview || managerMetadata.descriptions?.[locale] || translate(locale, 'manager.description.fallback');
+  const portfolioChange = getManagerPortfolioChange(manager);
+  const formattedPortfolioChange = formatManagerPortfolioChange(portfolioChange, locale);
 
   return (
     <div className="min-h-screen bg-background">
@@ -230,6 +233,17 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
                 <p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground">
                   {translate(locale, 'manager.intro', { managerName: manager.managerName, cik: manager.cik })}
                 </p>
+                <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                  <span className="rounded-sm border border-stone-200 bg-stone-50 px-2 py-1">
+                    {translate(locale, 'common.reportDate')}: {formatDate(manager.latestFiling.reportDate)}
+                  </span>
+                  <span className="rounded-sm border border-stone-200 bg-stone-50 px-2 py-1">
+                    {translate(locale, 'common.filingDate')}: {formatDate(manager.latestFiling.filingDate)}
+                  </span>
+                  <span className="rounded-sm border border-stone-200 bg-stone-50 px-2 py-1 font-mono">
+                    {manager.latestFiling.accessionNumber}
+                  </span>
+                </div>
                 {!managerMetadata.logoUrl && (
                   <p className="mt-2 text-xs leading-5 text-muted-foreground">
                     {managerMetadata.logoFallbackReason || translate(locale, 'manager.logoFallback')}
@@ -265,7 +279,23 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
           </Alert>
         )}
 
-        <section className="mb-8 grid gap-4 lg:grid-cols-4">
+        <section className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          {portfolioChange.status === 'available' && formattedPortfolioChange ? (
+            <MetricCard
+              icon={<ArrowUpDown className="h-4 w-4 text-primary" />}
+              title={translate(locale, 'manager.portfolioValueChange')}
+              value={formattedPortfolioChange.currentValue}
+              valueTone={portfolioChange.toneClass}
+              description={translate(locale, 'manager.portfolioValueChange.description', {
+                delta: formattedPortfolioChange.valueDelta,
+                percent: formattedPortfolioChange.percentDelta,
+                current: formattedPortfolioChange.currentQuarter,
+                previous: formattedPortfolioChange.previousQuarter,
+              })}
+            />
+          ) : (
+            <MetricCard icon={<ArrowUpDown className="h-4 w-4 text-primary" />} title={translate(locale, 'manager.portfolioValueChange')} value={translate(locale, 'common.noData')} description={translate(locale, 'manager.portfolioValueChange.unavailable')} />
+          )}
           <MetricCard icon={<Building2 className="h-4 w-4 text-primary" />} title={translate(locale, 'manager.companyHoldings')} value={formatNumber(manager.companyHoldings.length)} description={translate(locale, 'manager.companyHoldings.description')} />
           <MetricCard icon={<ArrowUpDown className="h-4 w-4 text-primary" />} title={translate(locale, 'manager.top10Weight')} value={formatWeight(manager.metrics.top10Weight)} description={concentrationName(manager.metrics.concentration)} />
           <MetricCard icon={<TrendingUp className="h-4 w-4 text-emerald-700" />} title={translate(locale, 'manager.increaseCount')} value={formatNumber(increases.length)} description={translate(locale, 'manager.increaseWeight', { value: formatWeight(manager.metrics.newValueWeight) })} />
@@ -453,7 +483,7 @@ function ProfileItem({ label, value }: { label: string; value: string }) {
   );
 }
 
-function MetricCard({ icon, title, value, description }: { icon: ReactNode; title: string; value: string; description: string }) {
+function MetricCard({ icon, title, value, description, valueTone }: { icon: ReactNode; title: string; value: string; description: string; valueTone?: string }) {
   return (
     <Card className="border-stone-200 bg-white">
       <CardHeader className="pb-3">
@@ -463,7 +493,7 @@ function MetricCard({ icon, title, value, description }: { icon: ReactNode; titl
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="font-mono text-2xl font-semibold text-slate-950">{value}</div>
+        <div className={`font-mono text-2xl font-semibold ${valueTone || 'text-slate-950'}`}>{value}</div>
         <p className="mt-2 text-sm text-muted-foreground">{description}</p>
       </CardContent>
     </Card>

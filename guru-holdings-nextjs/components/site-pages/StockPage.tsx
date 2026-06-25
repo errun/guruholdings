@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { buildHoldingChangeModel } from '@/lib/holding-change.mjs';
 import { getCompanyMarketCap } from '@/lib/market-data';
 import { getManagerColor } from '@/lib/manager-colors';
+import { getTradePriceEstimateMap, type TradePriceEstimate } from '@/lib/price-estimates';
 import {
   changeBadgeVariant,
   directionTextClass,
@@ -98,6 +99,10 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
   const descriptions = (stock as Stock & { descriptions?: Partial<Record<Locale, string>> | null }).descriptions;
   const description = getStockDescription(stock.companyId, locale) || descriptions?.[locale] || null;
   const marketCap = await getCompanyMarketCap(stock.companyId);
+  const priceEstimateMap = await getTradePriceEstimateMap(actions.map((action) => ({
+    companyId: stock.companyId,
+    quarter: action.managerQuarter,
+  })));
   const relatedOptions = getRelatedOptionStocks(stock);
   const headerStats = [
     { label: translate(locale, 'stock.currentManagers'), value: formatNumber(currentHolderCount) },
@@ -106,7 +111,11 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
       label: translate(locale, 'stock.companyMarketCap'),
       value: formatCurrency(marketCap.value),
       detail: translate(locale, 'stock.marketCap.source', { source: marketCap.sourceName, date: formatDateTime(marketCap.retrievedAt) }),
-    }] : []),
+    }] : [{
+      label: translate(locale, 'stock.companyMarketCap'),
+      value: translate(locale, 'stock.marketCap.unavailable'),
+      detail: translate(locale, 'stock.marketCap.missing'),
+    }]),
   ];
 
   return (
@@ -155,7 +164,14 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
         <section className="mb-10">
           <SectionHeading icon={<Activity className="h-5 w-5 text-primary" />} title={translate(locale, 'stock.actions.title')} description={translate(locale, 'stock.actions.description')} />
           <div className="divide-y divide-stone-200 border-y border-stone-200 bg-white">
-            {actions.map((action) => <ActionRow key={action.managerId} action={action} locale={locale} />)}
+            {actions.map((action) => (
+              <ActionRow
+                key={action.managerId}
+                action={action}
+                locale={locale}
+                priceEstimate={priceEstimateMap.get(`${stock.companyId}:${action.managerQuarter}`)}
+              />
+            ))}
           </div>
         </section>
 
@@ -228,12 +244,14 @@ function SectionHeading({ icon, title, description }: { icon: React.ReactNode; t
   );
 }
 
-function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) {
+function ActionRow({ action, locale, priceEstimate }: { action: StockAction; locale: Locale; priceEstimate?: TradePriceEstimate }) {
   const {
     changeName,
     formatDate,
+    formatDateTime,
     formatNumber,
     formatPercent,
+    formatPrice,
     formatQuarter,
     formatSignedNumber,
     formatWeight,
@@ -250,7 +268,7 @@ function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) 
   return (
     <article className="relative py-5 pl-4 pr-3 sm:px-5">
       <span className="absolute inset-y-5 left-0 w-1 rounded-full" style={{ backgroundColor: getManagerColor(action.managerId) }} />
-      <div className="grid gap-4 lg:grid-cols-[minmax(180px,1.15fr)_110px_minmax(240px,1.35fr)_minmax(180px,1fr)_80px] lg:items-center">
+      <div className="grid gap-4 lg:grid-cols-[minmax(180px,1.05fr)_90px_minmax(240px,1.3fr)_minmax(170px,1fr)_minmax(170px,1fr)_80px] lg:items-center">
         <div className="min-w-0">
           <Link href={localizedPath(locale, `/live-13f/${action.managerId}`)} className="break-words font-semibold text-slate-950 hover:text-primary hover:underline">
             {action.managerName}
@@ -284,6 +302,14 @@ function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) 
           </p>
         </div>
 
+        <PriceEstimateBlock
+          estimate={priceEstimate}
+          locale={locale}
+          formatDateTime={formatDateTime}
+          formatPrice={formatPrice}
+          formatQuarter={formatQuarter}
+        />
+
         <div>
           <div className={`font-mono text-sm font-semibold ${directionTextClass(model.shareDelta || 0)}`}>
             {formatSignedNumber(model.shareDelta || 0)} {translate(locale, 'common.shares')}
@@ -303,6 +329,51 @@ function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) 
         </a>
       </div>
     </article>
+  );
+}
+
+function PriceEstimateBlock({
+  estimate,
+  locale,
+  formatDateTime,
+  formatPrice,
+  formatQuarter,
+}: {
+  estimate?: TradePriceEstimate;
+  locale: Locale;
+  formatDateTime: (value: string) => string;
+  formatPrice: (value: number) => string;
+  formatQuarter: (value: string) => string;
+}) {
+  if (!estimate || estimate.status !== 'available') {
+    return (
+      <div className="rounded-md border border-dashed border-stone-200 bg-stone-50 p-3">
+        <div className="text-xs font-medium text-muted-foreground">{translate(locale, 'stock.estimatedPriceRange')}</div>
+        <div className="mt-1 text-sm text-muted-foreground">{translate(locale, 'stock.estimatedPriceUnavailable')}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-md border border-stone-200 bg-stone-50 p-3">
+      <div className="text-xs font-medium text-muted-foreground">{translate(locale, 'stock.estimatedPriceRange')}</div>
+      <div className="mt-1 font-mono text-sm font-semibold text-slate-950">
+        {formatPrice(estimate.low)} - {formatPrice(estimate.high)}
+      </div>
+      <div className="mt-1 text-[11px] leading-4 text-muted-foreground">
+        {translate(locale, 'stock.estimatedPriceReference', {
+          price: formatPrice(estimate.referencePrice),
+          quarter: formatQuarter(estimate.quarter),
+        })}
+      </div>
+      <a href={estimate.sourceUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline">
+        {translate(locale, 'stock.estimatedPriceSource', {
+          source: estimate.sourceName,
+          date: formatDateTime(estimate.retrievedAt),
+        })}
+        <ExternalLink className="h-3 w-3" />
+      </a>
+    </div>
   );
 }
 

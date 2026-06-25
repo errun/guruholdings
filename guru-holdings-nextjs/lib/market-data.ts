@@ -36,7 +36,7 @@ export async function getCompanyMarketCap(companyId: string): Promise<CompanyMar
   try {
     const response = await fetch(`https://api.nasdaq.com/api/quote/${encodeURIComponent(symbol)}/summary?assetclass=stocks`, {
       headers: nasdaqHeaders,
-      next: { revalidate: 60 * 60 },
+      next: { revalidate: 60 * 60 * 24 },
     });
     if (!response.ok) return { status: 'unavailable', symbol, reason: 'fetch_failed' };
 

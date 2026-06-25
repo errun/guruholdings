@@ -1,21 +1,17 @@
 import { Badge } from '@/components/ui/badge';
 import { FilingFreshnessStrip } from '@/components/signals/FilingFreshnessStrip';
 import { SignalCard } from '@/components/signals/SignalCard';
-import { SignalModeTabs } from '@/components/signals/SignalModeTabs';
-import { SignalSearchBox } from '@/components/signals/SignalSearchBox';
 import snapshot from '@/data-generated/snapshots/latest.json';
 import { getViewFormatters } from '@/lib/sec13f-view';
 import { translate, type Locale } from '@/lib/i18n/site';
-import type { SignalCounts, SignalItem } from '@/lib/signals';
+import type { SignalItem } from '@/lib/signals';
 
 export function SignalHero({
   locale,
   signals,
-  counts,
 }: {
   locale: Locale;
   signals: SignalItem[];
-  counts: SignalCounts;
 }) {
   const { formatNumber, formatQuarter } = getViewFormatters(locale);
   const topSignals = signals.slice(0, 3);
@@ -34,12 +30,6 @@ export function SignalHero({
             <p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground">
               {translate(locale, 'signal.hero.subtitle')}
             </p>
-            <div className="mt-5 max-w-3xl">
-              <SignalSearchBox locale={locale} />
-            </div>
-            <div className="mt-4">
-              <SignalModeTabs locale={locale} activeMode="all" counts={counts} />
-            </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <HeroStat label={translate(locale, 'home.latestQuarter')} value={formatQuarter(snapshot.latestQuarter)} />
               <HeroStat label={translate(locale, 'common.managers')} value={formatNumber(snapshot.managers.length)} />

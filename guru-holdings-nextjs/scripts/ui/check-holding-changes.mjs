@@ -96,6 +96,34 @@ for (const manager of snapshot.managers) {
   }
 }
 
+for (const manager of snapshot.managers) {
+  const [current, previous] = manager.quarterSummaries || [];
+  if (!current || !previous) continue;
+  const delta = current.totalValue - previous.totalValue;
+  assert.equal(Number.isFinite(delta), true, `invalid portfolio value delta: ${manager.id}`);
+}
+
+const marketDataSource = fs.readFileSync('lib/market-data.ts', 'utf8');
+assert.ok(marketDataSource.includes('revalidate: 60 * 60 * 24'), 'company market cap must refresh every 24 hours');
+
+const freshnessSource = fs.readFileSync('components/signals/FilingFreshnessStrip.tsx', 'utf8');
+assert.ok(!freshnessSource.includes('getNextExpectedFiling'), 'public freshness strip must not predict a specific manager filing date');
+assert.ok(freshnessSource.includes('signal.freshness.nextCheck'), 'freshness strip must show the monthly automated check cadence');
+
+const homeSource = fs.readFileSync('components/site-pages/HomePage.tsx', 'utf8');
+assert.ok(homeSource.includes('home.consensus.viewAllIncrease'), 'home page must link to all shared increases');
+assert.ok(homeSource.includes('home.consensus.viewAllDecrease'), 'home page must link to all shared decreases');
+assert.ok(homeSource.includes('ManagerPortfolioMini'), 'home manager cards must show disclosed portfolio value change');
+
+const stockSource = fs.readFileSync('components/site-pages/StockPage.tsx', 'utf8');
+assert.ok(stockSource.includes('stock.estimatedPriceRange'), 'stock actions must show estimated quarter price ranges');
+assert.ok(!stockSource.includes('average buy price'), 'stock page must not describe estimated prices as average buy price');
+assert.ok(!stockSource.includes('average sell price'), 'stock page must not describe estimated prices as average sell price');
+
+const priceEstimateSource = fs.readFileSync('lib/price-estimates.ts', 'utf8');
+assert.ok(priceEstimateSource.includes('query1.finance.yahoo.com'), 'price estimates must use a verifiable historical quote source');
+assert.ok(priceEstimateSource.includes('revalidate: 60 * 60 * 24'), 'price estimates must refresh every 24 hours');
+
 function parseRawInfoTable(path) {
   const xml = fs.readFileSync(path, 'utf8');
   const blocks = xml.match(/<[^:>]*:?infoTable[\s\S]*?<\/[^:>]*:?infoTable>/g) || [];

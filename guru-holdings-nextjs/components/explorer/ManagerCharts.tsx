@@ -23,6 +23,11 @@ type AnyRecord = Record<string, any>;
 
 const palette = ['#164e63', '#0f766e', '#b45309', '#b91c1c', '#5b21b6', '#475569'];
 
+function shortenLabel(value: string, maxLength = 20) {
+  if (!value || value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength - 1)}...`;
+}
+
 export function ManagerCharts({ manager, locale }: { manager: AnyRecord; locale: Locale }) {
   const { formatCurrency, formatNumber, formatWeight, themeName } = getViewFormatters(locale);
   const trend = [...(manager.quarterAnalytics || [])].reverse();
@@ -86,12 +91,12 @@ export function ManagerCharts({ manager, locale }: { manager: AnyRecord; locale:
         </ResponsiveContainer>
       </ChartCard>
 
-      <ChartCard title={translate(locale, 'charts.topWeights')}>
+      <ChartCard title={translate(locale, 'charts.topWeights')} heightClassName="h-[360px] sm:h-[420px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={topHoldings} layout="vertical" margin={{ top: 6, right: 18, bottom: 0, left: 82 }}>
+          <BarChart data={topHoldings} layout="vertical" margin={{ top: 8, right: 24, bottom: 0, left: 116 }}>
             <CartesianGrid stroke="#e7e0d6" horizontal={false} />
             <XAxis type="number" tickFormatter={(value) => `${Number(value).toFixed(0)}%`} />
-            <YAxis type="category" dataKey="name" width={82} tick={{ fontSize: 11 }} />
+            <YAxis type="category" dataKey="name" width={116} tick={{ fontSize: 11 }} tickFormatter={(value) => shortenLabel(String(value))} interval={0} />
             <Tooltip formatter={(value, _name, item: any) => [formatWeight(Number(value)), item.payload.name]} />
             <Bar dataKey="weight" fill="#164e63" radius={[0, 4, 4, 0]} />
           </BarChart>
@@ -125,14 +130,14 @@ export function ManagerCharts({ manager, locale }: { manager: AnyRecord; locale:
   );
 }
 
-function ChartCard({ title, children }: { title: string; children: ReactNode }) {
+function ChartCard({ title, children, heightClassName = 'h-72' }: { title: string; children: ReactNode; heightClassName?: string }) {
   return (
     <Card className="border-stone-200 bg-white">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-72 min-w-0">{children}</div>
+        <div className={`${heightClassName} min-w-0`}>{children}</div>
       </CardContent>
     </Card>
   );
