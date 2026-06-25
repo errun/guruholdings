@@ -127,12 +127,12 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
   return (
     <div className="min-h-screen bg-background">
       <section className="border-b border-stone-200 bg-white">
-        <div className="container py-7 lg:py-9">
-          <Link href={localizedPath(locale, '/live-13f')} className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
+        <div className="container py-6">
+          <Link href={localizedPath(locale, '/live-13f')} className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
             <ArrowLeft className="h-4 w-4" />
             {translate(locale, 'common.back13f')}
           </Link>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)_minmax(320px,392px)] lg:items-start">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,392px)_320px_392px] lg:items-start">
             <div className="min-w-0">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 {stock.canonicalTicker && <Badge variant="info" className="rounded-md">{stock.canonicalTicker}</Badge>}
@@ -142,7 +142,7 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
                 {stock.canonicalName}
               </h1>
               {description && (
-                <p className="mt-3 max-w-3xl text-base leading-7 text-slate-800">
+                <p className="mt-3 max-w-3xl text-base leading-7 text-slate-800 lg:max-w-[392px]">
                   {description}
                 </p>
               )}
@@ -292,7 +292,7 @@ function QuarterPriceRangeCard({
         ))}
       </div>
       {source ? (
-        <a href={source.sourceUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline">
+        <a href={source.sourceUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline">
           {translate(locale, 'stock.estimatedPriceSource', {
             source: source.sourceName,
             date: formatDateTime(source.retrievedAt),
@@ -344,17 +344,15 @@ function QuarterPriceRangeRow({
         <span className="font-mono font-semibold text-slate-800">{formatQuarter(estimate.quarter)}</span>
         <span className="break-words font-mono text-slate-950 sm:text-right">{formatPrice(estimate.low)} - {formatPrice(estimate.high)}</span>
       </div>
-      <div className="relative h-1.5 overflow-hidden rounded-full bg-stone-200">
-        <span
-          className="absolute inset-y-0 rounded-full bg-primary"
-          style={{ left: `${Math.max(0, Math.min(left, 100))}%`, width: `${Math.min(width, 100)}%` }}
-        />
-      </div>
-      <div className="text-[11px] leading-4 text-muted-foreground">
-        {translate(locale, 'stock.estimatedPriceReference', {
-          price: formatPrice(estimate.referencePrice),
-          quarter: formatQuarter(estimate.quarter),
-        })}
+      <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-2 sm:grid-cols-[64px_minmax(0,1fr)_64px]">
+        <span className="hidden truncate font-mono text-[10px] leading-4 text-muted-foreground sm:block">{formatPrice(estimate.low)}</span>
+        <div className="relative h-1.5 overflow-hidden rounded-full bg-stone-200">
+          <span
+            className="absolute inset-y-0 rounded-full bg-primary"
+            style={{ left: `${Math.max(0, Math.min(left, 100))}%`, width: `${Math.min(width, 100)}%` }}
+          />
+        </div>
+        <span className="hidden truncate text-right font-mono text-[10px] leading-4 text-muted-foreground sm:block">{formatPrice(estimate.high)}</span>
       </div>
     </div>
   );
