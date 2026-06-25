@@ -5,7 +5,6 @@ import snapshot from '@/data-generated/snapshots/latest.json';
 import { buildHoldingChangeModel } from '@/lib/holding-change.mjs';
 import { getViewFormatters } from '@/lib/sec13f-view';
 import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
-import type { SignalItem } from '@/lib/signals';
 import { stockPath } from '@/lib/stock-routes';
 import { getFreshnessDisplay } from '@/lib/update-cadence';
 
@@ -52,10 +51,8 @@ const darkDirectionClass = (value: number) => {
 
 export function SignalHero({
   locale,
-  signals,
 }: {
   locale: Locale;
-  signals: SignalItem[];
 }) {
   const { formatDateTime, formatNumber, formatQuarter } = getViewFormatters(locale);
   const freshness = getFreshnessDisplay(snapshot.latestQuarter, locale);
@@ -68,20 +65,9 @@ export function SignalHero({
       <div className="container py-5 sm:py-6 lg:py-8">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.78fr)] lg:items-stretch">
           <div className="min-w-0">
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <Badge variant="info" className="rounded-sm">
-                {translate(locale, 'signal.hero.badge')}
-              </Badge>
-              <span className="font-mono text-xs text-muted-foreground">
-                {translate(locale, 'signal.hero.trackedSignalCount', { count: formatNumber(signals.length) })}
-              </span>
-            </div>
             <h1 className="max-w-4xl break-words text-3xl font-semibold leading-[1.08] text-slate-950 sm:text-4xl lg:text-[2.65rem]">
               {translate(locale, 'home.hero.title')}
             </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
-              {translate(locale, 'signal.hero.subtitle')}
-            </p>
 
             <div className="mt-5 grid grid-cols-2 gap-3">
               <SignalCountBlock

@@ -21,7 +21,6 @@ import {
 } from '@/lib/sec13f-view';
 import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
 import { getManagerPortfolioChange, formatManagerPortfolioChange } from '@/lib/manager-portfolio';
-import { getSignalItems } from '@/lib/signals';
 import { stockPath } from '@/lib/stock-routes';
 
 type Manager = typeof snapshot.managers[number];
@@ -194,7 +193,6 @@ function ManagerPortfolioMini({ manager, locale }: { manager: Manager; locale: L
 export async function HomePage({ locale }: { locale: Locale }) {
   const explorerData = getExplorerData();
   const { formatNumber, formatQuarter } = getViewFormatters(locale);
-  const allSignals = getSignalItems('all');
   const topSharedIncrease = snapshot.consensus.sharedIncrease.slice(0, 4);
   const topSharedDecrease = snapshot.consensus.sharedDecrease.slice(0, 4);
   const marketCaps = await getCompanyMarketCaps([
@@ -206,7 +204,7 @@ export async function HomePage({ locale }: { locale: Locale }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <SignalHero locale={locale} signals={allSignals} />
+      <SignalHero locale={locale} />
 
       <div className="container py-7 lg:py-9">
         <section className="mb-10">

@@ -16,6 +16,12 @@ export function Header({ locale }: { locale: Locale }) {
           </span>
         </Link>
 
+        <div className="hidden min-w-0 flex-1 items-center md:flex">
+          <span className="inline-flex max-w-full items-center truncate rounded-sm bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-800 ring-1 ring-blue-100">
+            {translate(locale, 'signal.hero.badge')}
+          </span>
+        </div>
+
         <nav className="flex shrink-0 items-center gap-3 sm:gap-5" aria-label="Primary">
           <Link href={localizedPath(locale, '/')} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             {translate(locale, 'nav.home')}
