@@ -19,8 +19,14 @@ export function Header({ locale }: { locale: Locale }) {
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <BarChart3 className="h-4 w-4" />
           </span>
-          <span className="hidden truncate text-lg font-semibold text-slate-950 sm:inline">
-            {translate(locale, 'brand.name')}
+          <span className="hidden min-w-0 items-baseline gap-2 sm:flex">
+            <span className="shrink-0 text-lg font-semibold text-slate-950">
+              {translate(locale, 'brand.name')}
+            </span>
+            <span className="hidden h-4 w-px shrink-0 bg-stone-300 lg:inline-block" />
+            <span className="hidden truncate text-sm font-medium text-slate-700 lg:inline">
+              {translate(locale, 'home.hero.title')}
+            </span>
           </span>
         </Link>
 
