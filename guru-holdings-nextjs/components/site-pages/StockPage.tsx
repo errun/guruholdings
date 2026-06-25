@@ -92,21 +92,27 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
   const stock = getStockByCompanyId(companyId);
   if (!stock) notFound();
 
-  const { formatCurrency, formatDateTime, formatNumber, formatQuarter, themeName } = getViewFormatters(locale);
+  const { formatCurrency, formatDateTime, formatNumber, formatPrice, formatQuarter, themeName } = getViewFormatters(locale);
   const actions = getStockActions(stock.companyId);
   const currentHolderCount = actions.filter((action) => action.currentShares > 0).length;
   const stockSignals = getSignalsByCompanyId(stock.companyId);
   const descriptions = (stock as Stock & { descriptions?: Partial<Record<Locale, string>> | null }).descriptions;
   const description = getStockDescription(stock.companyId, locale) || descriptions?.[locale] || null;
   const marketCap = await getCompanyMarketCap(stock.companyId);
+  const recentPriceQuarters = stock.quarters.slice(-4).map((quarter) => quarter.quarter).reverse();
   const priceEstimateMap = await getTradePriceEstimateMap(actions.map((action) => ({
     companyId: stock.companyId,
     quarter: action.managerQuarter,
-  })));
+  })).concat(recentPriceQuarters.map((quarter) => ({
+    companyId: stock.companyId,
+    quarter,
+  }))));
+  const recentPriceEstimates = recentPriceQuarters
+    .map((quarter) => priceEstimateMap.get(`${stock.companyId}:${quarter}`))
+    .filter((estimate): estimate is TradePriceEstimate => Boolean(estimate));
   const relatedOptions = getRelatedOptionStocks(stock);
   const headerStats = [
     { label: translate(locale, 'stock.currentManagers'), value: formatNumber(currentHolderCount) },
-    { label: translate(locale, 'live.latestQuarter'), value: formatQuarter(stock.latestQuarter) },
     ...(marketCap.status === 'available' ? [{
       label: translate(locale, 'stock.companyMarketCap'),
       value: formatCurrency(marketCap.value),
@@ -126,7 +132,7 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
             <ArrowLeft className="h-4 w-4" />
             {translate(locale, 'common.back13f')}
           </Link>
-          <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)_minmax(320px,392px)] lg:items-start">
             <div className="min-w-0">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 {stock.canonicalTicker && <Badge variant="info" className="rounded-md">{stock.canonicalTicker}</Badge>}
@@ -140,18 +146,20 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
                   {description}
                 </p>
               )}
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
-                {translate(locale, 'stock.intro', {
-                  ticker: stock.canonicalTicker ? `${stock.canonicalTicker}, ` : '',
-                  cusips: stock.rawCusips.join(', '),
-                })}
-              </p>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:min-w-[420px] sm:grid-cols-3">
+            <div className="grid gap-3">
               {headerStats.map((stat) => (
                 <HeaderStat key={stat.label} label={stat.label} value={stat.value} detail={stat.detail} />
               ))}
             </div>
+            <QuarterPriceRangeCard
+              estimates={recentPriceEstimates}
+              locale={locale}
+              formatDateTime={formatDateTime}
+              formatNumber={formatNumber}
+              formatPrice={formatPrice}
+              formatQuarter={formatQuarter}
+            />
           </div>
         </div>
       </section>
@@ -224,10 +232,130 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
 
 function HeaderStat({ label, value, detail }: { label: string; value: string; detail?: string }) {
   return (
-    <div className="rounded-md border border-stone-200 bg-stone-50 p-3 sm:p-4">
+    <div className="rounded-md border border-stone-200 bg-stone-50 p-4">
       <div className="text-xs font-medium uppercase text-muted-foreground">{label}</div>
       <div className="mt-2 break-words text-base font-semibold leading-tight text-slate-950 sm:text-lg">{value}</div>
       {detail && <div className="mt-2 text-[11px] leading-4 text-muted-foreground">{detail}</div>}
+    </div>
+  );
+}
+
+function QuarterPriceRangeCard({
+  estimates,
+  locale,
+  formatDateTime,
+  formatNumber,
+  formatPrice,
+  formatQuarter,
+}: {
+  estimates: TradePriceEstimate[];
+  locale: Locale;
+  formatDateTime: (value: string) => string;
+  formatNumber: (value: number) => string;
+  formatPrice: (value: number) => string;
+  formatQuarter: (value: string) => string;
+}) {
+  const available = estimates.filter((estimate): estimate is Extract<TradePriceEstimate, { status: 'available' }> =>
+    estimate.status === 'available',
+  );
+  const low = available.length ? Math.min(...available.map((estimate) => estimate.low)) : 0;
+  const high = available.length ? Math.max(...available.map((estimate) => estimate.high)) : 0;
+  const span = Math.max(high - low, 1);
+  const source = available[0];
+
+  return (
+    <div className="rounded-md border border-stone-200 bg-stone-50 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-xs font-medium uppercase text-muted-foreground">
+            {translate(locale, 'stock.estimatedPriceRange')}
+          </div>
+          <div className="mt-1 text-[11px] leading-4 text-muted-foreground">
+            {translate(locale, 'stock.priceRange.latestFour')}
+          </div>
+        </div>
+        <Badge variant="outline" className="shrink-0 rounded-md">
+          {formatNumber(available.length)}
+        </Badge>
+      </div>
+      <div className="mt-4 space-y-3">
+        {estimates.map((estimate) => (
+          <QuarterPriceRangeRow
+            key={estimate.quarter}
+            estimate={estimate}
+            low={low}
+            span={span}
+            locale={locale}
+            formatPrice={formatPrice}
+            formatQuarter={formatQuarter}
+          />
+        ))}
+      </div>
+      {source ? (
+        <a href={source.sourceUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline">
+          {translate(locale, 'stock.estimatedPriceSource', {
+            source: source.sourceName,
+            date: formatDateTime(source.retrievedAt),
+          })}
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      ) : (
+        <div className="mt-4 text-[11px] leading-4 text-muted-foreground">
+          {translate(locale, 'stock.estimatedPriceUnavailable')}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function QuarterPriceRangeRow({
+  estimate,
+  low,
+  span,
+  locale,
+  formatPrice,
+  formatQuarter,
+}: {
+  estimate: TradePriceEstimate;
+  low: number;
+  span: number;
+  locale: Locale;
+  formatPrice: (value: number) => string;
+  formatQuarter: (value: string) => string;
+}) {
+  if (estimate.status !== 'available') {
+    return (
+      <div className="grid gap-1">
+        <div className="flex items-center justify-between gap-3 text-xs">
+          <span className="font-mono font-semibold text-slate-800">{formatQuarter(estimate.quarter)}</span>
+          <span className="text-muted-foreground">{translate(locale, 'stock.estimatedPriceUnavailable')}</span>
+        </div>
+        <div className="h-1.5 rounded-full bg-stone-200" />
+      </div>
+    );
+  }
+
+  const left = ((estimate.low - low) / span) * 100;
+  const width = Math.max(((estimate.high - estimate.low) / span) * 100, 6);
+
+  return (
+    <div className="grid gap-1.5">
+      <div className="flex items-center justify-between gap-3 text-xs">
+        <span className="font-mono font-semibold text-slate-800">{formatQuarter(estimate.quarter)}</span>
+        <span className="font-mono text-slate-950">{formatPrice(estimate.low)} - {formatPrice(estimate.high)}</span>
+      </div>
+      <div className="relative h-1.5 overflow-hidden rounded-full bg-stone-200">
+        <span
+          className="absolute inset-y-0 rounded-full bg-primary"
+          style={{ left: `${Math.max(0, Math.min(left, 100))}%`, width: `${Math.min(width, 100)}%` }}
+        />
+      </div>
+      <div className="text-[11px] leading-4 text-muted-foreground">
+        {translate(locale, 'stock.estimatedPriceReference', {
+          price: formatPrice(estimate.referencePrice),
+          quarter: formatQuarter(estimate.quarter),
+        })}
+      </div>
     </div>
   );
 }
