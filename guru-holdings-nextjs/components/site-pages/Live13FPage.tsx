@@ -13,6 +13,11 @@ import {
 import snapshot from '@/data-generated/snapshots/latest.json';
 import { ExplorerSearch } from '@/components/explorer/ExplorerSearch';
 import { ManagerCompare } from '@/components/explorer/ManagerCompare';
+import { FilingFreshnessStrip } from '@/components/signals/FilingFreshnessStrip';
+import { SecSourceTrustBlock } from '@/components/signals/SecSourceTrustBlock';
+import { SignalFeed } from '@/components/signals/SignalFeed';
+import { SignalModeTabs } from '@/components/signals/SignalModeTabs';
+import { SignalSearchBox } from '@/components/signals/SignalSearchBox';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -22,6 +27,7 @@ import {
 } from '@/lib/sec13f-view';
 import { getExplorerData, getManagerCompareData } from '@/lib/sec13f-lite';
 import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
+import { getSignalCounts, getSignalItems, type SignalMode } from '@/lib/signals';
 import { stockPath } from '@/lib/stock-routes';
 
 type Snapshot = typeof snapshot;
@@ -126,7 +132,15 @@ function ConsensusTable({
   );
 }
 
-export function Live13FPage({ locale }: { locale: Locale }) {
+export function Live13FPage({
+  locale,
+  signalMode = 'all',
+  initialQuery = '',
+}: {
+  locale: Locale;
+  signalMode?: SignalMode;
+  initialQuery?: string;
+}) {
   const explorerData = getExplorerData();
   const {
     concentrationName,
@@ -142,35 +156,55 @@ export function Live13FPage({ locale }: { locale: Locale }) {
   const sharedIncrease = snapshot.consensus.sharedIncrease;
   const sharedDecrease = snapshot.consensus.sharedDecrease;
   const themeChanges = snapshot.consensus.themeChanges;
+  const allSignals = getSignalItems('all');
+  const filteredSignals = signalMode === 'all' ? allSignals : getSignalItems(signalMode);
+  const signalCounts = getSignalCounts(allSignals);
 
   return (
     <div className="min-h-screen bg-background">
       <section className="border-b border-stone-200 bg-white">
         <div className="container py-8 lg:py-10">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
             <div className="max-w-4xl">
-              <Badge variant="info" className="mb-4 rounded-md">
-                {translate(locale, 'live.badge')}
+              <Badge variant="info" className="mb-4 rounded-sm">
+                {translate(locale, 'signal.hero.badge')}
               </Badge>
               <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
                 {translate(locale, 'live.title')}
               </h1>
               <p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground">
-                {translate(locale, 'live.subtitle')}
+                {translate(locale, 'signal.dashboard.description')}
               </p>
+              <div className="mt-5 max-w-3xl">
+                <SignalSearchBox locale={locale} activeMode={signalMode} initialQuery={initialQuery} />
+              </div>
+              <div className="mt-4">
+                <SignalModeTabs locale={locale} activeMode={signalMode} counts={signalCounts} />
+              </div>
             </div>
 
             <div className="min-w-[260px]">
-              <div className="rounded-lg border border-stone-200 bg-stone-50 p-4">
+              <div className="rounded-md border border-stone-200 bg-stone-50 p-4">
                 <div className="text-xs font-medium uppercase text-muted-foreground">{translate(locale, 'live.latestQuarter')}</div>
                 <div className="mt-2 text-lg font-semibold text-slate-950">{formatQuarter(snapshot.latestQuarter)}</div>
+                <div className="mt-4 text-xs font-medium uppercase text-muted-foreground">{translate(locale, 'signal.latest.title')}</div>
+                <div className="mt-2 font-mono text-lg font-semibold text-slate-950">{formatNumber(filteredSignals.length)}</div>
               </div>
             </div>
+          </div>
+          <div className="mt-5">
+            <FilingFreshnessStrip locale={locale} />
           </div>
         </div>
       </section>
 
       <div className="container py-8 lg:py-10">
+        <div className="mb-8">
+          <SignalFeed signals={filteredSignals} locale={locale} limit={16} />
+        </div>
+
+        <SecSourceTrustBlock locale={locale} className="mb-8" />
+
         <section className="mb-8">
           <ExplorerSearch
             stocks={explorerData.stocks}
@@ -179,6 +213,7 @@ export function Live13FPage({ locale }: { locale: Locale }) {
             themes={explorerData.themes}
             stockTotal={explorerData.stockTotal}
             managerTotal={explorerData.managerTotal}
+            initialQuery={initialQuery}
             locale={locale}
           />
         </section>
@@ -239,9 +274,9 @@ export function Live13FPage({ locale }: { locale: Locale }) {
                   </div>
 
                   <div className="rounded-md border border-stone-200 p-3 text-sm leading-6 text-muted-foreground">
-                    <div>CIK：<span className="font-mono text-slate-800">{manager.cik}</span></div>
-                    <div>Filing：{formatDate(manager.latestFiling.filingDate)}</div>
-                    <div>Accession：<span className="font-mono text-xs text-slate-800">{manager.latestFiling.accessionNumber}</span></div>
+                    <div>CIK: <span className="font-mono text-slate-800">{manager.cik}</span></div>
+                    <div>{translate(locale, 'common.filingDate')}: {formatDate(manager.latestFiling.filingDate)}</div>
+                    <div>{translate(locale, 'common.accession')}: <span className="font-mono text-xs text-slate-800">{manager.latestFiling.accessionNumber}</span></div>
                   </div>
                   <div className="flex flex-wrap gap-3">
                     <Link href={localizedPath(locale, `/live-13f/${manager.id}`)} className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">

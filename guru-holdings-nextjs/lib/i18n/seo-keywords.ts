@@ -2,26 +2,26 @@ import type { Locale } from './site';
 
 export const seoKeywordMap: Record<Locale, Record<'home' | 'data' | 'manager' | 'stock', string[]>> = {
   en: {
-    home: ['13F holdings tracker', 'institutional holdings', 'guru portfolios'],
-    data: ['SEC 13F holdings', '13F filing data', 'institutional portfolio comparison'],
+    home: ['13F signal discovery', 'institutional portfolio moves', 'guru portfolios'],
+    data: ['SEC 13F signals', '13F filing signals', 'institutional portfolio moves'],
     manager: ['13F portfolio', 'quarterly holdings changes', 'investment manager holdings'],
     stock: ['institutional ownership', '13F stock holders', 'hedge fund holdings'],
   },
   zh: {
-    home: ['13F 持仓追踪', '投资机构持仓', '投资大师持仓'],
-    data: ['SEC 13F 数据', '机构持仓对比', '季度持仓变化'],
+    home: ['13F 信号发现', '机构最新变仓', '投资大师持仓'],
+    data: ['SEC 13F 信号', '机构变仓信号', '季度持仓变化'],
     manager: ['13F 持仓', '季度持仓变化', '投资机构持仓'],
     stock: ['机构持股', '哪些机构持有', '13F 股票持仓'],
   },
   ja: {
-    home: ['13F 保有銘柄', '機関投資家 保有銘柄', '著名投資家 ポートフォリオ'],
-    data: ['SEC 13F データ', '機関投資家 比較', '四半期 保有変化'],
+    home: ['13F シグナル発見', '機関投資家 最新変化', '著名投資家 ポートフォリオ'],
+    data: ['SEC 13F シグナル', '機関投資家 変化シグナル', '四半期 保有変化'],
     manager: ['13F ポートフォリオ', '保有銘柄 変化', '投資機関 保有銘柄'],
     stock: ['機関投資家 保有', '13F 銘柄 保有者', 'ヘッジファンド 保有銘柄'],
   },
   ko: {
-    home: ['13F 보유종목', '기관투자자 보유종목', '유명 투자자 포트폴리오'],
-    data: ['SEC 13F 데이터', '기관투자자 비교', '분기별 보유 변화'],
+    home: ['13F 시그널 발견', '기관 최신 포트폴리오 변화', '유명 투자자 포트폴리오'],
+    data: ['SEC 13F 시그널', '기관 포트폴리오 변화 시그널', '분기별 보유 변화'],
     manager: ['13F 포트폴리오', '보유종목 변화', '투자기관 보유종목'],
     stock: ['기관투자자 보유', '13F 종목 보유기관', '헤지펀드 보유종목'],
   },

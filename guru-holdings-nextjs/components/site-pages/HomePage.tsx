@@ -9,16 +9,17 @@ import {
 } from 'lucide-react';
 import snapshot from '@/data-generated/snapshots/latest.json';
 import { ExplorerSearchDisclosure } from '@/components/explorer/ExplorerSearchDisclosure';
+import { SignalHero } from '@/components/signals/SignalHero';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { buildHoldingChangeModel } from '@/lib/holding-change.mjs';
-import { getCompanyMarketCaps, type CompanyMarketCap } from '@/lib/market-data';
 import { getExplorerData } from '@/lib/sec13f-lite';
 import {
   directionTextClass,
   getViewFormatters,
 } from '@/lib/sec13f-view';
 import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
+import { getSignalCounts, getSignalItems } from '@/lib/signals';
 import { stockPath } from '@/lib/stock-routes';
 
 type Manager = typeof snapshot.managers[number];
@@ -40,12 +41,10 @@ function ConsensusCard({
   item,
   direction,
   locale,
-  marketCap,
 }: {
   item: ConsensusItem;
   direction: 'increase' | 'decrease';
   locale: Locale;
-  marketCap?: CompanyMarketCap;
 }) {
   const rows = directionalManagers(item, direction);
   const Icon = direction === 'increase' ? ArrowUpRight : ArrowDownRight;
@@ -53,8 +52,6 @@ function ConsensusCard({
   const {
     changeName,
     formatSignedCurrency,
-    formatCurrency,
-    formatDateTime,
     formatNumber,
     formatWeight,
   } = getViewFormatters(locale);
@@ -74,23 +71,10 @@ function ConsensusCard({
             {item.canonicalTicker || item.rawCusips?.join(', ') || item.cusip}
           </p>
         </div>
-        <div className="grid shrink-0 gap-2 text-right">
-          <div>
-            <div className="text-xs text-muted-foreground">{translate(locale, 'stock.companyMarketCap')}</div>
-            <div className="font-mono text-sm font-semibold text-slate-950">
-              {marketCap?.status === 'available' ? formatCurrency(marketCap.value) : translate(locale, 'stock.marketCap.unavailable')}
-            </div>
-            {marketCap?.status === 'available' && (
-              <div className="mt-0.5 text-[10px] text-muted-foreground">
-                {translate(locale, 'stock.marketCap.shortSource', { source: marketCap.sourceName, date: formatDateTime(marketCap.retrievedAt) })}
-              </div>
-            )}
-          </div>
-          <div>
-            <div className="text-xs text-muted-foreground">{translate(locale, 'common.valueChange')}</div>
-            <div className={'font-mono text-sm font-semibold ' + directionTextClass(item.netValueChange)}>
-              {formatSignedCurrency(item.netValueChange)}
-            </div>
+        <div className="shrink-0 text-right">
+          <div className="text-xs text-muted-foreground">{translate(locale, 'common.valueChange')}</div>
+          <div className={'font-mono text-sm font-semibold ' + directionTextClass(item.netValueChange)}>
+            {formatSignedCurrency(item.netValueChange)}
           </div>
         </div>
       </div>
@@ -166,33 +150,16 @@ function EmptySignal({ text }: { text: string }) {
 export async function HomePage({ locale }: { locale: Locale }) {
   const explorerData = getExplorerData();
   const { formatNumber, formatQuarter } = getViewFormatters(locale);
+  const allSignals = getSignalItems('all');
+  const signalCounts = getSignalCounts(allSignals);
   const topSharedIncrease = snapshot.consensus.sharedIncrease.slice(0, 4);
   const topSharedDecrease = snapshot.consensus.sharedDecrease.slice(0, 4);
   const sharedNew = snapshot.consensus.sharedIncrease.filter((item) => item.newManagers.length >= 2).slice(0, 4);
   const sharedExit = snapshot.consensus.sharedDecrease.filter((item) => item.exitManagers.length >= 2).slice(0, 4);
-  const marketCaps = await getCompanyMarketCaps([
-    ...topSharedIncrease.map((item) => item.companyId),
-    ...topSharedDecrease.map((item) => item.companyId),
-  ]);
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="border-b border-stone-200 bg-white">
-        <div className="container py-7 lg:py-9">
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
-            <div className="max-w-4xl">
-              <Badge variant="info" className="mb-3 rounded-sm">SEC EDGAR 13F</Badge>
-              <h1 className="text-3xl font-semibold leading-tight text-slate-950 sm:text-4xl">
-                {translate(locale, 'home.hero.title')}
-              </h1>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Stat label={translate(locale, 'home.latestQuarter')} value={formatQuarter(snapshot.latestQuarter)} />
-              <Stat label={translate(locale, 'common.managers')} value={formatNumber(snapshot.managers.length)} />
-            </div>
-          </div>
-        </div>
-      </section>
+      <SignalHero locale={locale} signals={allSignals} counts={signalCounts} />
 
       <div className="container py-7 lg:py-9">
         <section className="mb-10">
@@ -220,7 +187,7 @@ export async function HomePage({ locale }: { locale: Locale }) {
               </div>
               <p className="mb-3 text-xs text-muted-foreground">{translate(locale, 'home.consensus.showingTop', { shown: formatNumber(topSharedIncrease.length), total: formatNumber(snapshot.consensus.sharedIncrease.length) })}</p>
               <div className="space-y-3">
-                {topSharedIncrease.map((item) => <ConsensusCard key={'inc-' + item.companyId} item={item} direction="increase" locale={locale} marketCap={marketCaps.get(item.companyId)} />)}
+                {topSharedIncrease.map((item) => <ConsensusCard key={'inc-' + item.companyId} item={item} direction="increase" locale={locale} />)}
               </div>
             </div>
 
@@ -236,7 +203,7 @@ export async function HomePage({ locale }: { locale: Locale }) {
               </div>
               <p className="mb-3 text-xs text-muted-foreground">{translate(locale, 'home.consensus.showingTop', { shown: formatNumber(topSharedDecrease.length), total: formatNumber(snapshot.consensus.sharedDecrease.length) })}</p>
               <div className="space-y-3">
-                {topSharedDecrease.map((item) => <ConsensusCard key={'dec-' + item.companyId} item={item} direction="decrease" locale={locale} marketCap={marketCaps.get(item.companyId)} />)}
+                {topSharedDecrease.map((item) => <ConsensusCard key={'dec-' + item.companyId} item={item} direction="decrease" locale={locale} />)}
               </div>
             </div>
           </div>
@@ -316,15 +283,6 @@ export async function HomePage({ locale }: { locale: Locale }) {
           />
         </section>
       </div>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-h-[76px] rounded-md border border-stone-200 bg-stone-50 p-3">
-      <div className="text-xs font-medium text-muted-foreground">{label}</div>
-      <div className="mt-2 font-mono text-lg font-semibold text-slate-950">{value}</div>
     </div>
   );
 }

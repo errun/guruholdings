@@ -17,6 +17,8 @@ import {
 import snapshot from '@/data-generated/snapshots/latest.json';
 import { ManagerCharts } from '@/components/explorer/ManagerCharts';
 import { ManagerOperationsTable } from '@/components/explorer/ManagerOperationsTable';
+import { SecSourceTrustBlock } from '@/components/signals/SecSourceTrustBlock';
+import { SourceLinkBadge } from '@/components/signals/SourceLinkBadge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,12 +54,14 @@ function ChangeList({
   changes,
   tone,
   locale,
+  filingSourceUrl,
 }: {
   title: string;
   description: string;
   changes: CompanyChange[];
   tone: 'increase' | 'decrease';
   locale: Locale;
+  filingSourceUrl: string;
 }) {
   const Icon = tone === 'increase' ? TrendingUp : TrendingDown;
   const iconClass = tone === 'increase' ? 'text-emerald-700' : 'text-red-700';
@@ -74,22 +78,27 @@ function ChangeList({
       </CardHeader>
       <CardContent className="space-y-3">
         {changes.slice(0, 8).map((change) => (
-          <Link key={`${title}-${change.companyId}`} href={localizedPath(locale, stockPath(change.companyId))} className="block rounded-lg border border-stone-200 bg-white p-4 hover:border-primary/40 hover:bg-stone-50">
+          <article key={`${title}-${change.companyId}`} className="rounded-md border border-stone-200 bg-white p-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <div className="break-words font-semibold text-slate-950">{change.canonicalName || change.issuerName}</div>
+                <Link href={localizedPath(locale, stockPath(change.companyId))} className="break-words font-semibold text-slate-950 hover:text-primary hover:underline">
+                  {change.canonicalName || change.issuerName}
+                </Link>
                 <div className="mt-1 font-mono text-xs text-muted-foreground">{change.rawCusips?.join(', ') || change.cusip}</div>
               </div>
-              <Badge variant={changeBadgeVariant(change.changeType)} className="w-fit rounded-md">
-                {changeName(change.changeType)}
-              </Badge>
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                <Badge variant={changeBadgeVariant(change.changeType)} className="w-fit rounded-sm">
+                  {changeName(change.changeType)}
+                </Badge>
+                <SourceLinkBadge href={change.sourceUrl || filingSourceUrl} locale={locale} />
+              </div>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <Metric label={translate(locale, 'common.shareChange')} value={formatSignedNumber(change.shareChange)} tone={directionTextClass(change.shareChange)} />
               <Metric label={translate(locale, 'common.valueChange')} value={formatSignedCurrency(change.valueChange)} tone={directionTextClass(change.valueChange)} />
               <Metric label={translate(locale, 'common.weightChange')} value={formatPercent(change.weightChange)} tone={directionTextClass(change.weightChange)} />
             </div>
-          </Link>
+          </article>
         ))}
         {changes.length === 0 && (
           <div className="rounded-lg border border-dashed border-stone-300 p-4 text-sm text-muted-foreground">
@@ -256,6 +265,47 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
           </Alert>
         )}
 
+        <section className="mb-8 grid gap-4 lg:grid-cols-4">
+          <MetricCard icon={<Building2 className="h-4 w-4 text-primary" />} title={translate(locale, 'manager.companyHoldings')} value={formatNumber(manager.companyHoldings.length)} description={translate(locale, 'manager.companyHoldings.description')} />
+          <MetricCard icon={<ArrowUpDown className="h-4 w-4 text-primary" />} title={translate(locale, 'manager.top10Weight')} value={formatWeight(manager.metrics.top10Weight)} description={concentrationName(manager.metrics.concentration)} />
+          <MetricCard icon={<TrendingUp className="h-4 w-4 text-emerald-700" />} title={translate(locale, 'manager.increaseCount')} value={formatNumber(increases.length)} description={translate(locale, 'manager.increaseWeight', { value: formatWeight(manager.metrics.newValueWeight) })} />
+          <MetricCard icon={<TrendingDown className="h-4 w-4 text-red-700" />} title={translate(locale, 'manager.decreaseCount')} value={formatNumber(decreases.length)} description={translate(locale, 'manager.turnover', { value: formatWeight(manager.metrics.turnoverRate) })} />
+        </section>
+
+        <section className="mb-10">
+          <div className="mb-4">
+            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'manager.latestMoves.title')}</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+              {translate(locale, 'manager.latestMoves.description')}
+            </p>
+          </div>
+          <div className="grid gap-6 xl:grid-cols-2">
+            <ChangeList
+              title={translate(locale, 'manager.increaseSection')}
+              description={translate(locale, 'manager.increaseSection.description')}
+              changes={increases}
+              tone="increase"
+              locale={locale}
+              filingSourceUrl={manager.latestFiling.sourceUrl}
+            />
+            <ChangeList
+              title={translate(locale, 'manager.decreaseSection')}
+              description={translate(locale, 'manager.decreaseSection.description')}
+              changes={decreases}
+              tone="decrease"
+              locale={locale}
+              filingSourceUrl={manager.latestFiling.sourceUrl}
+            />
+          </div>
+        </section>
+
+        <SecSourceTrustBlock locale={locale} sourceUrl={manager.latestFiling.sourceUrl} className="mb-10" />
+
+        <section className="mb-10 grid gap-5 xl:grid-cols-2">
+          <InsightCard title={translate(locale, 'manager.largestIncrease')} change={largestIncrease} tone="increase" locale={locale} filingSourceUrl={manager.latestFiling.sourceUrl} />
+          <InsightCard title={translate(locale, 'manager.largestDecrease')} change={largestDecrease} tone="decrease" locale={locale} filingSourceUrl={manager.latestFiling.sourceUrl} />
+        </section>
+
         {managerProfile && (
           <section className="mb-8">
             <div className="mb-4 flex items-center gap-3">
@@ -273,17 +323,6 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
           </section>
         )}
 
-        <section className="mb-8 grid gap-4 lg:grid-cols-4">
-          <MetricCard icon={<Building2 className="h-4 w-4 text-primary" />} title={translate(locale, 'manager.companyHoldings')} value={formatNumber(manager.companyHoldings.length)} description={translate(locale, 'manager.companyHoldings.description')} />
-          <MetricCard icon={<ArrowUpDown className="h-4 w-4 text-primary" />} title={translate(locale, 'manager.top10Weight')} value={formatWeight(manager.metrics.top10Weight)} description={concentrationName(manager.metrics.concentration)} />
-          <MetricCard icon={<TrendingUp className="h-4 w-4 text-emerald-700" />} title={translate(locale, 'manager.increaseCount')} value={formatNumber(increases.length)} description={translate(locale, 'manager.increaseWeight', { value: formatWeight(manager.metrics.newValueWeight) })} />
-          <MetricCard icon={<TrendingDown className="h-4 w-4 text-red-700" />} title={translate(locale, 'manager.decreaseCount')} value={formatNumber(decreases.length)} description={translate(locale, 'manager.turnover', { value: formatWeight(manager.metrics.turnoverRate) })} />
-        </section>
-
-        <section className="mb-10 grid gap-5 xl:grid-cols-2">
-          <InsightCard title={translate(locale, 'manager.largestIncrease')} change={largestIncrease} tone="increase" locale={locale} />
-          <InsightCard title={translate(locale, 'manager.largestDecrease')} change={largestDecrease} tone="decrease" locale={locale} />
-        </section>
 
         <section className="mb-10">
           <div className="mb-4 flex items-center gap-3">
@@ -326,23 +365,6 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
               </tbody>
             </table>
           </div>
-        </section>
-
-        <section className="mb-10 grid gap-6 xl:grid-cols-2">
-          <ChangeList
-            title={translate(locale, 'manager.increaseSection')}
-            description={translate(locale, 'manager.increaseSection.description')}
-            changes={increases}
-            tone="increase"
-            locale={locale}
-          />
-          <ChangeList
-            title={translate(locale, 'manager.decreaseSection')}
-            description={translate(locale, 'manager.decreaseSection.description')}
-            changes={decreases}
-            tone="decrease"
-            locale={locale}
-          />
         </section>
 
         <section className="mb-10">
@@ -448,7 +470,19 @@ function MetricCard({ icon, title, value, description }: { icon: ReactNode; titl
   );
 }
 
-function InsightCard({ title, change, tone, locale }: { title: string; change: CompanyChange | null; tone: 'increase' | 'decrease'; locale: Locale }) {
+function InsightCard({
+  title,
+  change,
+  tone,
+  locale,
+  filingSourceUrl,
+}: {
+  title: string;
+  change: CompanyChange | null;
+  tone: 'increase' | 'decrease';
+  locale: Locale;
+  filingSourceUrl: string;
+}) {
   const { changeName, formatPercent, formatSignedCurrency, formatSignedNumber } = getViewFormatters(locale);
   return (
     <Card className="border-stone-200 bg-white">
@@ -458,20 +492,25 @@ function InsightCard({ title, change, tone, locale }: { title: string; change: C
       </CardHeader>
       <CardContent>
         {change ? (
-          <Link href={localizedPath(locale, stockPath(change.companyId))} className="block rounded-lg border border-stone-200 bg-stone-50 p-4 hover:border-primary/40">
+          <article className="rounded-md border border-stone-200 bg-stone-50 p-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <div className="font-semibold text-slate-950">{change.canonicalName || change.issuerName}</div>
+              <div className="min-w-0">
+                <Link href={localizedPath(locale, stockPath(change.companyId))} className="break-words font-semibold text-slate-950 hover:text-primary hover:underline">
+                  {change.canonicalName || change.issuerName}
+                </Link>
                 <div className="mt-1 font-mono text-xs text-muted-foreground">{change.rawCusips?.join(', ') || change.cusip}</div>
               </div>
-              <Badge variant={tone === 'increase' ? 'success' : 'destructive'} className="w-fit rounded-md">{changeName(change.changeType)}</Badge>
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                <Badge variant={tone === 'increase' ? 'success' : 'destructive'} className="w-fit rounded-sm">{changeName(change.changeType)}</Badge>
+                <SourceLinkBadge href={change.sourceUrl || filingSourceUrl} locale={locale} />
+              </div>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <Metric label={translate(locale, 'common.shareChange')} value={formatSignedNumber(change.shareChange)} tone={directionTextClass(change.shareChange)} />
               <Metric label={translate(locale, 'common.valueChange')} value={formatSignedCurrency(change.valueChange)} tone={directionTextClass(change.valueChange)} />
               <Metric label={translate(locale, 'common.weightChange')} value={formatPercent(change.weightChange)} tone={directionTextClass(change.weightChange)} />
             </div>
-          </Link>
+          </article>
         ) : (
           <div className="rounded-lg border border-dashed border-stone-300 p-4 text-sm text-muted-foreground">{translate(locale, 'common.noData')}</div>
         )}

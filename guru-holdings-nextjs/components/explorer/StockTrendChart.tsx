@@ -121,7 +121,7 @@ export function StockTrendChart({ stock, locale }: { stock: AnyRecord; locale: L
                               {manager.name}
                             </div>
                             <div className="mt-1 text-muted-foreground">
-                              {formatWeight(Number(item.value))} · {formatNumber(Number(row[`${manager.id}Shares`]))} {translate(locale, 'common.shares')}
+                              {formatWeight(Number(item.value))} - {formatNumber(Number(row[`${manager.id}Shares`]))} {translate(locale, 'common.shares')}
                             </div>
                             <div className="mt-0.5 text-muted-foreground">{changeName(String(row[`${manager.id}Action`]))}</div>
                           </div>

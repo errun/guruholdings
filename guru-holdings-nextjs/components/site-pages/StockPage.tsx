@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import snapshot from '@/data-generated/snapshots/latest.json';
 import { StockTrendChart } from '@/components/explorer/StockTrendChart';
+import { SecSourceTrustBlock } from '@/components/signals/SecSourceTrustBlock';
+import { StockSignalSummary } from '@/components/signals/StockSignalSummary';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { buildHoldingChangeModel } from '@/lib/holding-change.mjs';
@@ -23,6 +25,7 @@ import {
 } from '@/lib/sec13f-view';
 import { getStockChartData } from '@/lib/sec13f-lite';
 import { localizedPath, translate, type Locale, type MessageKey } from '@/lib/i18n/site';
+import { getSignalsByCompanyId } from '@/lib/signals';
 import { getStockByCompanyId, getStockSlug, stockPath } from '@/lib/stock-routes';
 import { getStockDescription } from '@/lib/stock-profiles';
 
@@ -91,10 +94,20 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
   const { formatCurrency, formatDateTime, formatNumber, formatQuarter, themeName } = getViewFormatters(locale);
   const actions = getStockActions(stock.companyId);
   const currentHolderCount = actions.filter((action) => action.currentShares > 0).length;
+  const stockSignals = getSignalsByCompanyId(stock.companyId);
   const descriptions = (stock as Stock & { descriptions?: Partial<Record<Locale, string>> | null }).descriptions;
   const description = getStockDescription(stock.companyId, locale) || descriptions?.[locale] || null;
   const marketCap = await getCompanyMarketCap(stock.companyId);
   const relatedOptions = getRelatedOptionStocks(stock);
+  const headerStats = [
+    { label: translate(locale, 'stock.currentManagers'), value: formatNumber(currentHolderCount) },
+    { label: translate(locale, 'live.latestQuarter'), value: formatQuarter(stock.latestQuarter) },
+    ...(marketCap.status === 'available' ? [{
+      label: translate(locale, 'stock.companyMarketCap'),
+      value: formatCurrency(marketCap.value),
+      detail: translate(locale, 'stock.marketCap.source', { source: marketCap.sourceName, date: formatDateTime(marketCap.retrievedAt) }),
+    }] : []),
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -126,27 +139,27 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:min-w-[420px] sm:grid-cols-3">
-              <HeaderStat label={translate(locale, 'stock.currentManagers')} value={formatNumber(currentHolderCount)} />
-              <HeaderStat label={translate(locale, 'live.latestQuarter')} value={formatQuarter(stock.latestQuarter)} />
-              <HeaderStat
-                label={translate(locale, 'stock.companyMarketCap')}
-                value={marketCap.status === 'available' ? formatCurrency(marketCap.value) : translate(locale, 'stock.marketCap.unavailable')}
-                detail={marketCap.status === 'available'
-                  ? translate(locale, 'stock.marketCap.source', { source: marketCap.sourceName, date: formatDateTime(marketCap.retrievedAt) })
-                  : translate(locale, 'stock.marketCap.missing')}
-              />
+              {headerStats.map((stat) => (
+                <HeaderStat key={stat.label} label={stat.label} value={stat.value} detail={stat.detail} />
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       <div className="container py-7 lg:py-9">
+        <div className="mb-6">
+          <StockSignalSummary signals={stockSignals} locale={locale} />
+        </div>
+
         <section className="mb-10">
           <SectionHeading icon={<Activity className="h-5 w-5 text-primary" />} title={translate(locale, 'stock.actions.title')} description={translate(locale, 'stock.actions.description')} />
           <div className="divide-y divide-stone-200 border-y border-stone-200 bg-white">
             {actions.map((action) => <ActionRow key={action.managerId} action={action} locale={locale} />)}
           </div>
         </section>
+
+        <SecSourceTrustBlock locale={locale} sourceUrl={actions[0]?.sourceUrl} className="mb-10" />
 
         <section className="mb-10">
           <SectionHeading icon={<Activity className="h-5 w-5 text-slate-700" />} title={translate(locale, 'stock.trends')} description={translate(locale, 'stock.trend.description')} />
@@ -221,7 +234,6 @@ function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) 
     formatDate,
     formatNumber,
     formatPercent,
-    formatPercentagePoints,
     formatQuarter,
     formatSignedNumber,
     formatWeight,
@@ -255,16 +267,11 @@ function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) 
         <div>
           {model.showWeightTransition ? (
             <div className="font-mono text-sm font-semibold text-slate-950">
-              {formatWeight(model.previousWeight)} <span className="px-1 text-muted-foreground">→</span> {formatWeight(model.currentWeight)}
+              {formatWeight(model.previousWeight)} <span className="px-1 text-muted-foreground">-&gt;</span> {formatWeight(model.currentWeight)}
             </div>
           ) : (
             <div className="font-mono text-sm font-semibold text-slate-950">
               {model.isNew ? translate(locale, 'change.new') : translate(locale, 'change.exit')}: {formatWeight(model.specialWeight)}
-            </div>
-          )}
-          {model.weightDelta !== null && (
-            <div className={`mt-1 font-mono text-xs font-semibold ${directionTextClass(model.weightDelta)}`}>
-              {translate(locale, 'common.weightChange')}: {formatPercentagePoints(model.weightDelta)}
             </div>
           )}
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -281,6 +288,11 @@ function ActionRow({ action, locale }: { action: StockAction; locale: Locale }) 
           <div className={`font-mono text-sm font-semibold ${directionTextClass(model.shareDelta || 0)}`}>
             {formatSignedNumber(model.shareDelta || 0)} {translate(locale, 'common.shares')}
           </div>
+          {model.isExit && (
+            <div className="mt-1 font-mono text-xs text-slate-700">
+              {translate(locale, 'common.current')}: {formatNumber(model.currentShares || 0)} {translate(locale, 'common.shares')}
+            </div>
+          )}
           <div className="mt-1 font-mono text-xs text-muted-foreground">{formatPercent(model.shareDeltaPercent)}</div>
         </div>
 
@@ -367,7 +379,7 @@ function QuarterTable({ stock, locale }: { stock: Stock; locale: Locale }) {
                 <div className="flex max-w-[420px] flex-wrap gap-1">
                   {quarter.holders.map((holder) => (
                     <Badge key={`${quarter.quarter}-${holder.managerId}`} variant={changeBadgeVariant(holder.changeType)} className="rounded-md">
-                      {holder.managerName} {changeName(holder.changeType)} · {formatNumber(holder.shares)} {translate(locale, 'common.shares')}
+                      {holder.managerName} {changeName(holder.changeType)} - {formatNumber(holder.shares)} {translate(locale, 'common.shares')}
                     </Badge>
                   ))}
                 </div>
