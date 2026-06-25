@@ -61,7 +61,7 @@ export function SignalHero({
       <div className="container py-5 sm:py-6 lg:py-8">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.78fr)] lg:items-stretch">
           <div className="min-w-0">
-            <h1 className="max-w-4xl break-words text-3xl font-semibold leading-[1.08] text-slate-950 sm:text-4xl lg:text-[2.65rem]">
+            <h1 className="sr-only">
               {translate(locale, 'home.hero.title')}
             </h1>
           </div>
