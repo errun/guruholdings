@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import snapshot from '@/data-generated/snapshots/latest.json';
 import { ExplorerSearchDisclosure } from '@/components/explorer/ExplorerSearchDisclosure';
-import { SignalHero } from '@/components/signals/SignalHero';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { buildHoldingChangeModel } from '@/lib/holding-change.mjs';
@@ -204,14 +203,13 @@ export async function HomePage({ locale }: { locale: Locale }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <SignalHero locale={locale} />
-
       <div className="container py-7 lg:py-9">
         <section className="mb-10">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'home.consensus.title')}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{formatQuarter(snapshot.latestQuarter)}</p>
+              <div className="mt-2 h-7 border-l-4 border-primary" aria-hidden="true" />
             </div>
             <Link href={localizedPath(locale, '/live-13f')} className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
               {translate(locale, 'home.consensus.viewAll')}
