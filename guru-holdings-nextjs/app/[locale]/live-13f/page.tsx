@@ -1,7 +1,12 @@
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { Live13FPage } from '@/components/site-pages/Live13FPage';
+import {
+  legacyConsensusRedirect,
+  normalizeConsensusPage,
+  normalizeConsensusView,
+} from '@/lib/consensus-view';
 import { getLive13FMetadata } from '@/lib/i18n/page-metadata';
-import { isLocalizedLocale } from '@/lib/i18n/site';
+import { isLocalizedLocale, localizedPath } from '@/lib/i18n/site';
 import { normalizeSignalMode } from '@/lib/signals';
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -26,9 +31,16 @@ export default async function Page({
   const { locale } = await params;
   if (!isLocalizedLocale(locale)) notFound();
   const resolvedSearchParams = await searchParams;
+  const legacyRedirect = legacyConsensusRedirect(
+    localizedPath(locale, '/live-13f'),
+    resolvedSearchParams,
+  );
+  if (legacyRedirect) permanentRedirect(legacyRedirect);
   return (
     <Live13FPage
       locale={locale}
+      consensusView={normalizeConsensusView(resolvedSearchParams?.view)}
+      consensusPage={normalizeConsensusPage(resolvedSearchParams?.page)}
       signalMode={normalizeSignalMode(resolvedSearchParams?.signal)}
       initialQuery={readParam(resolvedSearchParams?.q)}
     />

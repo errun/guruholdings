@@ -58,6 +58,9 @@ const routeContracts = [
   ['lib/i18n/metadata.ts', ['canonical:', 'languages: languageAlternates', "'x-default'"]],
   ['components/layout/LanguageSelector.tsx', ['window.location.search', 'window.location.hash', 'localizedPath(nextLocale']],
   ['middleware.ts', ['stock-route-aliases.json', 'NextResponse.redirect(destination, 308)', 'request.nextUrl.clone()']],
+  ['components/site-pages/HomePage.tsx', ['/live-13f?view=shared-increase#consensus-results', '/live-13f?view=shared-decrease#consensus-results']],
+  ['app/(default)/live-13f/page.tsx', ['normalizeConsensusView', 'legacyConsensusRedirect', 'permanentRedirect']],
+  ['app/[locale]/live-13f/page.tsx', ['normalizeConsensusView', 'legacyConsensusRedirect', 'permanentRedirect']],
 ];
 
 for (const [relativePath, markers] of routeContracts) {

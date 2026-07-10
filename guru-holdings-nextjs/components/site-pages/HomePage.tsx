@@ -232,7 +232,7 @@ export async function HomePage({ locale }: { locale: Locale }) {
               <div className="space-y-3">
                 {topSharedIncrease.map((item) => <ConsensusCard key={'inc-' + item.companyId} item={item} direction="increase" locale={locale} marketCap={marketCaps.get(item.companyId)} />)}
               </div>
-              <Link href={localizedPath(locale, '/live-13f?mode=increase')} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+              <Link href={localizedPath(locale, '/live-13f?view=shared-increase#consensus-results')} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
                 {translate(locale, 'home.consensus.viewAllIncrease')}
                 <ArrowRight className="h-4 w-4" />
               </Link>
@@ -252,7 +252,7 @@ export async function HomePage({ locale }: { locale: Locale }) {
               <div className="space-y-3">
                 {topSharedDecrease.map((item) => <ConsensusCard key={'dec-' + item.companyId} item={item} direction="decrease" locale={locale} marketCap={marketCaps.get(item.companyId)} />)}
               </div>
-              <Link href={localizedPath(locale, '/live-13f?mode=decrease')} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+              <Link href={localizedPath(locale, '/live-13f?view=shared-decrease#consensus-results')} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
                 {translate(locale, 'home.consensus.viewAllDecrease')}
                 <ArrowRight className="h-4 w-4" />
               </Link>

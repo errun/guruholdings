@@ -113,7 +113,57 @@ assert.ok(freshnessSource.includes('signal.freshness.nextCheck'), 'freshness str
 const homeSource = fs.readFileSync('components/site-pages/HomePage.tsx', 'utf8');
 assert.ok(homeSource.includes('home.consensus.viewAllIncrease'), 'home page must link to all shared increases');
 assert.ok(homeSource.includes('home.consensus.viewAllDecrease'), 'home page must link to all shared decreases');
+assert.ok(homeSource.includes('/live-13f?view=shared-increase#consensus-results'), 'shared increase link must use the shared-increase view');
+assert.ok(homeSource.includes('/live-13f?view=shared-decrease#consensus-results'), 'shared decrease link must use the shared-decrease view');
+assert.ok(!homeSource.includes('/live-13f?mode=increase'), 'home page must not mix legacy mode with consensus views');
+assert.ok(!homeSource.includes('/live-13f?mode=decrease'), 'home page must not mix legacy mode with consensus views');
 assert.ok(homeSource.includes('ManagerPortfolioMini'), 'home manager cards must show disclosed portfolio value change');
+
+const liveSource = fs.readFileSync('components/site-pages/Live13FPage.tsx', 'utf8');
+const consensusPosition = liveSource.indexOf('id="consensus-results"');
+const searchPosition = liveSource.indexOf('id="explorer-search-title"');
+const singleSignalsPosition = liveSource.indexOf('id="single-signals"');
+const supportingPosition = liveSource.indexOf('id="supporting-analysis-title"');
+assert.ok(consensusPosition >= 0, 'live page must render consensus results');
+assert.ok(consensusPosition < searchPosition, 'consensus results must appear before search');
+assert.ok(searchPosition < singleSignalsPosition, 'search must appear before single-manager signals');
+assert.ok(singleSignalsPosition < supportingPosition, 'single-manager signals must appear before supporting analysis');
+assert.ok(liveSource.includes('<details'), 'single-manager signals must be collapsible');
+
+const consensusSource = fs.readFileSync('components/consensus/ConsensusMoveSection.tsx', 'utf8');
+assert.ok(consensusSource.includes('data-consensus-total={items.length}'), 'consensus sections must expose the complete result count');
+assert.ok(consensusSource.includes('data-consensus-company={item.companyId}'), 'consensus cards must expose a stable company identifier');
+assert.ok(!consensusSource.includes('min-w-[900px]'), 'consensus results must not require a 900px-wide table');
+assert.ok(consensusSource.includes('live.valueChangeDisclaimer'), 'disclosed value changes must include a non-transaction disclaimer');
+
+const consensusRoutes = [
+  fs.readFileSync('app/(default)/live-13f/page.tsx', 'utf8'),
+  fs.readFileSync('app/[locale]/live-13f/page.tsx', 'utf8'),
+];
+for (const source of consensusRoutes) {
+  assert.ok(source.includes('normalizeConsensusView'), 'live route must parse the consensus view parameter');
+  assert.ok(source.includes('legacyConsensusRedirect'), 'live route must preserve legacy mode compatibility');
+  assert.ok(source.includes('permanentRedirect'), 'legacy mode compatibility must use a permanent redirect');
+}
+
+const increaseKinds = new Set(['increase', 'new']);
+const decreaseKinds = new Set(['decrease', 'exit']);
+for (const item of snapshot.consensus.sharedIncrease) {
+  const managerCount = item.managers.filter((manager) => increaseKinds.has(manager.changeType)).length;
+  assert.ok(managerCount >= 2, `shared increase requires two same-direction managers: ${item.companyId}`);
+}
+for (const item of snapshot.consensus.sharedDecrease) {
+  const managerCount = item.managers.filter((manager) => decreaseKinds.has(manager.changeType)).length;
+  assert.ok(managerCount >= 2, `shared decrease requires two same-direction managers: ${item.companyId}`);
+}
+for (const item of snapshot.consensus.divergent) {
+  assert.ok(item.managers.some((manager) => increaseKinds.has(manager.changeType)), `divergent item requires an increasing manager: ${item.companyId}`);
+  assert.ok(item.managers.some((manager) => decreaseKinds.has(manager.changeType)), `divergent item requires a decreasing manager: ${item.companyId}`);
+}
+const divergentAmazon = snapshot.consensus.divergent.find((item) => item.companyId === '023135106');
+assert.ok(divergentAmazon, 'Amazon must be present in the divergent consensus view');
+assert.ok(divergentAmazon.managers.some((manager) => increaseKinds.has(manager.changeType)), 'Amazon must show an increasing manager');
+assert.ok(divergentAmazon.managers.some((manager) => decreaseKinds.has(manager.changeType)), 'Amazon must show a decreasing manager');
 
 const headerSource = fs.readFileSync('components/layout/Header.tsx', 'utf8');
 assert.ok(headerSource.includes('snapshot.consensus.sharedIncrease.length'), 'header must expose the shared increase total');
