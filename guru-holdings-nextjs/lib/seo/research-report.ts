@@ -8,12 +8,10 @@ export const RESEARCH_PERIODS = [
 
 export function researchRealtimeRequest() {
   return {
-    dimensions: [{ name: 'eventName' }, { name: 'streamId' }],
-    metrics: [{ name: 'eventCount' }, { name: 'activeUsers' }],
-    dimensionFilter: { andGroup: { expressions: [
-      { filter: { fieldName: 'platform', stringFilter: { value: 'web', matchType: 'EXACT', caseSensitive: false } } },
-      { filter: { fieldName: 'eventName', inListFilter: { values: [...RESEARCH_EVENTS] } } },
-    ] } }, limit: 100,
+    dimensions: [{ name: 'eventName' }],
+    metrics: [{ name: 'eventCount' }],
+    dimensionFilter: { filter: { fieldName: 'eventName', inListFilter: { values: [...RESEARCH_EVENTS] } } },
+    limit: '100',
   };
 }
 

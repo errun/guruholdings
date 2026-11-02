@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { NextRequest } from 'next/server';
-import { createHandlers, readConfig, productionDependencies, SCOPES, seal, unseal, periodRanges, type Dependencies } from '../../lib/seo/cloud';
+import { createHandlers, readConfig, productionDependencies, SCOPES, seal, unseal, periodRanges, realtimeDiagnostic, type Dependencies } from '../../lib/seo/cloud';
 
 const config = readConfig({ SEO_GOOGLE_CLIENT_ID: 'fixture.apps.googleusercontent.com', SEO_GOOGLE_CLIENT_SECRET: 'fixture-not-real',
   SEO_TOKEN_KEY: randomBytes(32).toString('base64'), SEO_CONNECT_SECRET: 'c'.repeat(40), SEO_JOB_SECRET: 'j'.repeat(40) });
@@ -150,4 +150,12 @@ test('rolling date ranges use Pacific calendar dates, independent of runner time
     { startDate: '2026-10-03', endDate: '2026-10-30' }, { startDate: '2026-09-05', endDate: '2026-10-02' },
   ]);
   assert.equal(periodRanges(new Date('2026-11-02T01:00:00Z'))[0].endDate, '2026-10-29');
+});
+
+test('realtime diagnostics never serialize request headers or sensitive OAuth errors', () => {
+  const error = { response: { status: 400, data: { error: { status: 'INVALID_ARGUMENT', message: 'Unsupported metric combination' } } },
+    config: { headers: { Authorization: 'Bearer fixture-private-access' } } };
+  assert.deepEqual(realtimeDiagnostic(error), { status: 400, code: 'INVALID_ARGUMENT', detail: 'Unsupported metric combination' });
+  error.response.data.error.message = 'client_secret=fixture-secret';
+  assert.equal(realtimeDiagnostic(error).detail, 'Google realtime report unavailable');
 });

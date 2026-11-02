@@ -133,7 +133,10 @@ export function createHandlers(config: Config, deps: Dependencies) {
         if (view === 'realtime') return json(report);
         await deps.write(`seo/reports/${report.generatedAt.slice(0, 10)}.enc`, seal(report, config.key, 'seo-report'));
         return json(report);
-      } catch { return json({ error: 'collection_failed_reauthorization_or_service_check_needed' }, 502); }
+      } catch (error) {
+        if (view === 'realtime' && error instanceof RealtimeReportError) return json({ error: 'realtime_report_unavailable', diagnostic: error.diagnostic }, 502);
+        return json({ error: 'collection_failed_reauthorization_or_service_check_needed' }, 502);
+      }
     },
   };
 }
@@ -142,6 +145,19 @@ function client(config: Config) {
   return new OAuth2Client(config.clientId, config.clientSecret, `${config.origin}/api/seo/google/callback`);
 }
 const GA_URL = `https://analyticsdata.googleapis.com/v1beta/properties/${PROPERTY}:runReport`;
+class RealtimeReportError extends Error {
+  constructor(public diagnostic: { status: number; code: string; detail: string }) { super('realtime_report_unavailable'); }
+}
+
+export function realtimeDiagnostic(error: unknown) {
+  const response = (error as { response?: { status?: number; data?: { error?: { status?: string; message?: string } } } })?.response;
+  const message = response?.data?.error?.message;
+  return { status: typeof response?.status === 'number' ? response.status : 0,
+    code: /^[A-Z_]{1,40}$/.test(response?.data?.error?.status || '') ? response!.data!.error!.status! : 'UNAVAILABLE',
+    // Only Google's fixed-query error message is eligible; never serialize SDK request/config/headers.
+    detail: typeof message === 'string' && !/ya29\.|GOCSPX-|1\/\/|refresh_token|client_secret|access_token/i.test(message)
+      ? message.slice(0, 240) : 'Google realtime report unavailable' };
+}
 const GSC_SITE_URL = `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(SITE)}`;
 
 export function periodRanges(now = new Date()) {
@@ -191,10 +207,12 @@ export function productionDependencies(config: Config): Dependencies {
         return response.data;
       };
       if (realtime) {
-        const report = await request<GaReport>('ga4_research_realtime', GA_URL.replace(':runReport', ':runRealtimeReport'), researchRealtimeRequest());
+        let report: GaReport;
+        try { report = await request<GaReport>('ga4_research_realtime', GA_URL.replace(':runReport', ':runRealtimeReport'), researchRealtimeRequest()); }
+        catch (error) { throw new RealtimeReportError(realtimeDiagnostic(error)); }
         return { generatedAt: new Date().toISOString(), ga4: [], gsc: [], evidence,
           behavior: { status: 'available', periods: [], reports: [], realtime: report },
-          warnings: ['实时检查按本媒体资源的Web数据流分组；不是按主机名过滤的历史报告，且不覆盖已保存的每日报告。'] };
+          warnings: ['实时检查按本媒体资源的事件名汇总；不是按主机名过滤的历史报告，且不覆盖已保存的每日报告。'] };
       }
       for (const range of ranges) {
         ga4.push(await request<GaReport>('ga4_totals', GA_URL, { dateRanges: [range], dimensionFilter: hostFilter,
