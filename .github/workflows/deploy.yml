@@ -40,8 +40,14 @@ jobs:
       - name: Check types
         run: npm run typecheck
 
+      - name: Check cloud SEO authorization
+        run: npm run seo:cloud:test
+
       - name: Build production site
         run: npm run build
+
+      - name: Check cloud SEO HTTP routes with fixtures
+        run: npm run seo:cloud:smoke
 
       - name: Check multilingual SEO
         run: npm run seo:check

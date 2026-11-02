@@ -1,0 +1,49 @@
+name: Collect SEO evidence
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seo-daily
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    # Enable only after production callback, consent and a manual collection pass.
+    if: vars.SEO_COLLECTION_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Collect and save encrypted evidence in the private cloud store
+        env:
+          SEO_JOB_SECRET: ${{ secrets.SEO_JOB_SECRET }}
+        shell: bash
+        run: |
+          if [ -z "$SEO_JOB_SECRET" ]; then
+            echo '::error::SEO_JOB_SECRET is missing.'
+            exit 1
+          fi
+          # Keep the report out of public logs and downloadable workflow artifacts.
+          report_file="$RUNNER_TEMP/guru-seo-report.json"
+          headers_file="$RUNNER_TEMP/guru-seo-headers.txt"
+          trap 'rm -f "$report_file" "$headers_file"' EXIT
+          printf 'Authorization: Bearer %s\n' "$SEO_JOB_SECRET" > "$headers_file"
+          chmod 600 "$headers_file"
+          status=$(curl --silent --show-error --max-time 300 --output "$report_file" --write-out '%{http_code}' --request POST --header @"$headers_file" https://guruholdings.net/api/seo/daily)
+          if [ "$status" != '200' ]; then
+            echo "::error::SEO collection failed: HTTP $status. Check consent, environment variables and private storage."
+            exit 1
+          fi
+          python3 - "$report_file" <<'PY'
+          import json, sys
+          with open(sys.argv[1], encoding='utf-8') as f:
+              report = json.load(f)
+          if not report.get('evidence') or not all(e.get('httpStatus') == 200 for e in report['evidence']):
+              raise SystemExit('Collection evidence is missing or unsuccessful.')
+          print('Encrypted cloud report saved; Google API requests:', len(report['evidence']))
+          PY
