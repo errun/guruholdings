@@ -53,9 +53,10 @@ test('behavior periods cover yesterday and a non-overlapping previous week in th
   ]);
 });
 
-test('realtime verification uses supported realtime dimensions and isolates web event types', () => {
+test('realtime verification requests only the event totals required for receipt validation', () => {
   const request = researchRealtimeRequest();
-  assert.deepEqual(request.dimensions, [{ name: 'eventName' }, { name: 'streamId' }]);
+  assert.deepEqual(request.dimensions, [{ name: 'eventName' }]);
   assert.ok(!JSON.stringify(request).includes('hostName'));
-  assert.equal(request.dimensionFilter.andGroup.expressions[0].filter.stringFilter?.value, 'web');
+  assert.equal(request.dimensionFilter.filter.fieldName, 'eventName');
+  assert.equal(request.limit, '100');
 });
