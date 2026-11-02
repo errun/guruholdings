@@ -79,7 +79,13 @@ function clear(response: NextResponse) {
 export function createHandlers(config: Config, deps: Dependencies) {
   return {
     page() {
-      return html('<h1>连接 Google 只读数据</h1><p>仅供站点管理员使用。授权范围为 GA4 与 Search Console 只读报告。</p><form method="post"><label>管理员连接码 <input name="secret" type="password" autocomplete="off" required maxlength="256"></label><button>前往 Google 授权</button></form>');
+      const response = html('<h1>连接 Google 只读数据</h1><p>仅供站点管理员使用。授权范围为 GA4 与 Search Console 只读报告。</p><form method="post"><label>管理员连接码 <input name="secret" type="password" autocomplete="off" required maxlength="256"></label><button>前往 Google 授权</button></form>');
+      // Native form POSTs under no-referrer send Origin: null in Chromium.
+      // Keep the strict Origin check; disclose referrers only within this site.
+      response.headers.set('Referrer-Policy', 'same-origin');
+      // Chromium also checks the form's cross-origin OAuth redirect against CSP.
+      response.headers.set('Content-Security-Policy', "default-src 'none'; form-action 'self' https://accounts.google.com; frame-ancestors 'none'; base-uri 'none'");
+      return response;
     },
     async connect(request: NextRequest) {
       if (request.headers.get('origin') !== config.origin) return json({ error: 'origin_rejected' }, 403);
