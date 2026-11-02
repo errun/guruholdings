@@ -89,7 +89,7 @@ export function StockTrendChart({ stock, locale }: { stock: AnyRecord; locale: L
   const { changeName, formatNumber, formatQuarter, formatWeight } = getViewFormatters(locale);
 
   return (
-    <div className="rounded-lg border border-stone-200 bg-white p-3 sm:p-5">
+    <div data-analytics-section="stock_history" data-analytics-chart="stock_history" className="rounded-lg border border-stone-200 bg-white p-3 sm:p-5">
       <div className="h-[500px] min-w-0 sm:h-[560px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={trend} margin={{ top: 28, right: 188, bottom: 14, left: 0 }}>

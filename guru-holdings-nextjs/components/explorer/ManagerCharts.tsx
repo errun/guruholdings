@@ -50,7 +50,7 @@ export function ManagerCharts({ manager, locale }: { manager: AnyRecord; locale:
   }));
 
   return (
-    <div className="grid gap-5 xl:grid-cols-2">
+    <div data-analytics-section="manager_history" data-analytics-chart="manager_history" className="grid gap-5 xl:grid-cols-2">
       <ChartCard title={translate(locale, 'charts.totalValueTrend')}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={trend} margin={{ top: 10, right: 18, bottom: 0, left: 4 }}>

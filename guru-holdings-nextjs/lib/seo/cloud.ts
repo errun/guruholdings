@@ -2,6 +2,7 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes, timingSafeEq
 import { CodeChallengeMethod, OAuth2Client } from 'google-auth-library';
 import { get, put } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
+import { RESEARCH_PERIODS, researchReportRequest } from './research-report';
 
 export const SCOPES = ['https://www.googleapis.com/auth/analytics.readonly', 'https://www.googleapis.com/auth/webmasters.readonly'];
 export const PROPERTY = '542593473';
@@ -19,7 +20,8 @@ type Grant = { refreshToken: string; connectedAt: string; scope: string };
 type Tokens = { accessToken: string; refreshToken: string; scope: string };
 type Row = { dimensionValues?: { value: string }[]; metricValues?: { value: string }[] };
 type GaReport = { rows?: Row[]; rowCount?: number; metadata?: Record<string, unknown>; [key: string]: unknown };
-export type CloudReport = { generatedAt: string; ga4: GaReport[]; gsc: Record<string, unknown>[]; warnings: string[]; evidence: Evidence[] };
+export type CloudReport = { generatedAt: string; ga4: GaReport[]; gsc: Record<string, unknown>[]; warnings: string[]; evidence: Evidence[];
+  behavior?: { status: 'available' | 'unavailable'; periods: typeof RESEARCH_PERIODS; reports: GaReport[] } };
 type Evidence = { source: string; httpStatus: number; elapsedMs: number };
 export interface Dependencies {
   authorizationUrl(state: string, challenge: string): string;
@@ -206,7 +208,14 @@ export function productionDependencies(config: Config): Dependencies {
       if (!Array.isArray(gsc[0].rows) || !gsc[0].rows.length) warnings.push('GSC 已完成数据为空；不能断言没有搜索曝光或接口失效。');
       if ((ga4[2].rowCount || 0) > 500) warnings.push('GA4 页面超过 500 行，当前结果按浏览量截取。');
       if (ga4.some(r => r.metadata?.subjectToThresholding)) warnings.push('GA4 报告受隐私阈值限制。');
-      return { generatedAt: new Date().toISOString(), period: ranges, ga4, gsc, warnings, evidence } as CloudReport;
+      const behavior: NonNullable<CloudReport['behavior']> = { status: 'available', periods: RESEARCH_PERIODS, reports: [] };
+      try {
+        for (const range of RESEARCH_PERIODS) behavior.reports.push(await request<GaReport>('ga4_research_events', GA_URL, researchReportRequest(range)));
+      } catch {
+        behavior.status = 'unavailable'; behavior.reports = [];
+        warnings.push('功能使用事件报表暂不可用；基础流量与搜索采集仍保留，不能将缺失事件解释为零使用。');
+      }
+      return { generatedAt: new Date().toISOString(), period: ranges, ga4, gsc, behavior, warnings, evidence } as CloudReport;
     },
   };
 }

@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { ArrowDownRight, ArrowRight, ArrowUpRight, GitCompareArrows } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { trackResearch } from '@/lib/research-analytics';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -15,6 +16,8 @@ type AnyRecord = Record<string, any>;
 export function ManagerCompare({ managers, locale }: { managers: AnyRecord[]; locale: Locale }) {
   const { concentrationName, formatCurrency, formatNumber, formatWeight } = getViewFormatters(locale);
   const [selectedIds, setSelectedIds] = useState<string[]>(managers.slice(0, 3).map((manager) => manager.id));
+  const started = useRef(false);
+  const lastComparison = useRef('');
 
   const selectedManagers = useMemo(
     () => managers.filter((manager) => selectedIds.includes(manager.id)),
@@ -81,6 +84,7 @@ export function ManagerCompare({ managers, locale }: { managers: AnyRecord[]; lo
   }, [selectedManagers]);
 
   const toggleManager = (id: string) => {
+    if (!started.current) { trackResearch('compare_start', { section: 'comparison' }); started.current = true; }
     setSelectedIds((current) => {
       if (current.includes(id)) return current.filter((item) => item !== id);
       if (current.length >= 3) return [current[1], current[2], id].filter(Boolean);
@@ -88,8 +92,16 @@ export function ManagerCompare({ managers, locale }: { managers: AnyRecord[]; lo
     });
   };
 
+  const selectionKey = selectedIds.join(',');
+  useEffect(() => {
+    if (!started.current || selectedIds.length < 2 || lastComparison.current === selectionKey) return;
+    if (trackResearch('compare_results', { section: 'comparison', selected_count: selectedIds.length,
+      shared_holdings: comparison.commonHoldings.length, shared_increases: comparison.sharedIncrease.length,
+      shared_decreases: comparison.sharedDecrease.length })) lastComparison.current = selectionKey;
+  }, [selectionKey, selectedIds.length, comparison]);
+
   return (
-    <Card className="border-stone-200 bg-white shadow-sm">
+    <Card data-analytics-section="comparison" className="border-stone-200 bg-white shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
           <GitCompareArrows className="h-5 w-5 text-primary" />
@@ -106,6 +118,7 @@ export function ManagerCompare({ managers, locale }: { managers: AnyRecord[]; lo
               <button
                 key={manager.id}
                 type="button"
+                aria-pressed={active}
                 onClick={() => toggleManager(manager.id)}
                 className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
                   active ? 'border-primary bg-primary text-primary-foreground' : 'border-stone-300 bg-white text-slate-800 hover:border-primary/40'

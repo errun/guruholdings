@@ -11,6 +11,7 @@ import {
   getViewFormatters,
 } from '@/lib/sec13f-view';
 import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
+import { trackResearch } from '@/lib/research-analytics';
 
 type AnyRecord = Record<string, any>;
 
@@ -48,11 +49,14 @@ export function ManagerOperationsTable({ manager, locale }: { manager: AnyRecord
   }, [changeType, manager.quarterlyCompanyChanges, query, quarter]);
 
   return (
-    <div className="rounded-lg border border-stone-200 bg-white">
+    <div data-analytics-section="quarter_table" className="rounded-lg border border-stone-200 bg-white">
       <div className="grid gap-3 border-b border-stone-200 p-4 lg:grid-cols-[auto_auto_minmax(0,1fr)]">
         <select
           value={quarter}
-          onChange={(event) => setQuarter(event.target.value)}
+          onChange={(event) => {
+            setQuarter(event.target.value);
+            trackResearch('history_quarter_change', { section: 'quarter_table', quarter: event.target.value });
+          }}
           className="h-10 rounded-md border border-input bg-background px-3 text-sm"
         >
           {quarters.map((item) => (

@@ -60,7 +60,7 @@ export function SignalCard({
   } = getViewFormatters(locale);
 
   return (
-    <article className={cn(
+    <article data-analytics-signal={signal.kind} data-analytics-entity={signal.companyId} data-analytics-manager={signal.managerId} className={cn(
       'rounded-md border border-stone-200 bg-white p-4 transition-colors hover:border-primary/40',
       compact && 'p-3',
     )}>

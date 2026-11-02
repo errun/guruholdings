@@ -43,6 +43,9 @@ jobs:
       - name: Check cloud SEO authorization
         run: npm run seo:cloud:test
 
+      - name: Check research measurement boundaries
+        run: npm run analytics:test
+
       - name: Build production site
         run: npm run build
 

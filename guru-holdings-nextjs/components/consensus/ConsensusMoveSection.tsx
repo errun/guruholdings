@@ -201,6 +201,8 @@ function ConsensusMoveCard({ item, direction, locale }: { item: ConsensusItem; d
   return (
     <article
       data-consensus-company={item.companyId}
+      data-analytics-signal={`shared_${direction}`}
+      data-analytics-entity={item.companyId}
       className="overflow-hidden rounded-md border border-stone-200 bg-white"
     >
       <div className="grid gap-4 border-b border-stone-100 p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
