@@ -58,6 +58,16 @@ test('forged origin and wrong admin secret never reach OAuth', async () => {
   assert.deepEqual(f.calls, []);
 });
 
+test('connect form preserves browser Origin and permits only the Google redirect; callback remains no-referrer', async () => {
+  const f = fixture();
+  const page = f.handlers.page();
+  assert.equal(page.headers.get('referrer-policy'), 'same-origin');
+  assert.equal(page.headers.get('content-security-policy'), "default-src 'none'; form-action 'self' https://accounts.google.com; frame-ancestors 'none'; base-uri 'none'");
+  assert.equal((await f.handlers.connect(connectRequest(config.connectSecret, 'null'))).status, 403);
+  const response = await f.handlers.callback(callback('', 'forged'));
+  assert.equal(response.headers.get('referrer-policy'), 'no-referrer');
+});
+
 test('callback rejects mismatched state, tampered cookie and expired request before exchanging code', async () => {
   const f = fixture(); const p = await pending(f);
   assert.equal((await f.handlers.callback(callback(p.cookie, 'forged'))).status, 400);
