@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { researchContext, researchPayload, trackResearch } from '../../lib/research-analytics';
-import { RESEARCH_PERIODS, researchReportRequest, researchRealtimeRequest } from '../../lib/seo/research-report';
+import { RESEARCH_PERIODS, researchReportRequest, researchRealtimeRequest, releaseFollowupRequests } from '../../lib/seo/research-report';
 
 test('localized research paths resolve without retaining query, hash or arbitrary URLs', () => {
   assert.deepEqual(researchContext('/zh/stocks/alphabet?q=private@example.com#notes'), {
@@ -59,4 +59,17 @@ test('realtime verification requests only the event totals required for receipt 
   assert.ok(!JSON.stringify(request).includes('hostName'));
   assert.equal(request.dimensionFilter.filter.fieldName, 'eventName');
   assert.equal(request.limit, '100');
+});
+
+test('release follow-up uses daily aggregates, excludes marked validation visits and contains no user identifiers', () => {
+  const requests = releaseFollowupRequests();
+  for (const query of Object.values(requests)) {
+    assert.deepEqual(query.dateRanges, [{ startDate: '14daysAgo', endDate: 'yesterday' }]);
+    assert.equal(query.limit, 500);
+    assert.deepEqual(query.dimensions[0], { name: 'date' });
+    const text = JSON.stringify(query);
+    assert.ok(text.includes('hostName') && text.includes('codex_') && text.includes('notExpression'));
+    assert.ok(!/userId|clientId|pageLocation|QueryString|customEvent:/.test(text));
+  }
+  assert.ok(requests.engagement.dimensions.some(d => d.name === 'newVsReturning'));
 });

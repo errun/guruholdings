@@ -1,14 +1,15 @@
 import Link from 'next/link';
 import { ArrowDownRight, ArrowUpRight, BarChart3 } from 'lucide-react';
 import snapshot from '@/data-generated/snapshots/latest.json';
+import check from '@/data-generated/freshness.json';
 import { getViewFormatters } from '@/lib/sec13f-view';
-import { getFreshnessDisplay } from '@/lib/update-cadence';
+import { getDataFreshness } from '@/lib/update-cadence';
 import { localizedPath, translate, type Locale } from '@/lib/i18n/site';
 import { LanguageSelector } from './LanguageSelector';
 
 export function Header({ locale }: { locale: Locale }) {
   const { formatDateTime, formatNumber, formatQuarter } = getViewFormatters(locale);
-  const freshness = getFreshnessDisplay(snapshot.latestQuarter, locale);
+  const freshness = getDataFreshness(snapshot, check);
   const sharedIncreaseCount = snapshot.consensus.sharedIncrease.length;
   const sharedDecreaseCount = snapshot.consensus.sharedDecrease.length;
 
@@ -67,8 +68,10 @@ export function Header({ locale }: { locale: Locale }) {
           </span>
           <span className="hidden text-stone-300 sm:inline">/</span>
           <span className="whitespace-nowrap">{translate(locale, 'signal.hero.generatedShort', { date: formatDateTime(snapshot.generatedAt) })}</span>
-          <span className="hidden text-stone-300 sm:inline">/</span>
-          <span className="whitespace-nowrap">{translate(locale, 'signal.hero.nextCheckShort', { date: freshness.nextCheckDate })}</span>
+          {freshness.checkedAt && <>
+            <span className="hidden text-stone-300 sm:inline">/</span>
+            <span className="whitespace-nowrap" data-testid="sec-last-check">{translate(locale, 'signal.hero.checkedShort', { date: formatDateTime(freshness.checkedAt) })}</span>
+          </>}
         </div>
       </div>
     </header>

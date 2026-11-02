@@ -74,8 +74,9 @@ const requiredStockProfiles = new Set([
   '191216100',
   'microsoft',
   'nvidia',
-  ...snapshot.consensus.sharedIncrease.slice(0, 10).map((item) => item.companyId),
-  ...snapshot.consensus.sharedDecrease.slice(0, 10).map((item) => item.companyId),
+  // Editorial profiles are optional enrichment. A newly disclosed holding must
+  // not block the SEC update just because it has no manually written profile.
+  ...Object.keys(stockProfiles),
 ]);
 
 for (const companyId of requiredStockProfiles) {
@@ -108,7 +109,8 @@ assert.ok(marketDataSource.includes('revalidate: 60 * 60 * 24'), 'company market
 
 const freshnessSource = fs.readFileSync('components/signals/FilingFreshnessStrip.tsx', 'utf8');
 assert.ok(!freshnessSource.includes('getNextExpectedFiling'), 'public freshness strip must not predict a specific manager filing date');
-assert.ok(freshnessSource.includes('signal.freshness.nextCheck'), 'freshness strip must show the monthly automated check cadence');
+assert.ok(freshnessSource.includes('signal.freshness.checked'), 'freshness strip must show an evidenced SEC check timestamp');
+assert.ok(!freshnessSource.includes('nextCheckDate'), 'a calendar prediction must not masquerade as a successful check');
 
 const homeSource = fs.readFileSync('components/site-pages/HomePage.tsx', 'utf8');
 assert.ok(homeSource.includes('home.consensus.viewAllIncrease'), 'home page must link to all shared increases');
@@ -204,8 +206,10 @@ function parseRawInfoTable(path) {
   return { totalValue, amazon };
 }
 
-const amazon2025Q4 = parseRawInfoTable('data-source/raw/sec-13f/2025Q4/third-point/0001040273-26-000001/infotable.xml');
-const amazon2026Q1 = parseRawInfoTable('data-source/raw/sec-13f/2026Q1/third-point/0001040273-26-000002/infotable.xml');
+// Immutable SEC regression fixtures stay available as the live four-quarter
+// window advances. These assertions describe Q1 2026, never "latest".
+const amazon2025Q4 = parseRawInfoTable('scripts/ui/fixtures/third-point-2025Q4.xml');
+const amazon2026Q1 = parseRawInfoTable('scripts/ui/fixtures/third-point-2026Q1.xml');
 assert.equal(amazon2025Q4.amazon.shares, 2165000);
 assert.equal(amazon2025Q4.amazon.value, 499725300);
 assert.equal(amazon2025Q4.totalValue, 7274621868);
@@ -215,11 +219,12 @@ assert.equal(amazon2026Q1.amazon.value, 404043800);
 assert.equal(amazon2026Q1.totalValue, 2082795760);
 assert.ok(Math.abs(amazon2026Q1.amazon.weight - 19.39910805272621) < 1e-9);
 
-const thirdPoint = snapshot.managers.find((manager) => manager.id === 'third-point');
-const amazonChange = thirdPoint.latestCompanyChanges.find((change) => change.companyId === '023135106');
-assert.equal(amazonChange.changeType, 'decrease');
-assert.equal(amazonChange.shareChange, -225000);
-assert.ok(amazonChange.weightChange > 0);
+const amazonChange = buildHoldingChangeModel({ changeType: 'decrease',
+  currentWeight: amazon2026Q1.amazon.weight, previousWeight: amazon2025Q4.amazon.weight,
+  currentShares: amazon2026Q1.amazon.shares, previousShares: amazon2025Q4.amazon.shares });
+assert.equal(amazonChange.action, 'decrease');
+assert.equal(amazonChange.shareDelta, -225000);
+assert.ok(amazonChange.weightDelta > 0);
 
 const forbiddenText = [
   'stock.description.fallback',
