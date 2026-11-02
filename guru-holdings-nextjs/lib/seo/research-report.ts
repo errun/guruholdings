@@ -6,6 +6,17 @@ export const RESEARCH_PERIODS = [
   { startDate: '14daysAgo', endDate: '8daysAgo' },
 ];
 
+export function researchRealtimeRequest() {
+  return {
+    dimensions: [{ name: 'eventName' }, { name: 'streamId' }],
+    metrics: [{ name: 'eventCount' }, { name: 'activeUsers' }],
+    dimensionFilter: { andGroup: { expressions: [
+      { filter: { fieldName: 'platform', stringFilter: { value: 'web', matchType: 'EXACT', caseSensitive: false } } },
+      { filter: { fieldName: 'eventName', inListFilter: { values: [...RESEARCH_EVENTS] } } },
+    ] } }, limit: 100,
+  };
+}
+
 // Built-in dimensions only: the existing read-only grant can read event totals
 // without creating GA4 custom dimensions or requesting administrative access.
 export function researchReportRequest(range: { startDate: string; endDate: string }) {

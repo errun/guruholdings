@@ -57,8 +57,18 @@ async (page) => {
   response = await page.goto(base + '/live-13f');
   check(response.status() === 200, 'signals HTTP 200');
   const search = page.getByTestId('explorer-search-input');
+  await page.evaluate(() => Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' }));
   await search.fill('private@example.invalid');
+  await page.waitForTimeout(800);
+  check(count('search_results') === 0 && count('search_no_results') === 0, 'background search is deferred');
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
   await until(() => count('search_no_results') === 1, 'empty search');
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await page.waitForTimeout(100);
+  check(count('search_results') === 1 && count('search_no_results') === 1, 'visibility restoration retries once without duplicates');
   check(count('search_results') === 1, 'one settled search event instead of per-keystroke events');
   await search.fill('NVDA');
   await until(() => count('search_results') === 2, 'matched search');

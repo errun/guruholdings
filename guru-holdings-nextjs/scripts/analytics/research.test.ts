@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { researchContext, researchPayload, trackResearch } from '../../lib/research-analytics';
-import { RESEARCH_PERIODS, researchReportRequest } from '../../lib/seo/research-report';
+import { RESEARCH_PERIODS, researchReportRequest, researchRealtimeRequest } from '../../lib/seo/research-report';
 
 test('localized research paths resolve without retaining query, hash or arbitrary URLs', () => {
   assert.deepEqual(researchContext('/zh/stocks/alphabet?q=private@example.com#notes'), {
@@ -51,4 +51,11 @@ test('behavior periods cover yesterday and a non-overlapping previous week in th
     { startDate: '7daysAgo', endDate: 'yesterday' },
     { startDate: '14daysAgo', endDate: '8daysAgo' },
   ]);
+});
+
+test('realtime verification uses supported realtime dimensions and isolates web event types', () => {
+  const request = researchRealtimeRequest();
+  assert.deepEqual(request.dimensions, [{ name: 'eventName' }, { name: 'streamId' }]);
+  assert.ok(!JSON.stringify(request).includes('hostName'));
+  assert.equal(request.dimensionFilter.andGroup.expressions[0].filter.stringFilter?.value, 'web');
 });

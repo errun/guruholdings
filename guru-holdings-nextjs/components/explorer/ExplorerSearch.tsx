@@ -127,8 +127,18 @@ export function ExplorerSearch({
   const latestSearch = useRef(recordSearch);
   latestSearch.current = recordSearch;
   useEffect(() => {
-    const timeout = window.setTimeout(() => latestSearch.current(), 600);
-    return () => window.clearTimeout(timeout);
+    let settled = false;
+    const retry = () => {
+      if (settled && document.visibilityState !== 'hidden') latestSearch.current();
+    };
+    const timeout = window.setTimeout(() => { settled = true; retry(); }, 600);
+    document.addEventListener('visibilitychange', retry);
+    window.addEventListener('guru:analytics-ready', retry);
+    return () => {
+      window.clearTimeout(timeout);
+      document.removeEventListener('visibilitychange', retry);
+      window.removeEventListener('guru:analytics-ready', retry);
+    };
   }, [searchKey, isFiltering]);
 
   return (
