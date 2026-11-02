@@ -63,6 +63,8 @@ function ConsensusCard({
   return (
     <Link
       href={localizedPath(locale, stockPath(item.companyId))}
+      data-analytics-signal={`shared_${direction}`}
+      data-analytics-entity={item.companyId}
       className="block rounded-md border border-stone-200 bg-white p-4 transition-colors hover:border-primary/50 hover:bg-stone-50"
     >
       <div className="flex items-start justify-between gap-3">
@@ -148,6 +150,8 @@ function PositionSignal({ item, kind, locale }: { item: ConsensusItem; kind: 'ne
   return (
     <Link
       href={localizedPath(locale, stockPath(item.companyId))}
+      data-analytics-signal={`shared_${kind}`}
+      data-analytics-entity={item.companyId}
       className="flex min-w-0 max-w-full items-center justify-between gap-3 overflow-hidden rounded-md border border-stone-200 bg-white px-4 py-3 hover:border-primary/50"
     >
       <div className="min-w-0">

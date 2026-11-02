@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { ArrowDownRight, ArrowRight, ArrowUpRight, Building2, Filter, LoaderCircle, Search, SlidersHorizontal, X } from 'lucide-react';
-import { useDeferredValue, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { trackResearch } from '@/lib/research-analytics';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -106,9 +107,42 @@ export function ExplorerSearch({
   }, [compact, consensus, managers, managerId, normalizedQuery, searchIndex.managers, stocks, changeType, theme, concentration]);
 
   const hasFilters = query || managerId !== 'all' || changeType !== 'all' || theme !== 'all' || concentration !== 'all';
+  const interacted = useRef(Boolean(initialQuery));
+  const lastSearch = useRef('');
+  const searchKey = JSON.stringify([normalizedQuery, managerId, changeType, theme, concentration]);
+  const recordSearch = () => {
+    if (!interacted.current || isFiltering || lastSearch.current === searchKey) return;
+    if (!hasFilters) { lastSearch.current = ''; return; }
+    const resultCount = results.stockResults.length + results.managerResults.length + results.consensusResults.length;
+    const params = { section: 'search', query_state: normalizedQuery ? 'text' : 'filters_only',
+      result_count: resultCount, stock_results: results.stockResults.length, manager_results: results.managerResults.length,
+      signal_results: results.consensusResults.length, has_manager: managerId !== 'all', has_theme: theme !== 'all',
+      change_type: changeType, concentration };
+    if (trackResearch('search_results', params)) {
+      lastSearch.current = searchKey;
+      if (resultCount === 0) trackResearch('search_no_results', params);
+    }
+  };
+  // Wait for the settled result set, never send each keystroke or the query itself.
+  const latestSearch = useRef(recordSearch);
+  latestSearch.current = recordSearch;
+  useEffect(() => {
+    let settled = false;
+    const retry = () => {
+      if (settled && document.visibilityState !== 'hidden') latestSearch.current();
+    };
+    const timeout = window.setTimeout(() => { settled = true; retry(); }, 600);
+    document.addEventListener('visibilitychange', retry);
+    window.addEventListener('guru:analytics-ready', retry);
+    return () => {
+      window.clearTimeout(timeout);
+      document.removeEventListener('visibilitychange', retry);
+      window.removeEventListener('guru:analytics-ready', retry);
+    };
+  }, [searchKey, isFiltering]);
 
   return (
-    <Card className="overflow-hidden border-stone-200 bg-white shadow-sm">
+    <Card data-analytics-section="search" onChangeCapture={() => { interacted.current = true; }} className="overflow-hidden border-stone-200 bg-white shadow-sm">
       <CardHeader className={compact ? 'gap-4 p-4 sm:p-5' : 'gap-3'}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -234,6 +268,8 @@ export function ExplorerSearch({
                   key={stock.companyId}
                   href={localizedPath(locale, stock.href)}
                   data-testid="stock-result"
+                  data-analytics-result="stock"
+                  onClick={recordSearch}
                   className="block rounded-md border border-stone-200 bg-white p-3 transition-colors hover:border-primary/40 hover:bg-stone-50"
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -282,6 +318,8 @@ export function ExplorerSearch({
                   key={manager.id}
                   href={localizedPath(locale, `/live-13f/${manager.id}`)}
                   data-testid="manager-result"
+                  data-analytics-result="manager"
+                  onClick={recordSearch}
                   className="block rounded-md border border-stone-200 bg-white p-3 transition-colors hover:border-primary/40 hover:bg-stone-50"
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -329,6 +367,8 @@ export function ExplorerSearch({
                     key={`${item.direction}-${item.companyId}`}
                     href={localizedPath(locale, item.href)}
                     data-testid="consensus-result"
+                    data-analytics-result="signal"
+                    onClick={recordSearch}
                     className="block rounded-md border border-stone-200 bg-white p-3 transition-colors hover:border-primary/40 hover:bg-stone-50"
                   >
                     <div className="flex items-start justify-between gap-3">

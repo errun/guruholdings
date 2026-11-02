@@ -107,6 +107,28 @@ test('job authentication and disconnected state are distinct', async () => {
   assert.deepEqual(f.calls, []);
 });
 
+test('realtime verification requires job authentication and never overwrites the encrypted daily report', async () => {
+  const f = fixture(); const p = await pending(f);
+  await f.handlers.callback(callback(p.cookie, p.state));
+  f.store.set('seo/reports/2026-11-02.enc', 'existing-daily-report');
+  let realtimeFlag: boolean | undefined;
+  f.deps.collect = async (_grant, realtime) => {
+    realtimeFlag = realtime;
+    return { generatedAt: '2026-11-02T12:00:00Z', ga4: [], gsc: [], warnings: [], evidence: [] };
+  };
+  const url = `${origin}/api/seo/daily?view=realtime`;
+  assert.equal((await f.handlers.daily(new NextRequest(url, { method: 'POST' }))).status, 401);
+  assert.equal(realtimeFlag, undefined);
+  const response = await f.handlers.daily(new NextRequest(url, { method: 'POST', headers: { Authorization: `Bearer ${config.jobSecret}` } }));
+  assert.equal(response.status, 200);
+  assert.equal(realtimeFlag, true);
+  assert.equal(f.store.get('seo/reports/2026-11-02.enc'), 'existing-daily-report');
+  assert.equal(f.calls.filter(call => call === 'write').length, 1);
+  assert.equal((await f.handlers.daily(new NextRequest(`${origin}/api/seo/daily?view=invalid`, {
+    method: 'POST', headers: { Authorization: `Bearer ${config.jobSecret}` },
+  }))).status, 400);
+});
+
 test('AES envelopes cannot be moved between state, credentials and reports', () => {
   const encrypted = seal({ secret: 'fixture' }, config.key, 'google-grant');
   assert.throws(() => unseal(encrypted, config.key, 'oauth-state'));

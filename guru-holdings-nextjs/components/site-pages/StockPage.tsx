@@ -505,7 +505,7 @@ function PriceEstimateBlock({
 
 function DetailDisclosure({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <details className="group rounded-md border border-stone-200 bg-white">
+    <details data-analytics-history="stock_details" className="group rounded-md border border-stone-200 bg-white">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 font-medium text-slate-900 marker:content-none">
         <span className="flex items-center gap-2">{icon}{title}</span>
         <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
