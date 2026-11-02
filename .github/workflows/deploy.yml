@@ -46,6 +46,12 @@ jobs:
       - name: Check research measurement boundaries
         run: npm run analytics:test
 
+      - name: Check freshness evidence and holding changes
+        run: |
+          npm run data:test
+          npm run changes:check
+          npm run routes:check
+
       - name: Build production site
         run: npm run build
 

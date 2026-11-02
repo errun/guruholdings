@@ -7,6 +7,7 @@
     "data:update": "node scripts/data/update-13f.mjs",
     "data:build": "node scripts/data/update-13f.mjs",
     "data:verify": "node scripts/data/verify-13f.mjs",
+    "data:test": "node --import tsx --test scripts/data/freshness.test.ts",
     "routes:sync": "node scripts/routes/sync-stock-slugs.mjs",
     "routes:check": "node scripts/routes/check-stock-routes.mjs",
     "changes:check": "node scripts/ui/check-holding-changes.mjs",

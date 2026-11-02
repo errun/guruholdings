@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..', '..');
-const userAgent = process.env.SEC_USER_AGENT || 'GuruHoldingsTracker/0.1 edwin@example.com';
+const userAgent = process.env.SEC_USER_AGENT || 'GuruHoldingsTracker/0.2 https://guruholdings.net';
 
 let lastRequestAt = 0;
 
@@ -30,6 +30,7 @@ const secFetch = async (url) => {
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
       const response = await fetch(url, {
+        signal: AbortSignal.timeout(25000),
         headers: {
           'User-Agent': userAgent,
           'Accept-Encoding': 'gzip, deflate',
@@ -295,12 +296,15 @@ const verifySecurityNormalization = (snapshot, securitiesConfig, normalizedManag
     for (const [quarter, holdings] of Object.entries(manager.holdingsByQuarter || {})) {
       const alphabetRows = holdings.filter((holding) => alphabetCusips.has(holding.cusip));
       for (const holding of alphabetRows) {
-        if (holding.canonicalCompanyId !== 'alphabet' || holding.companyId !== 'alphabet') {
+        const expectedCompanyId = ['PUT', 'CALL'].includes(holding.positionType) ? `alphabet:${holding.positionType}` : 'alphabet';
+        if (holding.canonicalCompanyId !== 'alphabet' || holding.companyId !== expectedCompanyId) {
           failures.push(`alphabet_raw_holding_not_normalized:${manager.id}:${quarter}:${holding.cusip}`);
         }
       }
 
-      const groupedRawCusips = unique(alphabetRows.map((holding) => holding.cusip)).sort();
+      // New share classes may not be in the exact-CUSIP configuration. Check
+      // the complete resolved group, retaining A/C mapping and raw sum checks.
+      const groupedRawCusips = unique(holdings.filter((holding) => holding.companyId === 'alphabet').map((holding) => holding.cusip)).sort();
       if (groupedRawCusips.length > 0) {
         const companyHolding = manager.companyHoldingsByQuarter?.[quarter]?.find((holding) => holding.companyId === 'alphabet');
         if (!companyHolding) {

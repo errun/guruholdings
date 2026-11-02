@@ -2,7 +2,7 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes, timingSafeEq
 import { CodeChallengeMethod, OAuth2Client } from 'google-auth-library';
 import { get, put } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
-import { RESEARCH_PERIODS, researchReportRequest, researchRealtimeRequest } from './research-report';
+import { RESEARCH_PERIODS, researchReportRequest, researchRealtimeRequest, releaseFollowupRequests } from './research-report';
 
 export const SCOPES = ['https://www.googleapis.com/auth/analytics.readonly', 'https://www.googleapis.com/auth/webmasters.readonly'];
 export const PROPERTY = '542593473';
@@ -21,6 +21,7 @@ type Tokens = { accessToken: string; refreshToken: string; scope: string };
 type Row = { dimensionValues?: { value: string }[]; metricValues?: { value: string }[] };
 type GaReport = { rows?: Row[]; rowCount?: number; metadata?: Record<string, unknown>; [key: string]: unknown };
 export type CloudReport = { generatedAt: string; ga4: GaReport[]; gsc: Record<string, unknown>[]; warnings: string[]; evidence: Evidence[];
+  followup?: { status: 'available' | 'unavailable'; engagement?: GaReport; events?: GaReport };
   behavior?: { status: 'available' | 'unavailable'; periods: typeof RESEARCH_PERIODS; reports: GaReport[]; realtime?: GaReport } };
 type Evidence = { source: string; httpStatus: number; elapsedMs: number };
 export interface Dependencies {
@@ -242,7 +243,19 @@ export function productionDependencies(config: Config): Dependencies {
         behavior.status = 'unavailable'; behavior.reports = [];
         warnings.push('功能使用事件报表暂不可用；基础流量与搜索采集仍保留，不能将缺失事件解释为零使用。');
       }
-      return { generatedAt: new Date().toISOString(), period: ranges, ga4, gsc, behavior, warnings, evidence } as CloudReport;
+      const followup: NonNullable<CloudReport['followup']> = { status: 'unavailable' };
+      try {
+        const queries = releaseFollowupRequests();
+        const engagement = await request<GaReport>('ga4_release_engagement', GA_URL, queries.engagement);
+        const events = await request<GaReport>('ga4_release_events', GA_URL, queries.events);
+        Object.assign(followup, { status: 'available', engagement, events });
+        if ([engagement, events].some(r => (r.rowCount || 0) > 500 || r.metadata?.subjectToThresholding || r.metadata?.dataLossFromOtherRow)) {
+          warnings.push('发布跟踪报告存在截断、隐私阈值或汇总限制，比较时需保留该限制。');
+        }
+      } catch {
+        warnings.push('发布效果的逐日跟踪暂不可用，不影响原有统计；不能把缺失解释为零。');
+      }
+      return { generatedAt: new Date().toISOString(), period: ranges, ga4, gsc, behavior, followup, warnings, evidence } as CloudReport;
     },
   };
 }

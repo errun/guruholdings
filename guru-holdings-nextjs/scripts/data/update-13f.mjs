@@ -14,7 +14,7 @@ const normalizedDir = path.join(generatedDir, 'normalized');
 const snapshotsDir = path.join(generatedDir, 'snapshots');
 const reportsDir = path.join(generatedDir, 'reports');
 
-const userAgent = process.env.SEC_USER_AGENT || 'GuruHoldingsTracker/0.1 edwin@example.com';
+const userAgent = process.env.SEC_USER_AGENT || 'GuruHoldingsTracker/0.2 https://guruholdings.net';
 const requestHeaders = {
   'User-Agent': userAgent,
   'Accept-Encoding': 'gzip, deflate',
@@ -57,6 +57,7 @@ const secFetch = async (url, options = {}) => {
     try {
       const response = await fetch(url, {
         ...options,
+        signal: AbortSignal.timeout(25000),
         headers: {
           ...requestHeaders,
           ...(options.headers || {}),
