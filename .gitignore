@@ -14,6 +14,9 @@ tsconfig.tsbuildinfo
 dist
 dist-ssr
 *.local
+client_secret*.json
+oauth-client.json
+.seo-private/
 
 # Generated 13F debugging artifacts. The site commits only the slim public
 # snapshot/report; raw SEC XML and normalized full detail are regenerated in CI.
