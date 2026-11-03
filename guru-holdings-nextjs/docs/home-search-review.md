@@ -7,3 +7,5 @@
 沿用已有search_results、search_no_results、search_result_select、research_navigation事件。快捷入口仅发送固定类别home_entry及公开目标类型，不发送查询原文、用户标识或伪造参与时长。预览与本机不初始化正式Google统计；浏览器测试使用本地捕获器验证事件，不代表已验证Google生产接收。
 
 本批只交付审核分支、测试和预览，不合并或生产发布。外部市值请求等待与首屏响应性能仍单独跟踪。没有新增依赖、费用或Google权限。
+
+恢复错误定位：旧预览的React现场记录显示main第一次接管时游标在MAIN，异步内容到达后的同一容器重放时游标已在内部DIV，且服务端DOM仍是有效的HEADER/MAIN/FOOTER。与React问题 https://github.com/react/react/issues/37584 的HostComponent重放机制一致。页面异步内容和无UI研究观察器分别增加显式Suspense边界，使内容延迟在边界内处理。未修改React依赖、未隐藏恢复报错；修复必须通过旧版失败对照、冷加载/语言/视口重复及完整交互验收。
