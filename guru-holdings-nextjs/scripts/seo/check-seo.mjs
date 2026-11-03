@@ -120,6 +120,15 @@ try {
       if (/{{\s*\w+\s*}}/.test(html)) errors.push(`${localized}: unresolved translation placeholder`);
       if (/\uFFFD|Ã.|Â.|â(?:€|™|€œ|€\u009d)|涓|鎸|鍙|鏁版嵁/.test(html)) errors.push(`${localized}: possible mojibake`);
       if (pathname === '/' && !$('body').text().includes(config.marker)) errors.push(`${localized}: localized home marker missing from initial HTML`);
+      if (pathname === '/') {
+        const managerLinks = $('#tracked-managers a');
+        for (const manager of snapshot.managers) {
+          const href = localize(locale, '/live-13f/' + manager.id);
+          const entry = managerLinks.filter((_, element) => $(element).attr('href') === href);
+          if (entry.length !== 1) errors.push(`${localized}: manager ${manager.id} must remain discoverable once in initial HTML`);
+          if (!entry.text().includes(manager.latestQuarter.slice(0, 4))) errors.push(`${localized}: manager ${manager.id} must retain its own filing year`);
+        }
+      }
 
       for (const targetLocale of Object.keys(locales)) {
         const expected = canonical(targetLocale, pathname);
