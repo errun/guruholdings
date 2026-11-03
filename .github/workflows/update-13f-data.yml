@@ -75,6 +75,9 @@ jobs:
       - name: Check translations
         run: npm run i18n:check
 
+      - name: Check search identities and source content
+        run: npm run seo:content:test
+
       - name: Check types
         run: npm run typecheck
 

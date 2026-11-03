@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { PageBreadcrumbs } from '@/components/layout/PageBreadcrumbs';
 import type { ReactNode } from 'react';
 import {
   ArrowDownRight,
@@ -114,6 +115,7 @@ export function Live13FPage({
     <div className="min-h-screen bg-background">
       <section className="border-b border-stone-200 bg-white">
         <div className="container py-6 lg:py-7">
+          <PageBreadcrumbs locale={locale} current={translate(locale, 'nav.data')} path="/live-13f" />
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.72fr)] lg:items-end">
             <div className="max-w-3xl">
               <div className="flex flex-wrap items-center gap-2">

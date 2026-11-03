@@ -7,6 +7,7 @@ import { stockPath } from '@/lib/stock-routes';
 const canonicalPaths = [
   '/',
   '/live-13f',
+  '/methodology',
   ...snapshot.managers.map((manager) => `/live-13f/${encodeURIComponent(manager.id)}`),
   ...snapshot.stocks.map((stock) => stockPath(stock.companyId)),
 ];
@@ -17,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return canonicalPaths.flatMap((path) =>
     locales.map((locale) => ({
       url: absoluteUrl(localizedPath(locale, path)),
-      lastModified,
+      ...(path === '/methodology' ? {} : { lastModified }),
       changeFrequency: path === '/' ? 'weekly' as const : 'monthly' as const,
       priority: path === '/' ? 1 : path === '/live-13f' ? 0.9 : 0.7,
       alternates: {

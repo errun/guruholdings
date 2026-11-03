@@ -18,6 +18,7 @@ const hreflang = { en: 'en', zh: 'zh-Hans', ja: 'ja', ko: 'ko' };
 const representativePaths = [
   '/',
   '/live-13f',
+  '/methodology',
   '/live-13f/berkshire',
   '/live-13f/himalaya',
   '/stocks/alphabet',
@@ -101,6 +102,17 @@ try {
       if ($('html').attr('lang') !== config.lang) errors.push(`${localized}: incorrect html lang`);
       if (!title) errors.push(`${localized}: missing title`);
       if (!description) errors.push(`${localized}: missing meta description`);
+      if (!$('a[href="'+localize(locale, '/methodology')+'"]').length) errors.push(`${localized}: methodology is not discoverable`);
+      if (pathname !== '/') {
+        const raw=$('script[type="application/ld+json"]').first().text();
+        try {
+          const data=JSON.parse(raw);
+          if (data['@type'] !== 'BreadcrumbList' || data.itemListElement.at(-1)?.item !== canonical(locale, pathname)) {
+            errors.push(`${localized}: breadcrumb does not match visible canonical page`);
+          }
+          if (!$('nav[aria-label] [aria-current="page"]').length) errors.push(`${localized}: breadcrumb has no visible current item`);
+        } catch { errors.push(`${localized}: breadcrumb JSON-LD is missing or invalid`); }
+      }
       if (localeTitles.has(title)) errors.push(`${localized}: duplicate title within ${locale}`);
       localeTitles.add(title);
       if (canonicalHref !== canonical(locale, pathname)) errors.push(`${localized}: incorrect canonical ${canonicalHref}`);
@@ -209,7 +221,7 @@ try {
   const sitemapText = await sitemapResponse.text();
   const sitemap = load(sitemapText, { xmlMode: true });
   const locations = sitemap('url > loc').map((_, element) => sitemap(element).text()).get();
-  const expectedCount = (2 + snapshot.managers.length + snapshot.stocks.length) * Object.keys(locales).length;
+  const expectedCount = (3 + snapshot.managers.length + snapshot.stocks.length) * Object.keys(locales).length;
   if (locations.length !== expectedCount) errors.push(`sitemap.xml: expected ${expectedCount} URLs, received ${locations.length}`);
   if (new Set(locations).size !== locations.length) errors.push('sitemap.xml: duplicate URLs found');
   if (locations.some((url) => !url.startsWith(siteUrl))) errors.push('sitemap.xml: non-canonical domain found');

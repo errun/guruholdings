@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { PageBreadcrumbs } from '@/components/layout/PageBreadcrumbs';
+import { securitySeoName } from '@/lib/seo-identity';
 import { notFound } from 'next/navigation';
 import {
   Activity,
@@ -128,6 +130,7 @@ export async function StockPage({ companyId, locale }: { companyId: string; loca
     <div className="min-h-screen bg-background">
       <section className="border-b border-stone-200 bg-white">
         <div className="container py-6">
+          <PageBreadcrumbs locale={locale} current={securitySeoName(stock)} path={stockPath(stock.companyId)} inSignals />
           <Link href={localizedPath(locale, '/live-13f')} className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
             <ArrowLeft className="h-4 w-4" />
             {translate(locale, 'common.back13f')}
