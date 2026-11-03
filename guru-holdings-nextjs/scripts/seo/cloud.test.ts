@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { NextRequest } from 'next/server';
 import { createHandlers, readConfig, productionDependencies, SCOPES, seal, unseal, periodRanges, realtimeDiagnostic, type Dependencies } from '../../lib/seo/cloud';
+import { collectTrafficReports, trafficReportRequests } from '../../lib/seo/traffic-report';
 
 const config = readConfig({ SEO_GOOGLE_CLIENT_ID: 'fixture.apps.googleusercontent.com', SEO_GOOGLE_CLIENT_SECRET: 'fixture-not-real',
   SEO_TOKEN_KEY: randomBytes(32).toString('base64'), SEO_CONNECT_SECRET: 'c'.repeat(40), SEO_JOB_SECRET: 'j'.repeat(40) });
@@ -133,6 +134,55 @@ test('AES envelopes cannot be moved between state, credentials and reports', () 
   const encrypted = seal({ secret: 'fixture' }, config.key, 'google-grant');
   assert.throws(() => unseal(encrypted, config.key, 'oauth-state'));
   assert.throws(() => unseal(encrypted, randomBytes(32), 'google-grant'));
+});
+
+test('traffic diagnostics are authenticated and cannot overwrite the daily report', async () => {
+  const f = fixture(); const p = await pending(f);
+  await f.handlers.callback(callback(p.cookie, p.state));
+  f.store.set('seo/reports/2026-11-02.enc', 'original-daily');
+  let flags: unknown[] = [];
+  f.deps.collect = async (_grant, realtime, traffic) => {
+    flags = [realtime, traffic];
+    return { generatedAt: '2026-11-02T12:00:00Z', ga4: [], gsc: [], warnings: [], evidence: [] };
+  };
+  const url = `${origin}/api/seo/daily?view=traffic`;
+  assert.equal((await f.handlers.daily(new NextRequest(url, { method: 'POST' }))).status, 401);
+  assert.deepEqual(flags, []);
+  const response = await f.handlers.daily(new NextRequest(url, { method: 'POST', headers: { Authorization: `Bearer ${config.jobSecret}` } }));
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+  assert.deepEqual(flags, [false, true]);
+  assert.equal(f.store.get('seo/reports/2026-11-02.enc'), 'original-daily');
+  assert.equal(f.calls.filter(call => call === 'write').length, 1);
+});
+
+test('traffic queries use complete days, production hosts and test exclusions, without identifying dimensions', () => {
+  const queries = trafficReportRequests();
+  assert.equal(Object.keys(queries).length, 7);
+  for (const query of Object.values(queries)) {
+    assert.deepEqual(query.dateRanges, [{ startDate: '28daysAgo', endDate: 'yesterday' }]);
+    const text = JSON.stringify(query);
+    assert.ok(text.includes('hostName') && text.includes('codex_') && text.includes('notExpression'));
+    assert.ok(!/userId|clientId|pageLocation|QueryString|customEvent:|searchTerm/.test(text));
+    assert.ok(query.limit <= 200);
+  }
+  assert.ok(queries.landing.dimensions.some(d => d.name === 'landingPage'));
+});
+
+test('one upstream failure preserves independent diagnostics and cannot expose SDK credentials', async () => {
+  const result = await collectTrafficReports(async source => {
+    if (source.endsWith('_geography')) throw { config: { headers: { Authorization: 'fixture-private' } } };
+    return { rowCount: source.endsWith('_landing') ? 201 : 1, rows: [],
+      metadata: source.endsWith('_events') ? { subjectToThresholding: true } : {} };
+  });
+  assert.equal(result.status, 'partial');
+  assert.deepEqual(result.unavailable, ['geography']);
+  assert.equal(Object.keys(result.reports).length, 6);
+  assert.deepEqual(new Set(result.limited), new Set(['landing', 'events']));
+  assert.ok(!JSON.stringify(result).includes('fixture-private'));
+  const missing = await collectTrafficReports(async () => { throw new Error('private'); });
+  assert.equal(missing.status, 'unavailable');
+  assert.equal(Object.keys(missing.reports).length, 0);
 });
 
 test('Google official SDK requests offline access, PKCE and exactly two readonly scopes', () => {

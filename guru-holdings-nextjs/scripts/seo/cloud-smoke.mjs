@@ -51,6 +51,8 @@ try {
   assert.ok(start.headers.get('set-cookie').includes('SameSite=lax'));
   await check('/api/seo/google/callback?code=fixture&state=forged', {}, 400);
   await check('/api/seo/daily', { method: 'POST' }, 401);
+  await check('/api/seo/daily?view=traffic', { method: 'POST' }, 401);
+  await check('/api/seo/daily?view=traffic', { method: 'POST', headers: { Authorization: 'Bearer incorrect' } }, 401);
   console.log(JSON.stringify({ fixtureOnly: true, results, googleConsentOrStorageTested: false }, null, 2));
 } finally {
   server.kill();
