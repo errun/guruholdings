@@ -144,17 +144,18 @@ export function ExplorerSearch({
   }, [searchKey, isFiltering]);
 
   return (
-    <Card data-analytics-section="search" data-testid={home ? 'home-search' : undefined} onChangeCapture={() => { interacted.current = true; }} className="overflow-hidden border-stone-200 bg-white shadow-sm">
+    <Card data-analytics-section="search" data-testid={home ? 'home-search' : undefined} onChangeCapture={() => { interacted.current = true; }} className={home ? 'overflow-hidden border-slate-900 bg-slate-950 text-slate-50 shadow-sm' : 'overflow-hidden border-stone-200 bg-white shadow-sm'}>
       <CardHeader className={compact ? 'gap-4 p-4 sm:p-5' : 'gap-3'}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            {home ? <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+            {home && <p className="mb-3 text-xs font-semibold tracking-widest text-cyan-200">{translate(locale, 'home.search.eyebrow')}</p>}
+            {home ? <h1 className="max-w-3xl text-2xl font-semibold tracking-tight text-white sm:text-4xl">
               {translate(locale, 'home.search.title')}
             </h1> : <CardTitle className="flex items-center gap-2 text-xl">
               <Search className="h-5 w-5 text-primary" />
               {translate(locale, 'search.title')}
             </CardTitle>}
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            <p className={home ? 'mt-3 text-sm leading-6 text-slate-300' : 'mt-1 text-sm leading-6 text-muted-foreground'}>
               {translate(locale, home ? 'home.search.subtitle' : 'search.subtitle', {
                 stocks: formatNumber(stockTotal ?? stocks.length),
                 managers: formatNumber(managerTotal ?? managers.length),
@@ -165,6 +166,7 @@ export function ExplorerSearch({
             <Button
               variant="outline"
               size="sm"
+              className={home ? 'border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white' : undefined}
               onClick={() => {
                 setQuery('');
                 setManagerId('all');
@@ -195,7 +197,7 @@ export function ExplorerSearch({
               data-testid="explorer-search-input"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className={home ? 'h-12 pl-10 text-base' : 'h-11 pl-9'}
+              className={home ? 'h-12 border-white bg-white pl-10 text-base text-slate-950 placeholder:text-slate-500 sm:h-14' : 'h-11 pl-9'}
               placeholder={translate(locale, home ? 'home.search.placeholder' : 'search.placeholder')}
               aria-busy={isFiltering}
             />
@@ -205,23 +207,23 @@ export function ExplorerSearch({
           </div>
           {home && <nav aria-label={translate(locale, 'home.search.shortcuts')} className="grid grid-cols-3 gap-2">
             {([
-              { id: 'shared_increase', href: '/live-13f?view=shared-increase#consensus-results', label: 'home.sharedIncrease', Icon: ArrowUpRight, tone: 'text-emerald-700' },
-              { id: 'shared_decrease', href: '/live-13f?view=shared-decrease#consensus-results', label: 'home.sharedDecrease', Icon: ArrowDownRight, tone: 'text-red-700' },
-              { id: 'managers', href: '/#tracked-managers', label: 'home.search.managers', Icon: Building2, tone: 'text-primary' },
+              { id: 'shared_increase', href: '/live-13f?view=shared-increase#consensus-results', label: 'home.sharedIncrease', Icon: ArrowUpRight, tone: 'text-emerald-300' },
+              { id: 'shared_decrease', href: '/live-13f?view=shared-decrease#consensus-results', label: 'home.sharedDecrease', Icon: ArrowDownRight, tone: 'text-rose-300' },
+              { id: 'managers', href: '/#tracked-managers', label: 'home.search.managers', Icon: Building2, tone: 'text-cyan-200' },
             ] as const).map(({ id, href, label, Icon, tone }) => <Link key={id}
               href={localizedPath(locale, href)}
               onClick={() => trackResearch('research_navigation', { section: 'home_entry', target_type: id === 'managers' ? 'manager_list' : 'signals', target_id: id })}
-              className="flex min-h-12 min-w-0 items-center justify-center gap-1.5 rounded-md border border-stone-200 bg-stone-50 px-2 py-2 text-center text-xs font-medium text-slate-800 transition-colors hover:border-primary/40 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:text-sm">
+              className="flex min-h-12 min-w-0 items-center justify-center gap-1.5 rounded-md border border-white/20 bg-white/5 px-2 py-2 text-center text-xs font-medium text-slate-100 transition-colors hover:border-white/40 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 sm:text-sm">
               <Icon className={`h-4 w-4 shrink-0 ${tone}`} aria-hidden="true" />
               <span>{translate(locale, label)}</span>
             </Link>)}
           </nav>}
           <details open={home ? undefined : true}>
-            <summary className={home ? 'w-fit cursor-pointer py-2 text-sm font-medium text-slate-600 marker:text-primary' : 'hidden'}>
+            <summary className={home ? 'w-fit cursor-pointer py-2 text-sm font-medium text-slate-300 marker:text-cyan-200' : 'hidden'}>
               {translate(locale, 'home.search.filters')}
-              {[managerId, changeType, theme, concentration].some(value => value !== 'all') && <span className="ml-2 rounded bg-stone-100 px-1.5 py-0.5 text-xs">{[managerId, changeType, theme, concentration].filter(value => value !== 'all').length}</span>}
+              {[managerId, changeType, theme, concentration].some(value => value !== 'all') && <span className="ml-2 rounded bg-stone-100 px-1.5 py-0.5 text-xs text-slate-700">{[managerId, changeType, theme, concentration].filter(value => value !== 'all').length}</span>}
             </summary>
-          <div className="grid min-w-0 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid min-w-0 gap-2 text-slate-900 sm:grid-cols-2 xl:grid-cols-4">
             <label className="sr-only" htmlFor="explorer-manager">{translate(locale, 'search.manager')}</label>
             <select
               id="explorer-manager"
@@ -280,8 +282,8 @@ export function ExplorerSearch({
         </div>
 
         {(!home || hasFilters) && <>
-        {home && <p role="status" className="text-sm text-muted-foreground">{translate(locale, 'home.search.resultsHint')}</p>}
-        <div className={compact ? 'grid gap-4 lg:grid-cols-2' : 'grid gap-4 xl:grid-cols-3'}>
+        {home && <p role="status" className="text-sm text-slate-300">{translate(locale, 'home.search.resultsHint')}</p>}
+        <div className={compact ? 'grid gap-4 text-slate-950 lg:grid-cols-2' : 'grid gap-4 text-slate-950 xl:grid-cols-3'}>
           <section data-testid="stock-results" className="min-w-0 rounded-lg border border-stone-200 bg-stone-50 p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-950">
