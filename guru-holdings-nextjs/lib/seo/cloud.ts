@@ -32,7 +32,7 @@ export interface Dependencies {
   verifyAccess(accessToken: string): Promise<void>;
   read(path: string): Promise<string | null>;
   write(path: string, value: string): Promise<void>;
-  collect(grant: Grant, realtime?: boolean, traffic?: boolean): Promise<CloudReport>;
+  collect(grant: Grant, realtime?: boolean, traffic?: boolean | 'remaining'): Promise<CloudReport>;
 }
 
 export function readConfig(env: Record<string, string | undefined> = process.env): Config {
@@ -126,14 +126,14 @@ export function createHandlers(config: Config, deps: Dependencies) {
     async daily(request: NextRequest) {
       if (!equal(request.headers.get('authorization') || '', `Bearer ${config.jobSecret}`)) return json({ error: 'unauthorized' }, 401);
       const view = new URL(request.url).searchParams.get('view');
-      if (view && view !== 'realtime' && view !== 'traffic') return json({ error: 'invalid_report_view' }, 400);
+      if (view && !['realtime', 'traffic', 'traffic_remaining'].includes(view)) return json({ error: 'invalid_report_view' }, 400);
       try {
         const encrypted = await deps.read(TOKEN_PATH);
         if (!encrypted) return json({ error: 'google_not_connected' }, 409);
         const grant = unseal<Grant>(encrypted, config.key, 'google-grant');
         if (!scopesValid(grant.scope)) return json({ error: 'readonly_grant_required' }, 409);
-        const report = await deps.collect(grant, view === 'realtime', view === 'traffic');
-        if (view === 'realtime' || view === 'traffic') return json(report);
+        const report = await deps.collect(grant, view === 'realtime', view === 'traffic_remaining' ? 'remaining' : view === 'traffic');
+        if (view === 'realtime' || view === 'traffic' || view === 'traffic_remaining') return json(report);
         await deps.write(`seo/reports/${report.generatedAt.slice(0, 10)}.enc`, seal(report, config.key, 'seo-report'));
         return json(report);
       } catch (error) {
@@ -210,10 +210,11 @@ export function productionDependencies(config: Config): Dependencies {
         return response.data;
       };
       if (traffic) {
-        const diagnostics = await collectTrafficReports((source, data) => request<GaReport>(source, GA_URL, data));
+        const diagnostics = await collectTrafficReports((source, data) => request<GaReport>(source, GA_URL, data), traffic === 'remaining' ? 'remaining' : 'all');
         return { generatedAt: new Date().toISOString(), ga4: [], gsc: [], evidence, traffic: diagnostics,
           warnings: ['来源、地区和事件均为聚合样本，不能据此识别个人或确定机器人身份。',
             '仅正式主机且排除codex_测试来源，统计截止GA4资源时区昨天；各分组不可跨表相加。',
+            ...(traffic === 'remaining' ? ['仅排除Direct+Singapore+desktop这一组合；剩余访问不等于已验证真人。'] : []),
             ...(diagnostics.limited.length ? ['部分诊断存在截断、隐私阈值或抽样限制。'] : []),
             ...(diagnostics.unavailable.length ? ['部分诊断不可用，不得将缺失解释为零。'] : [])] };
       }
