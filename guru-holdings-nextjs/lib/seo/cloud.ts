@@ -3,6 +3,7 @@ import { CodeChallengeMethod, OAuth2Client } from 'google-auth-library';
 import { get, put } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
 import { RESEARCH_PERIODS, researchReportRequest, researchRealtimeRequest, releaseFollowupRequests } from './research-report';
+import { collectTrafficReports } from './traffic-report';
 
 export const SCOPES = ['https://www.googleapis.com/auth/analytics.readonly', 'https://www.googleapis.com/auth/webmasters.readonly'];
 export const PROPERTY = '542593473';
@@ -21,6 +22,7 @@ type Tokens = { accessToken: string; refreshToken: string; scope: string };
 type Row = { dimensionValues?: { value: string }[]; metricValues?: { value: string }[] };
 type GaReport = { rows?: Row[]; rowCount?: number; metadata?: Record<string, unknown>; [key: string]: unknown };
 export type CloudReport = { generatedAt: string; ga4: GaReport[]; gsc: Record<string, unknown>[]; warnings: string[]; evidence: Evidence[];
+  traffic?: Awaited<ReturnType<typeof collectTrafficReports>>;
   followup?: { status: 'available' | 'unavailable'; engagement?: GaReport; events?: GaReport };
   behavior?: { status: 'available' | 'unavailable'; periods: typeof RESEARCH_PERIODS; reports: GaReport[]; realtime?: GaReport } };
 type Evidence = { source: string; httpStatus: number; elapsedMs: number };
@@ -30,7 +32,7 @@ export interface Dependencies {
   verifyAccess(accessToken: string): Promise<void>;
   read(path: string): Promise<string | null>;
   write(path: string, value: string): Promise<void>;
-  collect(grant: Grant, realtime?: boolean): Promise<CloudReport>;
+  collect(grant: Grant, realtime?: boolean, traffic?: boolean): Promise<CloudReport>;
 }
 
 export function readConfig(env: Record<string, string | undefined> = process.env): Config {
@@ -124,14 +126,14 @@ export function createHandlers(config: Config, deps: Dependencies) {
     async daily(request: NextRequest) {
       if (!equal(request.headers.get('authorization') || '', `Bearer ${config.jobSecret}`)) return json({ error: 'unauthorized' }, 401);
       const view = new URL(request.url).searchParams.get('view');
-      if (view && view !== 'realtime') return json({ error: 'invalid_report_view' }, 400);
+      if (view && view !== 'realtime' && view !== 'traffic') return json({ error: 'invalid_report_view' }, 400);
       try {
         const encrypted = await deps.read(TOKEN_PATH);
         if (!encrypted) return json({ error: 'google_not_connected' }, 409);
         const grant = unseal<Grant>(encrypted, config.key, 'google-grant');
         if (!scopesValid(grant.scope)) return json({ error: 'readonly_grant_required' }, 409);
-        const report = await deps.collect(grant, view === 'realtime');
-        if (view === 'realtime') return json(report);
+        const report = await deps.collect(grant, view === 'realtime', view === 'traffic');
+        if (view === 'realtime' || view === 'traffic') return json(report);
         await deps.write(`seo/reports/${report.generatedAt.slice(0, 10)}.enc`, seal(report, config.key, 'seo-report'));
         return json(report);
       } catch (error) {
@@ -196,7 +198,7 @@ export function productionDependencies(config: Config): Dependencies {
     async write(path, value) {
       await put(path, value, { access: 'private', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/octet-stream' });
     },
-    async collect(grant, realtime = false) {
+    async collect(grant, realtime = false, traffic = false) {
       const oauth = client(config); oauth.setCredentials({ refresh_token: grant.refreshToken });
       const ga4: GaReport[] = []; const gsc: Record<string, unknown>[] = []; const evidence: Evidence[] = [];
       const ranges = periodRanges();
@@ -207,6 +209,14 @@ export function productionDependencies(config: Config): Dependencies {
         evidence.push({ source, httpStatus: response.status, elapsedMs: Date.now() - started });
         return response.data;
       };
+      if (traffic) {
+        const diagnostics = await collectTrafficReports((source, data) => request<GaReport>(source, GA_URL, data));
+        return { generatedAt: new Date().toISOString(), ga4: [], gsc: [], evidence, traffic: diagnostics,
+          warnings: ['来源、地区和事件均为聚合样本，不能据此识别个人或确定机器人身份。',
+            '仅正式主机且排除codex_测试来源，统计截止GA4资源时区昨天；各分组不可跨表相加。',
+            ...(diagnostics.limited.length ? ['部分诊断存在截断、隐私阈值或抽样限制。'] : []),
+            ...(diagnostics.unavailable.length ? ['部分诊断不可用，不得将缺失解释为零。'] : [])] };
+      }
       if (realtime) {
         let report: GaReport;
         try { report = await request<GaReport>('ga4_research_realtime', GA_URL.replace(':runReport', ':runRealtimeReport'), researchRealtimeRequest()); }
