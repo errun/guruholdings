@@ -185,6 +185,54 @@ test('one upstream failure preserves independent diagnostics and cannot expose S
   assert.equal(Object.keys(missing.reports).length, 0);
 });
 
+test('remaining reports exclude only the joint suspicious segment, preserving other Singapore, desktop and direct visits', () => {
+  type Expr = { andGroup?: { expressions: Expr[] }; notExpression?: Expr;
+    filter?: { fieldName: string; inListFilter?: { values: string[] }; stringFilter?: { matchType: string; value: string } } };
+  function matches(expression: Expr, row: Record<string, string>): boolean {
+    if (expression.andGroup) return expression.andGroup.expressions.every(e => matches(e, row));
+    if (expression.notExpression) return !matches(expression.notExpression, row);
+    const filter = expression.filter!; const value = row[filter.fieldName] || '';
+    if (filter.inListFilter) return filter.inListFilter.values.includes(value);
+    const expected = filter.stringFilter!.value.toLowerCase();
+    return filter.stringFilter!.matchType === 'EXACT' ? value.toLowerCase() === expected : value.toLowerCase().startsWith(expected);
+  }
+  const baseline = { hostName: 'guruholdings.net', sessionSource: '(direct)',
+    sessionSourceMedium: '(direct) / (none)', country: 'Singapore', deviceCategory: 'desktop' };
+  for (const query of Object.values(trafficReportRequests('remaining'))) {
+    const expression = query.dimensionFilter as Expr;
+    assert.equal(matches(expression, baseline), false);
+    assert.equal(matches(expression, { ...baseline, deviceCategory: 'mobile' }), true);
+    assert.equal(matches(expression, { ...baseline, sessionSource: 'google', sessionSourceMedium: 'google / organic' }), true);
+    assert.equal(matches(expression, { ...baseline, country: 'United States' }), true);
+    assert.equal(matches(expression, { ...baseline, country: 'United States', sessionSource: 'codex_validation' }), false);
+    assert.equal(matches(expression, { ...baseline, country: 'United States', hostName: 'preview.vercel.app' }), false);
+  }
+});
+
+test('remaining mode uses the same admin gate, does not persist results, and labels the cohort', async () => {
+  const f = fixture(); const p = await pending(f); await f.handlers.callback(callback(p.cookie, p.state));
+  let received: unknown;
+  f.deps.collect = async (_grant, realtime, traffic) => {
+    received = { realtime, traffic };
+    return { generatedAt: '2026-11-03T10:00:00Z', ga4: [], gsc: [], warnings: [], evidence: [] };
+  };
+  const url = `${origin}/api/seo/daily?view=traffic_remaining`;
+  assert.equal((await f.handlers.daily(new NextRequest(url, { method: 'POST' }))).status, 401);
+  assert.equal(received, undefined);
+  const result = await f.handlers.daily(new NextRequest(url, { method: 'POST', headers: { Authorization: `Bearer ${config.jobSecret}` } }));
+  assert.equal(result.status, 200); assert.equal(result.headers.get('cache-control'), 'no-store');
+  assert.deepEqual(received, { realtime: false, traffic: 'remaining' });
+  assert.equal(f.calls.filter(c => c === 'write').length, 1);
+  const collected = await collectTrafficReports(async () => ({ rows: [], rowCount: 0 }), 'remaining');
+  assert.equal(collected.cohort, 'remaining');
+  assert.equal(Object.keys(collected.reports).length, 8);
+  const queries = trafficReportRequests('remaining');
+  assert.ok(queries.geography.dimensions.some(d => d.name === 'newVsReturning'));
+  assert.ok(queries.events.dimensions.some(d => d.name === 'date'));
+  assert.ok(queries.pages!.dimensions.some(d => d.name === 'pagePath'));
+  assert.deepEqual(collected.excludedSegment, { sessionSourceMedium: '(direct) / (none)', country: 'Singapore', deviceCategory: 'desktop' });
+});
+
 test('Google official SDK requests offline access, PKCE and exactly two readonly scopes', () => {
   const url = new URL(productionDependencies(config).authorizationUrl('fixture-state', 'fixture-challenge'));
   assert.equal(url.origin, 'https://accounts.google.com');

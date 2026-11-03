@@ -53,6 +53,8 @@ try {
   await check('/api/seo/daily', { method: 'POST' }, 401);
   await check('/api/seo/daily?view=traffic', { method: 'POST' }, 401);
   await check('/api/seo/daily?view=traffic', { method: 'POST', headers: { Authorization: 'Bearer incorrect' } }, 401);
+  await check('/api/seo/daily?view=traffic_remaining', { method: 'POST' }, 401);
+  await check('/api/seo/daily?view=traffic_remaining', { method: 'POST', headers: { Authorization: 'Bearer incorrect' } }, 401);
   console.log(JSON.stringify({ fixtureOnly: true, results, googleConsentOrStorageTested: false }, null, 2));
 } finally {
   server.kill();
