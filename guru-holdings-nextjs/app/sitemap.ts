@@ -3,13 +3,14 @@ import snapshot from '@/data-generated/snapshots/latest.json';
 import { absoluteUrl, languageAlternates } from '@/lib/i18n/metadata';
 import { localizedPath, locales } from '@/lib/i18n/site';
 import { stockPath } from '@/lib/stock-routes';
+import { stockReportingPeriod } from '@/lib/seo-identity';
 
 const canonicalPaths = [
   '/',
   '/live-13f',
   '/methodology',
   ...snapshot.managers.map((manager) => `/live-13f/${encodeURIComponent(manager.id)}`),
-  ...snapshot.stocks.map((stock) => stockPath(stock.companyId)),
+  ...snapshot.stocks.filter(stock => stockReportingPeriod(stock)).map((stock) => stockPath(stock.companyId)),
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

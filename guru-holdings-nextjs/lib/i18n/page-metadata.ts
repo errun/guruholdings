@@ -54,13 +54,13 @@ export function getStockMetadata(locale: Locale, routeSegment: string) {
   const name = stock ? securitySeoName(stock, (nameCounts.get(stock.canonicalName) || 0) > 1) : routeSegment;
   const period = stock ? stockReportingPeriod(stock) : null;
   return buildMetadata(locale, {
-    titleKey: 'seo.stock.title',
-    descriptionKey: 'seo.stock.description',
+    titleKey: period ? 'seo.stock.title' : 'seo.stock.historical.title',
+    descriptionKey: period ? 'seo.stock.description' : 'seo.stock.historical.description',
     titleValues: { name, quarter: period ? formatQuarter(period.quarter, locale) : '' },
     descriptionValues: { name, quarter: period ? formatQuarter(period.quarter, locale) : '', holders: period?.holderCount || 0 },
     path: route ? stockPath(route.companyId) : `/stocks/${encodeURIComponent(routeSegment)}`,
     keywords: [...seoKeywordMap[locale].stock, name, ...(stock?.canonicalTicker ? [stock.canonicalTicker] : [])],
-    index: Boolean(stock && route?.isCanonical),
+    index: Boolean(stock && route?.isCanonical && period),
   });
 }
 

@@ -221,7 +221,8 @@ try {
   const sitemapText = await sitemapResponse.text();
   const sitemap = load(sitemapText, { xmlMode: true });
   const locations = sitemap('url > loc').map((_, element) => sitemap(element).text()).get();
-  const expectedCount = (3 + snapshot.managers.length + snapshot.stocks.length) * Object.keys(locales).length;
+  const indexableStocks = snapshot.stocks.filter(stock => stock.quarters.some(q => q.eventCount > 0));
+  const expectedCount = (3 + snapshot.managers.length + indexableStocks.length) * Object.keys(locales).length;
   if (locations.length !== expectedCount) errors.push(`sitemap.xml: expected ${expectedCount} URLs, received ${locations.length}`);
   if (new Set(locations).size !== locations.length) errors.push('sitemap.xml: duplicate URLs found');
   if (locations.some((url) => !url.startsWith(siteUrl))) errors.push('sitemap.xml: non-canonical domain found');
@@ -234,6 +235,18 @@ try {
   if (opaqueStockUrl) errors.push(`sitemap.xml: opaque stock URL found ${opaqueStockUrl}`);
   if (!locations.includes(`${siteUrl}/stocks/coca-cola`)) errors.push('sitemap.xml: readable Coca-Cola URL is missing');
   if (locations.includes(`${siteUrl}/stocks/191216100`)) errors.push('sitemap.xml: legacy Coca-Cola CUSIP URL is present');
+
+  const stockSlugs = JSON.parse(fs.readFileSync(path.join(root, 'data-source', 'stock-slugs.json'), 'utf8'));
+  const noDatedEventStocks = snapshot.stocks.filter(stock => stock.quarters.every(q => q.eventCount === 0));
+  for (const stock of noDatedEventStocks) {
+    if (locations.some(url => new URL(url).pathname.endsWith(`/stocks/${stockSlugs[stock.companyId]}`))) errors.push(`sitemap.xml: undated historical page indexed ${stock.companyId}`);
+  }
+  for (const stock of noDatedEventStocks.slice(0, 2)) {
+    const pathname = `/stocks/${stockSlugs[stock.companyId]}`;
+    const { $ } = await getHtml(pathname);
+    if (!/noindex/.test($('meta[name="robots"]').attr('content') || '')) errors.push(`${pathname}: empty history must be noindex`);
+    if (/Q[1-4] 20\d\d/.test($('title').text())) errors.push(`${pathname}: claims an unevidenced reporting quarter`);
+  }
 
   if (errors.length > 0) {
     console.error(`SEO check failed with ${errors.length} issue(s):`);

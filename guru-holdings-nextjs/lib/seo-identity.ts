@@ -7,7 +7,7 @@ export function securitySeoName(stock: SecurityIdentity, ambiguousName = false) 
 export function stockReportingPeriod(stock: { latestQuarter: string; quarters: { quarter: string; eventCount: number; holderCount: number }[] }) {
   // Retained historical securities may have no filing in the global latest quarter.
   const available = stock.quarters.filter(q => q.eventCount > 0).sort((a, b) => a.quarter.localeCompare(b.quarter));
-  return available.at(-1) || { quarter: stock.latestQuarter, holderCount: 0 };
+  return available.at(-1) || null;
 }
 export function breadcrumbData(items: { name: string; url: string }[]) {
   return { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items.map((item, index) => ({
