@@ -119,7 +119,8 @@ assert.ok(homeSource.includes('/live-13f?view=shared-increase#consensus-results'
 assert.ok(homeSource.includes('/live-13f?view=shared-decrease#consensus-results'), 'shared decrease link must use the shared-decrease view');
 assert.ok(!homeSource.includes('/live-13f?mode=increase'), 'home page must not mix legacy mode with consensus views');
 assert.ok(!homeSource.includes('/live-13f?mode=decrease'), 'home page must not mix legacy mode with consensus views');
-assert.ok(homeSource.includes('ManagerPortfolioMini'), 'home manager cards must show disclosed portfolio value change');
+// Homepage entries are compact navigation. Their complete localized routes and
+// evidenced filing years are checked in rendered HTML by seo:check.
 
 const liveSource = fs.readFileSync('components/site-pages/Live13FPage.tsx', 'utf8');
 const consensusPosition = liveSource.indexOf('id="consensus-results"');
