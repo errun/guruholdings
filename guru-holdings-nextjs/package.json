@@ -13,6 +13,7 @@
     "changes:check": "node scripts/ui/check-holding-changes.mjs",
     "i18n:check": "node scripts/i18n/check-i18n.mjs",
     "seo:check": "node scripts/seo/check-seo.mjs",
+    "seo:content:test": "node --import tsx --test scripts/seo/content.test.ts",
     "seo:cloud:test": "node --import tsx --test scripts/seo/cloud.test.ts",
     "analytics:test": "node --import tsx --test scripts/analytics/research.test.ts",
     "seo:cloud:smoke": "node scripts/seo/cloud-smoke.mjs",

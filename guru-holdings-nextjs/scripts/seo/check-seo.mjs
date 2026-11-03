@@ -18,6 +18,7 @@ const hreflang = { en: 'en', zh: 'zh-Hans', ja: 'ja', ko: 'ko' };
 const representativePaths = [
   '/',
   '/live-13f',
+  '/methodology',
   '/live-13f/berkshire',
   '/live-13f/himalaya',
   '/stocks/alphabet',
@@ -101,6 +102,17 @@ try {
       if ($('html').attr('lang') !== config.lang) errors.push(`${localized}: incorrect html lang`);
       if (!title) errors.push(`${localized}: missing title`);
       if (!description) errors.push(`${localized}: missing meta description`);
+      if (!$('a[href="'+localize(locale, '/methodology')+'"]').length) errors.push(`${localized}: methodology is not discoverable`);
+      if (pathname !== '/') {
+        const raw=$('script[type="application/ld+json"]').first().text();
+        try {
+          const data=JSON.parse(raw);
+          if (data['@type'] !== 'BreadcrumbList' || data.itemListElement.at(-1)?.item !== canonical(locale, pathname)) {
+            errors.push(`${localized}: breadcrumb does not match visible canonical page`);
+          }
+          if (!$('nav[aria-label] [aria-current="page"]').length) errors.push(`${localized}: breadcrumb has no visible current item`);
+        } catch { errors.push(`${localized}: breadcrumb JSON-LD is missing or invalid`); }
+      }
       if (localeTitles.has(title)) errors.push(`${localized}: duplicate title within ${locale}`);
       localeTitles.add(title);
       if (canonicalHref !== canonical(locale, pathname)) errors.push(`${localized}: incorrect canonical ${canonicalHref}`);
@@ -209,7 +221,8 @@ try {
   const sitemapText = await sitemapResponse.text();
   const sitemap = load(sitemapText, { xmlMode: true });
   const locations = sitemap('url > loc').map((_, element) => sitemap(element).text()).get();
-  const expectedCount = (2 + snapshot.managers.length + snapshot.stocks.length) * Object.keys(locales).length;
+  const indexableStocks = snapshot.stocks.filter(stock => stock.quarters.some(q => q.eventCount > 0));
+  const expectedCount = (3 + snapshot.managers.length + indexableStocks.length) * Object.keys(locales).length;
   if (locations.length !== expectedCount) errors.push(`sitemap.xml: expected ${expectedCount} URLs, received ${locations.length}`);
   if (new Set(locations).size !== locations.length) errors.push('sitemap.xml: duplicate URLs found');
   if (locations.some((url) => !url.startsWith(siteUrl))) errors.push('sitemap.xml: non-canonical domain found');
@@ -222,6 +235,18 @@ try {
   if (opaqueStockUrl) errors.push(`sitemap.xml: opaque stock URL found ${opaqueStockUrl}`);
   if (!locations.includes(`${siteUrl}/stocks/coca-cola`)) errors.push('sitemap.xml: readable Coca-Cola URL is missing');
   if (locations.includes(`${siteUrl}/stocks/191216100`)) errors.push('sitemap.xml: legacy Coca-Cola CUSIP URL is present');
+
+  const stockSlugs = JSON.parse(fs.readFileSync(path.join(root, 'data-source', 'stock-slugs.json'), 'utf8'));
+  const noDatedEventStocks = snapshot.stocks.filter(stock => stock.quarters.every(q => q.eventCount === 0));
+  for (const stock of noDatedEventStocks) {
+    if (locations.some(url => new URL(url).pathname.endsWith(`/stocks/${stockSlugs[stock.companyId]}`))) errors.push(`sitemap.xml: undated historical page indexed ${stock.companyId}`);
+  }
+  for (const stock of noDatedEventStocks.slice(0, 2)) {
+    const pathname = `/stocks/${stockSlugs[stock.companyId]}`;
+    const { $ } = await getHtml(pathname);
+    if (!/noindex/.test($('meta[name="robots"]').attr('content') || '')) errors.push(`${pathname}: empty history must be noindex`);
+    if (/Q[1-4] 20\d\d/.test($('title').text())) errors.push(`${pathname}: claims an unevidenced reporting quarter`);
+  }
 
   if (errors.length > 0) {
     console.error(`SEO check failed with ${errors.length} issue(s):`);

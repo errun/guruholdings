@@ -46,6 +46,9 @@ jobs:
       - name: Check research measurement boundaries
         run: npm run analytics:test
 
+      - name: Check search identities and source content
+        run: npm run seo:content:test
+
       - name: Check freshness evidence and holding changes
         run: |
           npm run data:test

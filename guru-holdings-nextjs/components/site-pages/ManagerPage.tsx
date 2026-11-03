@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { PageBreadcrumbs } from '@/components/layout/PageBreadcrumbs';
 import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import {
@@ -213,6 +214,7 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
     <div className="min-h-screen bg-background">
       <section className="border-b border-stone-200 bg-white">
         <div className="container py-8 lg:py-10">
+          <PageBreadcrumbs locale={locale} current={manager.displayName} path={`/live-13f/${manager.id}`} inSignals />
           <Link href={localizedPath(locale, '/live-13f')} className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
             <ArrowLeft className="h-4 w-4" />
             {translate(locale, 'common.back13f')}
