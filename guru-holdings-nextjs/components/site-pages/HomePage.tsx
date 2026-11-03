@@ -5,10 +5,9 @@ import {
   ArrowUpRight,
   Building2,
   LogIn,
-  Search,
 } from 'lucide-react';
 import snapshot from '@/data-generated/snapshots/latest.json';
-import { ExplorerSearchDisclosure } from '@/components/explorer/ExplorerSearchDisclosure';
+import { ExplorerSearch } from '@/components/explorer/ExplorerSearch';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { buildHoldingChangeModel } from '@/lib/holding-change.mjs';
@@ -208,6 +207,19 @@ export async function HomePage({ locale }: { locale: Locale }) {
   return (
     <div className="min-h-screen bg-background">
       <div className="container py-7 lg:py-9">
+        <section className="mb-8" aria-label={translate(locale, 'home.search.title')}>
+          <ExplorerSearch
+            stocks={explorerData.stocks}
+            managers={explorerData.managers}
+            consensus={explorerData.consensus}
+            themes={explorerData.themes}
+            stockTotal={explorerData.stockTotal}
+            managerTotal={explorerData.managerTotal}
+            locale={locale}
+            compact
+            home
+          />
+        </section>
         <section className="mb-10">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -290,7 +302,7 @@ export async function HomePage({ locale }: { locale: Locale }) {
           </div>
         </section>
 
-        <section className="mb-10">
+        <section id="tracked-managers" className="mb-10 scroll-mt-64 sm:scroll-mt-40">
           <div className="mb-4 flex items-center gap-3">
             <Building2 className="h-5 w-5 text-slate-700" />
             <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'home.popularManagers')}</h2>
@@ -323,21 +335,6 @@ export async function HomePage({ locale }: { locale: Locale }) {
           </div>
         </section>
 
-        <section className="border-t border-stone-200 pt-7">
-          <div className="mb-3 flex items-center gap-2">
-            <Search className="h-5 w-5 text-slate-700" />
-            <h2 className="text-xl font-semibold text-slate-950">{translate(locale, 'search.title')}</h2>
-          </div>
-          <ExplorerSearchDisclosure
-            stocks={explorerData.stocks}
-            managers={explorerData.managers}
-            consensus={explorerData.consensus}
-            themes={explorerData.themes}
-            stockTotal={explorerData.stockTotal}
-            managerTotal={explorerData.managerTotal}
-            locale={locale}
-          />
-        </section>
       </div>
     </div>
   );

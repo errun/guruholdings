@@ -26,6 +26,7 @@ async (page) => {
   });
   let response = await page.goto(base + '/');
   check(response.status() === 200, 'home HTTP 200');
+  await page.locator('a[data-analytics-signal]').first().scrollIntoViewIfNeeded();
   await until(() => count('signal_view') > 0, 'visible signal');
   check(count('search_results') === 0 && count('compare_start') === 0, 'passive view does not invent searches or comparisons');
   const initialViews = count('signal_view');
