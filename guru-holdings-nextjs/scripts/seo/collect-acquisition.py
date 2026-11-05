@@ -9,6 +9,7 @@ import urllib.error
 import urllib.request
 
 PERIODS = ('current7', 'previous7', 'current28', 'previous28')
+QUALITY_KEYS = ('timeZone', 'subjectToThresholding', 'dataLossFromOtherRow', 'samplingMetadatas')
 DEFINITION = {'metric': 'newUsers', 'channelDimension': 'firstUserDefaultChannelGroup',
               'channel': 'Organic Search', 'attribution': 'first_user', 'testExclusionDimension': 'firstUserSource'}
 
@@ -39,7 +40,8 @@ def summarize(report):
     for name in PERIODS:
         item = data.get('totals', {}).get(name, {})
         value = count(item.get('newUsers')) if item.get('state') == 'reported' else None
-        totals[name] = {'newUsers': value, 'state': item.get('state', 'unavailable'), 'limited': bool(item.get('limited'))}
+        state = 'invalid_metric' if item.get('state') == 'reported' and value is None else item.get('state', 'unavailable')
+        totals[name] = {'newUsers': value, 'state': state, 'limited': bool(item.get('limited'))}
     periods = {name: {key: data.get('periods', {}).get(name, {}).get(key)
                       for key in ('startDate', 'endDate')} for name in PERIODS}
     sections = {}
@@ -60,12 +62,14 @@ def summarize(report):
         metadata = item.get('metadata', {})
         sections[name] = {'returnedRows': len(item.get('rows', [])), 'availableRows': item.get('rowCount'),
                           'savedRows': len(rows), 'rows': rows,
-                          'metadata': {key: metadata[key] for key in ('timeZone', 'subjectToThresholding', 'dataLossFromOtherRow', 'samplingMetadatas') if key in metadata}}
+                          'metadata': {key: metadata[key] for key in QUALITY_KEYS if key in metadata}}
+    quality = {name: {key: item.get('metadata', {})[key] for key in QUALITY_KEYS if key in item.get('metadata', {})}
+               for name, item in data.get('reports', {}).items() if name in (*PERIODS, 'daily28', 'sources28')}
     return {'generatedAt': report.get('generatedAt'), 'status': data.get('status', 'unavailable'),
             'definition': DEFINITION, 'timeZone': data['timeZone'], 'periods': periods, 'totals': totals,
             'unavailable': [x for x in data.get('unavailable', []) if x in (*PERIODS, 'daily28', 'sources28')],
             'limited': [x for x in data.get('limited', []) if x in (*PERIODS, 'daily28', 'sources28')],
-            'apiStatuses': [x.get('httpStatus') for x in report.get('evidence', [])], 'sections': sections,
+            'apiStatuses': [x.get('httpStatus') for x in report.get('evidence', [])], 'quality': quality, 'sections': sections,
             'limits': ['First-user organic acquisition, not session attribution or event counts.',
                        'No report rows or unavailable totals remain null, not zero.',
                        'Period totals come directly from Google; never sum source or daily rows as their replacement.',
@@ -89,7 +93,12 @@ def self_test():
     assert value['totals']['current28']['newUsers'] == 2
     assert 'private@example.invalid' not in json.dumps(value) and 'fixture-private-value' not in json.dumps(value)
     assert count(True) is None and count('NaN') is None
-    print(json.dumps({'fixtureTestsPassed': 6, 'realGoogleQueried': False}))
+    fixture['acquisition']['reports']['current7'] = {'metadata': {'subjectToThresholding': True, 'private_sdk_error': 'fixture-private-value'}}
+    fixture['acquisition']['totals']['current7'] = {'newUsers': True, 'state': 'reported'}
+    invalid = summarize(fixture)
+    assert invalid['totals']['current7'] == {'newUsers': None, 'state': 'invalid_metric', 'limited': False}
+    assert invalid['quality']['current7'] == {'subjectToThresholding': True}
+    print(json.dumps({'fixtureTestsPassed': 8, 'realGoogleQueried': False}))
 
 
 def main():
