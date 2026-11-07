@@ -53,6 +53,7 @@ export function ResearchObserver() {
       if (!link || !root.contains(link)) return;
       const url = new URL(link.href, window.location.href);
       if (url.origin !== window.location.origin) return;
+      if (url.hash && url.pathname === window.location.pathname && url.search === window.location.search) return;
       const target = researchContext(url.pathname);
       if (!['stock', 'manager'].includes(target.page_type) || !target.page_entity) return;
       const section = link.closest<HTMLElement>('[data-analytics-section]')?.dataset.analyticsSection;

@@ -181,6 +181,13 @@ function HoldingsTable({ manager, locale }: { manager: Manager; locale: Locale }
   );
 }
 
+const managerSections = {
+  'portfolio-moves': 'manager.latestMoves.title',
+  'portfolio-trends': 'manager.trends',
+  'portfolio-operations': 'manager.operations',
+  'portfolio-holdings': 'manager.completeHoldings',
+} as const;
+
 export async function ManagerPage({ managerId, locale }: { managerId: string; locale: Locale }) {
   const manager = snapshot.managers.find((item) => item.id === managerId);
   if (!manager) notFound();
@@ -281,6 +288,18 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
           </Alert>
         )}
 
+        <nav aria-label={translate(locale, 'manager.sectionNavigation')} className="mb-8">
+          <ul className="flex flex-wrap gap-2">
+            {Object.entries(managerSections).map(([id, title]) => (
+              <li key={id}>
+                <a href={`#${id}`} className="inline-flex min-h-11 items-center rounded-md border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-primary hover:border-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                  {translate(locale, title)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
         <section className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {portfolioChange.status === 'available' && formattedPortfolioChange ? (
             <MetricCard
@@ -306,7 +325,7 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
 
         <section className="mb-10">
           <div className="mb-4">
-            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'manager.latestMoves.title')}</h2>
+            <h2 id="portfolio-moves" tabIndex={-1} className="scroll-mt-64 text-2xl sm:scroll-mt-40 font-semibold text-slate-950">{translate(locale, managerSections['portfolio-moves'])}</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
               {translate(locale, 'manager.latestMoves.description')}
             </p>
@@ -359,7 +378,7 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
         <section className="mb-10">
           <div className="mb-4 flex items-center gap-3">
             <FileText className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'manager.trends')}</h2>
+            <h2 id="portfolio-trends" tabIndex={-1} className="scroll-mt-64 text-2xl sm:scroll-mt-40 font-semibold text-slate-950">{translate(locale, managerSections['portfolio-trends'])}</h2>
           </div>
           <ManagerCharts manager={getManagerChartData(manager)} locale={locale} />
         </section>
@@ -402,7 +421,7 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
         <section className="mb-10">
           <div className="mb-4 flex items-center gap-3">
             <Table2 className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'manager.operations')}</h2>
+            <h2 id="portfolio-operations" tabIndex={-1} className="scroll-mt-64 text-2xl sm:scroll-mt-40 font-semibold text-slate-950">{translate(locale, managerSections['portfolio-operations'])}</h2>
           </div>
           <ManagerOperationsTable manager={getManagerOperationData(manager)} locale={locale} />
         </section>
@@ -410,7 +429,7 @@ export async function ManagerPage({ managerId, locale }: { managerId: string; lo
         <section className="mb-10">
           <div className="mb-4 flex items-center gap-3">
             <Table2 className="h-5 w-5 text-slate-700" />
-            <h2 className="text-2xl font-semibold text-slate-950">{translate(locale, 'manager.completeHoldings')}</h2>
+            <h2 id="portfolio-holdings" tabIndex={-1} className="scroll-mt-64 text-2xl sm:scroll-mt-40 font-semibold text-slate-950">{translate(locale, managerSections['portfolio-holdings'])}</h2>
           </div>
           <HoldingsTable manager={manager} locale={locale} />
         </section>
