@@ -2,15 +2,13 @@ import crypto from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createSecFetch } from './sec-fetch.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..', '..');
-const userAgent = process.env.SEC_USER_AGENT || 'GuruHoldingsTracker/0.2 https://guruholdings.net';
+const secFetch = createSecFetch();
 
-let lastRequestAt = 0;
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const sha256 = (value) => crypto.createHash('sha256').update(value).digest('hex');
 
 const normalizeCik = (cik) => String(cik).padStart(10, '0');
@@ -19,42 +17,6 @@ const compareQuarter = (a, b) => {
   const [ay, aq] = a.split('Q').map(Number);
   const [by, bq] = b.split('Q').map(Number);
   return ay === by ? aq - bq : ay - by;
-};
-
-const secFetch = async (url) => {
-  const elapsed = Date.now() - lastRequestAt;
-  if (elapsed < 160) await sleep(160 - elapsed);
-  lastRequestAt = Date.now();
-
-  let lastError;
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
-    try {
-      const response = await fetch(url, {
-        signal: AbortSignal.timeout(25000),
-        headers: {
-          'User-Agent': userAgent,
-          'Accept-Encoding': 'gzip, deflate',
-        },
-      });
-
-      if (response.status === 429 || response.status >= 500) {
-        lastError = new Error(`SEC source returned ${response.status}: ${url}`);
-        await sleep(500 * attempt * attempt);
-        continue;
-      }
-
-      if (!response.ok) {
-        throw new Error(`SEC source returned ${response.status}: ${url}`);
-      }
-
-      return response;
-    } catch (error) {
-      lastError = error;
-      await sleep(500 * attempt * attempt);
-    }
-  }
-
-  throw lastError;
 };
 
 const loadJson = async (relativePath) =>

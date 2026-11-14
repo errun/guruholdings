@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createSecFetch } from './sec-fetch.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,14 +15,7 @@ const normalizedDir = path.join(generatedDir, 'normalized');
 const snapshotsDir = path.join(generatedDir, 'snapshots');
 const reportsDir = path.join(generatedDir, 'reports');
 
-const userAgent = process.env.SEC_USER_AGENT || 'GuruHoldingsTracker/0.2 https://guruholdings.net';
-const requestHeaders = {
-  'User-Agent': userAgent,
-  'Accept-Encoding': 'gzip, deflate',
-};
-let lastRequestAt = 0;
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const secFetch = createSecFetch();
 
 const ensureDir = async (dir) => {
   await mkdir(dir, { recursive: true });
@@ -44,45 +38,6 @@ const writeJson = async (file, value) => {
 };
 
 const sha256 = (value) => crypto.createHash('sha256').update(value).digest('hex');
-
-const secFetch = async (url, options = {}) => {
-  const elapsed = Date.now() - lastRequestAt;
-  if (elapsed < 160) {
-    await sleep(160 - elapsed);
-  }
-  lastRequestAt = Date.now();
-
-  let lastError;
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: AbortSignal.timeout(25000),
-        headers: {
-          ...requestHeaders,
-          ...(options.headers || {}),
-        },
-      });
-
-      if (response.status === 429 || response.status >= 500) {
-        lastError = new Error(`SEC request failed ${response.status} for ${url}`);
-        await sleep(500 * attempt * attempt);
-        continue;
-      }
-
-      if (!response.ok) {
-        throw new Error(`SEC request failed ${response.status} for ${url}`);
-      }
-
-      return response;
-    } catch (error) {
-      lastError = error;
-      await sleep(500 * attempt * attempt);
-    }
-  }
-
-  throw lastError;
-};
 
 const toQuarter = (dateString) => {
   const date = new Date(`${dateString}T00:00:00Z`);
