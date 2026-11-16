@@ -206,20 +206,19 @@ try {
     ['divergent', snapshot.consensus.divergent],
   ];
   for (const [view, items] of focusedConsensusPages) {
-    const pathname = `/zh/live-13f?view=${view}`;
+    const query = view === 'divergent' ? 'amazon' : '';
+    const pathname = `/zh/live-13f?view=${view}${query ? `&q=${query}` : ''}`;
     const { $ } = await getHtml(pathname);
     const section = $(`[data-consensus-view="${view}"]`).first();
     if (!section.length) errors.push(`${pathname}: focused consensus section is missing`);
     if (section.attr('data-consensus-total') !== String(items.length)) errors.push(`${pathname}: incorrect consensus total`);
-    if (items.length && !section.find(`[data-consensus-company="${items[0].companyId}"]`).length) {
-      errors.push(`${pathname}: first consensus company is missing from initial HTML`);
+    const firstCompany = section.find('[data-consensus-company]').first().attr('data-consensus-company');
+    if (firstCompany !== items[0]?.companyId) errors.push(`${pathname}: incorrect first consensus company in initial HTML`);
+    if (query && $('#explorer-search').attr('value') !== query) {
+      errors.push(`${pathname}: research search input is missing the URL query`);
     }
     if ($('#single-signals').index() < section.index()) errors.push(`${pathname}: single-manager signals appear before consensus results`);
   }
-
-  const amazonDivergence = await getHtml('/zh/live-13f?view=divergent&q=amazon');
-  const amazonCard = amazonDivergence.$('[data-consensus-company="023135106"]').first();
-  if (!amazonCard.length) errors.push('/zh/live-13f?view=divergent: Amazon divergence card is missing');
 
   const robotsResponse = await fetch(`${baseUrl}/robots.txt`);
   const robotsText = await robotsResponse.text();

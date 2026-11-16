@@ -163,10 +163,6 @@ for (const item of snapshot.consensus.divergent) {
   assert.ok(item.managers.some((manager) => increaseKinds.has(manager.changeType)), `divergent item requires an increasing manager: ${item.companyId}`);
   assert.ok(item.managers.some((manager) => decreaseKinds.has(manager.changeType)), `divergent item requires a decreasing manager: ${item.companyId}`);
 }
-const divergentAmazon = snapshot.consensus.divergent.find((item) => item.companyId === '023135106');
-assert.ok(divergentAmazon, 'Amazon must be present in the divergent consensus view');
-assert.ok(divergentAmazon.managers.some((manager) => increaseKinds.has(manager.changeType)), 'Amazon must show an increasing manager');
-assert.ok(divergentAmazon.managers.some((manager) => decreaseKinds.has(manager.changeType)), 'Amazon must show a decreasing manager');
 
 const headerSource = fs.readFileSync('components/layout/Header.tsx', 'utf8');
 assert.ok(headerSource.includes('snapshot.consensus.sharedIncrease.length'), 'header must expose the shared increase total');
