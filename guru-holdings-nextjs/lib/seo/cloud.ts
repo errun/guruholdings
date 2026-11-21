@@ -4,6 +4,7 @@ import { get, put } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
 import { RESEARCH_PERIODS, researchReportRequest, researchRealtimeRequest, releaseFollowupRequests } from './research-report';
 import { collectTrafficReports } from './traffic-report';
+import { collectAcquisitionReports } from './acquisition-report';
 
 export const SCOPES = ['https://www.googleapis.com/auth/analytics.readonly', 'https://www.googleapis.com/auth/webmasters.readonly'];
 export const PROPERTY = '542593473';
@@ -23,6 +24,7 @@ type Row = { dimensionValues?: { value: string }[]; metricValues?: { value: stri
 type GaReport = { rows?: Row[]; rowCount?: number; metadata?: Record<string, unknown>; [key: string]: unknown };
 export type CloudReport = { generatedAt: string; ga4: GaReport[]; gsc: Record<string, unknown>[]; warnings: string[]; evidence: Evidence[];
   traffic?: Awaited<ReturnType<typeof collectTrafficReports>>;
+  acquisition?: Awaited<ReturnType<typeof collectAcquisitionReports>>;
   followup?: { status: 'available' | 'unavailable'; engagement?: GaReport; events?: GaReport };
   behavior?: { status: 'available' | 'unavailable'; periods: typeof RESEARCH_PERIODS; reports: GaReport[]; realtime?: GaReport } };
 type Evidence = { source: string; httpStatus: number; elapsedMs: number };
@@ -32,7 +34,7 @@ export interface Dependencies {
   verifyAccess(accessToken: string): Promise<void>;
   read(path: string): Promise<string | null>;
   write(path: string, value: string): Promise<void>;
-  collect(grant: Grant, realtime?: boolean, traffic?: boolean | 'remaining'): Promise<CloudReport>;
+  collect(grant: Grant, realtime?: boolean, traffic?: boolean | 'remaining', acquisition?: boolean): Promise<CloudReport>;
 }
 
 export function readConfig(env: Record<string, string | undefined> = process.env): Config {
@@ -126,14 +128,14 @@ export function createHandlers(config: Config, deps: Dependencies) {
     async daily(request: NextRequest) {
       if (!equal(request.headers.get('authorization') || '', `Bearer ${config.jobSecret}`)) return json({ error: 'unauthorized' }, 401);
       const view = new URL(request.url).searchParams.get('view');
-      if (view && !['realtime', 'traffic', 'traffic_remaining'].includes(view)) return json({ error: 'invalid_report_view' }, 400);
+      if (view && !['realtime', 'traffic', 'traffic_remaining', 'acquisition'].includes(view)) return json({ error: 'invalid_report_view' }, 400);
       try {
         const encrypted = await deps.read(TOKEN_PATH);
         if (!encrypted) return json({ error: 'google_not_connected' }, 409);
         const grant = unseal<Grant>(encrypted, config.key, 'google-grant');
         if (!scopesValid(grant.scope)) return json({ error: 'readonly_grant_required' }, 409);
-        const report = await deps.collect(grant, view === 'realtime', view === 'traffic_remaining' ? 'remaining' : view === 'traffic');
-        if (view === 'realtime' || view === 'traffic' || view === 'traffic_remaining') return json(report);
+        const report = await deps.collect(grant, view === 'realtime', view === 'traffic_remaining' ? 'remaining' : view === 'traffic', view === 'acquisition');
+        if (view) return json(report);
         await deps.write(`seo/reports/${report.generatedAt.slice(0, 10)}.enc`, seal(report, config.key, 'seo-report'));
         return json(report);
       } catch (error) {
@@ -198,7 +200,7 @@ export function productionDependencies(config: Config): Dependencies {
     async write(path, value) {
       await put(path, value, { access: 'private', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/octet-stream' });
     },
-    async collect(grant, realtime = false, traffic = false) {
+    async collect(grant, realtime = false, traffic = false, acquisition = false) {
       const oauth = client(config); oauth.setCredentials({ refresh_token: grant.refreshToken });
       const ga4: GaReport[] = []; const gsc: Record<string, unknown>[] = []; const evidence: Evidence[] = [];
       const ranges = periodRanges();
@@ -209,6 +211,17 @@ export function productionDependencies(config: Config): Dependencies {
         evidence.push({ source, httpStatus: response.status, elapsedMs: Date.now() - started });
         return response.data;
       };
+      if (acquisition) {
+        const result = await collectAcquisitionReports((source, data) => request<GaReport>(source, GA_URL, data));
+        return { generatedAt: new Date().toISOString(), ga4: [], gsc: [], evidence, acquisition: result,
+          warnings: ['新增用户按首次获客自然搜索渠道统计，不是自然搜索访问次数或first_visit事件计数。',
+            '日期在America/Los_Angeles按完整日一次解析；最近日仍可能修订，比较时跳过发布当天。',
+            '来源为前100行样本，来源或逐日分项不相加代替Google直接返回的周期总数。',
+            '此口径排除firstUserSource以codex_开头的测试来源，不代表其他流量均为真人。',
+            '未返回显式周期总数时保留null；空行或不可用查询不当作零。',
+            ...(result.limited.length ? ['部分查询存在截断、隐私阈值、抽样或资源时区差异，须保留限制。'] : []),
+            ...(result.unavailable.length ? ['部分获客查询不可用，不得将缺失解释为零新增用户。'] : [])] };
+      }
       if (traffic) {
         const diagnostics = await collectTrafficReports((source, data) => request<GaReport>(source, GA_URL, data), traffic === 'remaining' ? 'remaining' : 'all');
         return { generatedAt: new Date().toISOString(), ga4: [], gsc: [], evidence, traffic: diagnostics,
