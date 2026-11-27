@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { getDataFreshness } from '../../lib/update-cadence';
+import { createSecFetch } from './sec-fetch.mjs';
 
 const snapshot = { latestQuarter: '2026Q2', generatedAt: '2026-11-02T16:45:03Z', dataFingerprint: 'verified-content',
   managers: [
@@ -28,4 +29,50 @@ test('missing latest-quarter data does not invent a date or manager coverage', (
   assert.equal(result.reportDate, null);
   assert.equal(result.filingStart, null);
   assert.equal(result.currentManagerCount, 0);
+});
+
+const sourceUrl = 'https://www.sec.gov/fixture.xml';
+
+function secFixture(responses: Response[]) {
+  let requests = 0;
+  const waits: number[] = [];
+  const fetchSec = createSecFetch({
+    request: async () => responses[requests++],
+    wait: async (ms: number) => { if (ms >= 1000) waits.push(ms); },
+  });
+  return { fetchSec, waits, count: () => requests };
+}
+
+test('the same SEC file can recover after three temporary 503 responses', async () => {
+  const errors = Array.from({ length: 3 }, () => new Response('unavailable', { status: 503 }));
+  const fixture = secFixture([...errors, new Response('<filing/>')]);
+  assert.equal(await (await fixture.fetchSec(sourceUrl)).text(), '<filing/>');
+  assert.equal(fixture.count(), 4);
+  assert.deepEqual(fixture.waits, [2000, 6000, 18000]);
+  assert.ok(errors.every(response => response.bodyUsed));
+});
+
+test('SEC throttling honors the source wait before trying again', async () => {
+  const fixture = secFixture([new Response(null, { status: 429, headers: { 'Retry-After': '12' } }), new Response('ok')]);
+  assert.equal((await fixture.fetchSec(sourceUrl)).status, 200);
+  assert.deepEqual(fixture.waits, [12000]);
+});
+
+test('a long SEC Retry-After or a missing file stops this run without an early retry', async () => {
+  for (const response of [
+    new Response(null, { status: 503, headers: { 'Retry-After': '120' } }),
+    new Response(null, { status: 404 }),
+  ]) {
+    const fixture = secFixture([response]);
+    await assert.rejects(fixture.fetchSec(sourceUrl), new RegExp(String(response.status)));
+    assert.equal(fixture.count(), 1);
+    assert.deepEqual(fixture.waits, []);
+  }
+});
+
+test('persistent SEC unavailability fails after four attempts', async () => {
+  const fixture = secFixture(Array.from({ length: 4 }, () => new Response(null, { status: 503 })));
+  await assert.rejects(fixture.fetchSec(sourceUrl), /503/);
+  assert.equal(fixture.count(), 4);
+  assert.deepEqual(fixture.waits, [2000, 6000, 18000]);
 });
