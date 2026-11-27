@@ -43,6 +43,9 @@ jobs:
       - name: Check cloud SEO authorization
         run: npm run seo:cloud:test
 
+      - name: Check bounded acquisition collector with fixtures
+        run: python3 scripts/seo/collect-acquisition.py --self-test
+
       - name: Check research measurement boundaries
         run: npm run analytics:test
 
